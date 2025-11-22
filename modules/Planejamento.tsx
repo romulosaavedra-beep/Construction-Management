@@ -5,7 +5,7 @@ import { Card, CardHeader } from '../components/Card';
 import { Button } from '../components/Button';
 import { ProgressBar } from '../components/ProgressBar';
 import { StatusBadge } from '../components/StatusBadge';
-import type { PlanejamentoItem, ConstraintItem } from '../types';
+import type { PlanejamentoItem, Restriction } from '../types';
 import { profissionaisData } from '../data/mockData';
 import { formatCurrency, formatDate, addWorkingDays, calculateDurationInWorkingDays, WorkScheduleConfig } from '../utils/formatters';
 import { 
@@ -15,9 +15,10 @@ import {
     manageConstraintsGemini, 
     generateExecutiveReportGemini
 } from '../services/aiPlannerService';
+import { AdvancedAIModal } from '../components/AdvancedAIModal';
 
 interface PlanejamentoProps {
-    orcamentoData: any[]; // Using any to avoid strict type issues with OrcamentoItem
+    orcamentoData: any[]; 
     savedData: PlanejamentoItem[];
     onSave: (data: PlanejamentoItem[]) => void;
 }
@@ -51,7 +52,7 @@ const HELP_CONTENT: Record<Tab, { title: string; body: string }> = {
     }
 };
 
-const LOCAL_STORAGE_KEY_PLAN_WIDTHS = 'vobi-planejamento-column-widths-v3';
+const LOCAL_STORAGE_KEY_PLAN_WIDTHS = 'vobi-planejamento-column-widths-v4';
 const LOCAL_STORAGE_KEY_PLAN_PINNED = 'vobi-planejamento-pinned-columns';
 const LOCAL_STORAGE_KEY_PLAN_HIDDEN = 'vobi-planejamento-hidden-columns';
 const LOCAL_STORAGE_KEY_PROFS = 'vobi-settings-profs';
@@ -71,7 +72,7 @@ const formatDateOrDash = (dateStr: string) => {
 };
 
 const getStatus = (item: PlanejamentoItem): string => {
-    if (item.percentualConclusao >= 100) return 'Finalizado';
+    if (item.percentualConclusao >= 100) return 'Concluído';
     
     if (item.dataInicio && item.dataFim) {
         const hoje = new Date();
@@ -106,6 +107,7 @@ const recalculateTree = (items: PlanejamentoItem[], config: WorkScheduleConfig):
         let maxEndReal: number | null = null;
         let totalWeightedProgress = 0;
         let totalValue = 0;
+        let totalCustoRealizado = 0;
 
         freshChildren.forEach(child => {
             if (child.dataInicio) {
@@ -127,6 +129,7 @@ const recalculateTree = (items: PlanejamentoItem[], config: WorkScheduleConfig):
             const val = child.valorTotal || 0;
             totalValue += val;
             totalWeightedProgress += (child.percentualConclusao || 0) * val;
+            totalCustoRealizado += (child.custoRealizado || 0);
         });
 
         if (parentId !== null) {
@@ -146,12 +149,20 @@ const recalculateTree = (items: PlanejamentoItem[], config: WorkScheduleConfig):
                 } else {
                     parent.duracaoReal = 0;
                 }
+                
+                // Aggregations
+                parent.custoRealizado = totalCustoRealizado;
+                parent.custoOrcado = totalValue; // Matches valorTotal aggregation logic
+                
                 if (totalValue > 0) {
                     parent.percentualConclusao = totalWeightedProgress / totalValue;
                 } else {
                     const sumPct = freshChildren.reduce((acc, c) => acc + c.percentualConclusao, 0);
                     parent.percentualConclusao = freshChildren.length > 0 ? sumPct / freshChildren.length : 0;
                 }
+                
+                // Determine parent status based on children/progress
+                parent.status = getStatus(parent) as any;
             }
         }
     };
@@ -180,9 +191,9 @@ const handleEnterNavigation = (e: React.KeyboardEvent<HTMLElement>, colId: strin
 };
 
 const EditableCell = ({ value, onCommit, type = 'text', className = "", onKeyDown, disabled = false, options = [], isSelected = false, columnId, step, min, max }: {
-    value: string | number;
-    onCommit: (newValue: string | number) => void;
-    type?: 'text' | 'number' | 'date' | 'select';
+    value: string | number | number[] | string[];
+    onCommit: (newValue: any) => void;
+    type?: 'text' | 'number' | 'date' | 'select' | 'array';
     className?: string;
     onKeyDown?: (e: React.KeyboardEvent<any>) => void;
     disabled?: boolean;
@@ -193,71 +204,76 @@ const EditableCell = ({ value, onCommit, type = 'text', className = "", onKeyDow
     min?: number;
     max?: number;
 }) => {
-    const [currentValue, setCurrentValue] = useState(value);
+    const formatArrayValue = (val: any) => {
+        if (Array.isArray(val)) return val.join(', ');
+        return val;
+    };
+
+    const [currentValue, setCurrentValue] = useState(type === 'array' ? formatArrayValue(value) : value);
 
     useEffect(() => {
-        setCurrentValue(value);
-    }, [value]);
+        setCurrentValue(type === 'array' ? formatArrayValue(value) : value);
+    }, [value, type]);
 
     const handleBlur = () => {
         if (disabled) return;
-        // Loose check to handle string/number diffs
-        if (currentValue != value) {
-            if (type === 'number') {
-                let val = parseFloat(currentValue as string);
+        
+        let commitValue: any = currentValue;
 
-                if (isNaN(val)) val = 0; // Default to 0 if empty or invalid
-
-                // Clamp value on blur just in case
-                if (max !== undefined && val > max) val = max;
-                if (min !== undefined && val < min) val = min;
-
-                // Rounding logic based on step if provided
-                if (step) {
-                    const stepStr = String(step);
-                    if (stepStr.includes('.')) {
-                        const decimals = stepStr.split('.')[1].length;
-                        val = Number(val.toFixed(decimals));
-                    } else {
-                        val = Math.round(val);
-                    }
+        if (type === 'number') {
+            let val = parseFloat(currentValue as string);
+            if (isNaN(val)) val = 0;
+            if (max !== undefined && val > max) val = max;
+            if (min !== undefined && val < min) val = min;
+            if (step) {
+                const stepStr = String(step);
+                if (stepStr.includes('.')) {
+                    const decimals = stepStr.split('.')[1].length;
+                    val = Number(val.toFixed(decimals));
+                } else {
+                    val = Math.round(val);
                 }
-                setCurrentValue(val); // Show formatted value
-                onCommit(val);
-            } else {
-                onCommit(currentValue);
             }
+            commitValue = val;
+            setCurrentValue(val);
+        } else if (type === 'array') {
+            // Parse string back to array (numbers or strings)
+            const strVal = currentValue as string;
+            if (!strVal.trim()) {
+                commitValue = [];
+            } else {
+                const parts = strVal.split(',').map(s => s.trim()).filter(s => s !== '');
+                // Try to convert to numbers if looks like numbers
+                const numParts = parts.map(p => !isNaN(Number(p)) ? Number(p) : p);
+                commitValue = numParts;
+            }
+        }
+
+        if (commitValue != value) { // Loose check
+            onCommit(commitValue);
         }
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
          let newVal = e.target.value;
-         
          if (type === 'number') {
-             // Allow empty string or minus sign during typing
              if (newVal === '' || newVal === '-') {
                  setCurrentValue(newVal);
                  return;
              }
-
-             // Enforce decimal places while typing
              if (step) {
                  const stepStr = String(step);
                  if (stepStr.includes('.')) {
                      const maxDecimals = stepStr.split('.')[1].length;
-                     // Regex to ensure we don't exceed decimal places
                      const regex = new RegExp(`^-?\\d*(\\.\\d{0,${maxDecimals}})?$`);
-                     if (!regex.test(newVal)) return; // Prevent update if regex doesn't match
+                     if (!regex.test(newVal)) return;
                  }
              }
-
-             // Enforce Max Value while typing (prevent entering numbers larger than max)
              if (max !== undefined) {
                  const numVal = parseFloat(newVal);
-                 if (!isNaN(numVal) && numVal > max) return; // Prevent update
+                 if (!isNaN(numVal) && numVal > max) return;
              }
          }
-
          setCurrentValue(newVal);
     };
     
@@ -269,14 +285,13 @@ const EditableCell = ({ value, onCommit, type = 'text', className = "", onKeyDow
         }
         if (e.key === 'Enter') {
             if (columnId) {
-                // Force blur-like commit behavior on Enter before navigation
                 handleBlur();
                 handleEnterNavigation(e, columnId);
             } else {
                 e.currentTarget.blur();
             }
         } else if (e.key === 'Escape') {
-            setCurrentValue(value);
+            setCurrentValue(type === 'array' ? formatArrayValue(value) : value);
             e.currentTarget.blur();
         }
     }
@@ -284,7 +299,7 @@ const EditableCell = ({ value, onCommit, type = 'text', className = "", onKeyDow
     if (type === 'select') {
         return (
             <select
-                value={currentValue}
+                value={currentValue as string}
                 onChange={(e) => { setCurrentValue(e.target.value); onCommit(e.target.value); }}
                 disabled={disabled}
                 onKeyDown={handleLocalKeyDown}
@@ -294,7 +309,6 @@ const EditableCell = ({ value, onCommit, type = 'text', className = "", onKeyDow
                     ${isSelected ? 'bg-[#0084ff]/20 border-[#0084ff] text-white' : 'bg-[#242830] border-[#3a3e45]'}
                 `}
             >
-                <option value="">-</option>
                 {options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
             </select>
         );
@@ -302,8 +316,8 @@ const EditableCell = ({ value, onCommit, type = 'text', className = "", onKeyDow
 
     return (
         <input
-            type={type}
-            value={currentValue}
+            type={type === 'array' ? 'text' : type}
+            value={currentValue as string | number}
             onChange={handleChange}
             onBlur={handleBlur}
             onKeyDown={handleLocalKeyDown}
@@ -334,36 +348,7 @@ interface ColumnConfig {
 const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, onSave }) => {
     const [activeTab, setActiveTab] = useState<Tab>('cronograma');
     const [helpModalOpen, setHelpModalOpen] = useState(false);
-    
-    // Generator State in Modal
-    const [isGeneratorModalOpen, setGeneratorModalOpen] = useState(false);
-    const [isGeneratorProcessing, setGeneratorProcessing] = useState(false);
-    const abortGeneratorRef = useRef(false);
-
-    const [dataInicialProjeto, setDataInicialProjeto] = useState(new Date().toISOString().split('T')[0]);
-    const [dataFinalProjeto, setDataFinalProjeto] = useState(() => {
-        const d = new Date();
-        d.setMonth(d.getMonth() + 6); 
-        return d.toISOString().split('T')[0];
-    });
-    const [duration, setDuration] = useState<number | ''>('');
-    const [durationUnit, setDurationUnit] = useState<'days' | 'months'>('months');
-
-    // AI Feature States
-    const [dataCorte, setDataCorte] = useState(new Date().toISOString().split('T')[0]);
-    const [predictResult, setPredictResult] = useState<any>(null);
-    const [predictLoading, setPredictLoading] = useState(false);
-
-    const [optimizeResult, setOptimizeResult] = useState<any>(null);
-    const [optimizeLoading, setOptimizeLoading] = useState(false);
-
-    const [constraints, setConstraints] = useState<ConstraintItem[]>([]);
-    const [newConstraint, setNewConstraint] = useState<Partial<ConstraintItem>>({ type: 'material' } as any);
-    const [constraintResult, setConstraintResult] = useState<any>(null);
-    const [constraintLoading, setConstraintLoading] = useState(false);
-
-    const [reportResult, setReportResult] = useState<any>(null);
-    const [reportLoading, setReportLoading] = useState(false);
+    const [aiModalOpen, setAiModalOpen] = useState(false);
 
     const [scheduleConfig, setScheduleConfig] = useState<WorkScheduleConfig>({ scheduleType: 'mon_fri', workOnHolidays: false });
     const [planejamentoItems, setPlanejamentoItems] = useState<PlanejamentoItem[]>([]);
@@ -375,7 +360,7 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
 
     const [columnWidths, setColumnWidths] = useState<number[]>([]);
     const [pinnedColumns, setPinnedColumns] = useState<Set<string>>(new Set());
-    const [hiddenColumns, setHiddenColumns] = useState<Set<string>>(new Set());
+    const [hiddenColumns, setHiddenColumns] = useState<Set<string>>(new Set(['lag', 'folga_total', 'folga_livre', 'custo_por_dia', 'dependencia_externa', 'materiais_requeridos', 'risco_nivel', 'observacoes', 'custoRealizado']));
     const [selectedColumn, setSelectedColumn] = useState<string | null>(null);
     const [isRestoreMenuOpen, setRestoreMenuOpen] = useState(false);
 
@@ -400,7 +385,9 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
     const restoreButtonRef = useRef<HTMLButtonElement>(null);
     const restoreMenuRef = useRef<HTMLDivElement>(null);
 
+    // Full Columns Config based on Critical Data Pillars
     const baseColumnsConfig: ColumnConfig[] = useMemo(() => [
+        { id: 'id', label: 'ID', initialWidth: 40, minWidth: 40, align: 'center', resizable: false },
         { id: 'nivel', label: 'Nível', initialWidth: 100, minWidth: 60 },
         { id: 'discriminacao', label: 'Discriminação', initialWidth: 250, minWidth: 150, align: 'left' },
         { id: 'un', label: 'Un.', initialWidth: 50, minWidth: 40, align: 'center' },
@@ -408,13 +395,36 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
         { id: 'percent_concl', label: '% Concl.', initialWidth: 70, minWidth: 60, align: 'right' },
         { id: 'duracao', label: 'Duração (D)', initialWidth: 80, minWidth: 60, align: 'center' },
         { id: 'inicio', label: 'Data Início', initialWidth: 100, minWidth: 90, align: 'center' },
-        { id: 'responsavel', label: 'Responsável', initialWidth: 200, minWidth: 150, align: 'left' },
         { id: 'fim', label: 'Data Fim', initialWidth: 100, minWidth: 90, align: 'center' },
+        { id: 'responsavel', label: 'Responsável', initialWidth: 180, minWidth: 150, align: 'left' },
+        
+        // Pilar 1: Logic & CPM
+        { id: 'predecessores', label: 'Predecessores', initialWidth: 100, minWidth: 80, align: 'left' },
+        { id: 'sucessores', label: 'Sucessores', initialWidth: 100, minWidth: 80, align: 'left' },
+        { id: 'tipoRelacao', label: 'Tipo Rel.', initialWidth: 80, minWidth: 70, align: 'center' },
+        { id: 'lag', label: 'Lag (dias)', initialWidth: 70, minWidth: 60, align: 'right' },
+        { id: 'folga_total', label: 'Folga Total', initialWidth: 80, minWidth: 70, align: 'center' },
+        { id: 'eh_critica', label: 'Crítica', initialWidth: 60, minWidth: 60, align: 'center' },
+
+        // Pilar 2: Execution
         { id: 'duracao_real', label: 'Dur. Real', initialWidth: 80, minWidth: 60, align: 'center' },
         { id: 'inicio_real', label: 'Início Real', initialWidth: 100, minWidth: 90, align: 'center' },
         { id: 'fim_real', label: 'Fim Real', initialWidth: 100, minWidth: 90, align: 'center' },
-        { id: 'progresso', label: 'Progresso', initialWidth: 140, minWidth: 100, align: 'left' },
         { id: 'status', label: 'Status', initialWidth: 100, minWidth: 80, align: 'center' },
+        { id: 'observacoes', label: 'Observações', initialWidth: 200, minWidth: 150, align: 'left' },
+
+        // Pilar 3: Optimization
+        { id: 'custo_por_dia', label: 'Custo/Dia (R$)', initialWidth: 100, minWidth: 90, align: 'right' },
+        
+        // Pilar 4: Constraints
+        { id: 'dependencia_externa', label: 'Dep. Externa', initialWidth: 80, minWidth: 70, align: 'center' },
+        { id: 'materiais_requeridos', label: 'Materiais Req.', initialWidth: 150, minWidth: 120, align: 'left' },
+
+        // Pilar 5: Report / Financial
+        { id: 'custoRealizado', label: 'Custo Real.', initialWidth: 100, minWidth: 90, align: 'right' },
+        { id: 'risco_nivel', label: 'Risco', initialWidth: 80, minWidth: 70, align: 'center' },
+
+        { id: 'progresso', label: 'Progresso Visual', initialWidth: 140, minWidth: 100, align: 'left' },
     ], []);
 
     const columnsConfig = useMemo(() => baseColumnsConfig, [baseColumnsConfig]);
@@ -460,16 +470,55 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
                         isParent: isParent,
                         expandido: existing ? existing.expandido : true,
                         
+                        // Pilar 1 Default
                         duracao: existing?.duracao || 0,
                         dataInicio: existing?.dataInicio || '',
                         dataFim: existing?.dataFim || '',
-                        quantidadeExecutada: existing?.quantidadeExecutada || 0,
+                        predecessores: existing?.predecessores || [],
+                        sucessores: existing?.sucessores || [],
+                        tipoRelacao: existing?.tipoRelacao || "FS",
+                        lag: existing?.lag || 0,
                         responsavel: existing?.responsavel || '-',
-                        
+                        folga_total: existing?.folga_total || 0,
+                        folga_livre: existing?.folga_livre || 0,
+                        eh_critica: existing?.eh_critica || false,
+                        caminho_critico: existing?.caminho_critico || false,
+
+                        // Pilar 2 Default
+                        quantidadeExecutada: existing?.quantidadeExecutada || 0,
                         percentualConclusao: existing?.percentualConclusao || 0,
+                        status: existing?.status || 'Não iniciado',
                         duracaoReal: existing?.duracaoReal || 0,
                         inicioReal: existing?.inicioReal || '',
-                        fimReal: existing?.fimReal || ''
+                        fimReal: existing?.fimReal || '',
+                        data_update_real: existing?.data_update_real || '',
+                        usuario_update: existing?.usuario_update || '',
+                        observacoes: existing?.observacoes || '',
+                        desvio_inicio: existing?.desvio_inicio || 0,
+                        desvio_prazo: existing?.desvio_prazo || 0,
+                        
+                        // Pilar 3 Default
+                        custo_por_dia: existing?.custo_por_dia || 0,
+                        quantidade_recursos_minimo: existing?.quantidade_recursos_minimo || 0,
+                        quantidade_recursos_maximo: existing?.quantidade_recursos_maximo || 0,
+                        pode_fasttrack: existing?.pode_fasttrack || false,
+                        pode_crash: existing?.pode_crash || false,
+                        producao_planejada: existing?.producao_planejada || 0,
+                        producao_real: existing?.producao_real || 0,
+                        indice_produtividade: existing?.indice_produtividade || 1,
+
+                        // Pilar 4 Default
+                        restricoes: existing?.restricoes || [],
+                        dependencia_externa: existing?.dependencia_externa || false,
+                        materiais_requeridos: existing?.materiais_requeridos || [],
+                        data_liberacao_minima: existing?.data_liberacao_minima || '',
+
+                        // Pilar 5 Default
+                        custoOrcado: valorTotal,
+                        custoRealizado: existing?.custoRealizado || 0,
+                        risco_nivel: existing?.risco_nivel || 'BAIXO',
+                        foto_progresso: existing?.foto_progresso || [],
+                        data_conclusao_esperada: existing?.data_conclusao_esperada || ''
                     };
                 });
                 
@@ -544,58 +593,6 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
         };
     }, [isRestoreMenuOpen]);
 
-    // Date and Duration Sync Logic
-    const calculateEndDate = (start: string, dur: number, unit: 'days' | 'months') => {
-        if (!start) return '';
-        const d = new Date(start);
-        if (unit === 'days') d.setDate(d.getDate() + dur);
-        else d.setMonth(d.getMonth() + dur);
-        return d.toISOString().split('T')[0];
-    };
-  
-    const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const newStart = e.target.value;
-        let newEnd = dataFinalProjeto;
-        
-        if (newStart && typeof duration === 'number') {
-            newEnd = calculateEndDate(newStart, duration, durationUnit);
-        }
-        setDataInicialProjeto(newStart);
-        setDataFinalProjeto(newEnd);
-    };
-  
-    const handleDurationChange = (val: number | '') => {
-        setDuration(val);
-        if (val !== '' && dataInicialProjeto) {
-            const newEnd = calculateEndDate(dataInicialProjeto, Number(val), durationUnit);
-            setDataFinalProjeto(newEnd);
-        }
-    };
-  
-    const handleUnitChange = (unit: 'days' | 'months') => {
-        setDurationUnit(unit);
-        if (duration !== '' && dataInicialProjeto) {
-            const newEnd = calculateEndDate(dataInicialProjeto, Number(duration), unit);
-            setDataFinalProjeto(newEnd);
-        }
-    };
-  
-    const handleEndDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const newEnd = e.target.value;
-        setDataFinalProjeto(newEnd);
-        
-        if (dataInicialProjeto && newEnd) {
-            const start = new Date(dataInicialProjeto);
-            const end = new Date(newEnd);
-            const diffTime = end.getTime() - start.getTime();
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            
-            if (diffDays >= 0) {
-                setDuration(diffDays);
-                setDurationUnit('days');
-            }
-        }
-    };
 
     const updateItems = useCallback((updater: React.SetStateAction<PlanejamentoItem[]>) => {
         setPlanejamentoItems(currentData => {
@@ -636,7 +633,13 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
             'responsavel': 'responsavel',
             'duracao_real': 'duracaoReal',
             'inicio_real': 'inicioReal',
-            'fim_real': 'fimReal'
+            'fim_real': 'fimReal',
+            'observacoes': 'observacoes',
+            'predecessores': 'predecessores',
+            'sucessores': 'sucessores',
+            'lag': 'lag',
+            'custo_por_dia': 'custo_por_dia',
+            'materiais_requeridos': 'materiais_requeridos'
         };
 
         const field = fieldMap[selectedColumn];
@@ -646,8 +649,10 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
             const newItems = prev.map(item => {
                 if (item.isParent) return item; 
                 let newValue: any = '';
-                if (field === 'duracao' || field === 'percentualConclusao' || field === 'duracaoReal') {
+                if (field === 'duracao' || field === 'percentualConclusao' || field === 'duracaoReal' || field === 'lag' || field === 'custo_por_dia') {
                     newValue = 0;
+                } else if (field === 'predecessores' || field === 'sucessores' || field === 'materiais_requeridos') {
+                    newValue = [];
                 } else if (field === 'responsavel') {
                     newValue = '-';
                 }
@@ -746,11 +751,40 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
 
     const handleValueCommit = (id: number, field: string, value: any) => {
         updateItems(prev => {
+            // Calculate Max ID for clamping
+            const maxId = prev.length;
+
             const updatedList = prev.map(item => {
                 if (item.id === id) {
                     let safeValue = value;
-                    // Enforce precision on commit to ensure data integrity
-                    if (typeof safeValue === 'number') {
+                    
+                    // Strict Validation for Predecessors/Successors
+                    if (field === 'predecessores' || field === 'sucessores') {
+                        const rawArray = Array.isArray(safeValue) ? safeValue : [];
+                        
+                        // Logic: Parse Int -> Clamp Max -> Filter > 0 -> Filter Self -> Unique
+                        safeValue = rawArray
+                            .map((refId: any) => {
+                                // Handle strings that might contain decimals (parse as Int drops decimal part)
+                                // or parse strings like "1"
+                                const num = parseInt(String(refId).trim(), 10);
+                                if (isNaN(num)) return null;
+                                
+                                // Clamp to Max ID ("se digitar algo maior que o último ID... retorna o último ID")
+                                if (num > maxId) return maxId;
+                                
+                                return num;
+                            })
+                            .filter((num: number | null) => {
+                                // Filter out nulls, 0s ("não poder digitar 0"), and self-references
+                                return num !== null && num > 0 && num !== item.id;
+                            });
+
+                        // Remove duplicates
+                        safeValue = [...new Set(safeValue)];
+                    }
+                    // Enforce precision on commit to ensure data integrity for other fields
+                    else if (typeof safeValue === 'number') {
                         if (field === 'percentualConclusao') {
                             if (safeValue > 100) safeValue = 100;
                             if (safeValue < 0) safeValue = 0;
@@ -779,110 +813,6 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
     const handleUpdateScheduleFromAI = (newSchedule: PlanejamentoItem[]) => {
         updateItems(recalculateTree(newSchedule, scheduleConfig));
         onSave(recalculateTree(newSchedule, scheduleConfig));
-    };
-
-    const handleStopGenerator = () => {
-        abortGeneratorRef.current = true;
-        setGeneratorProcessing(false);
-    };
-
-    const handleGenerateSchedule = async () => {
-        if(!dataFinalProjeto) { alert("Defina data fim"); return; }
-        
-        setGeneratorProcessing(true);
-        abortGeneratorRef.current = false;
-
-        try {
-            const output = await generateScheduleWithGemini({
-                dataInicio: dataInicialProjeto,
-                dataFim: dataFinalProjeto,
-                escopo: planejamentoItems,
-                profissionaisDisponiveis: profissionaisOptions,
-                scheduleConfig: scheduleConfig
-            });
-            
-            if (abortGeneratorRef.current) return;
-
-            if (output && output.cronograma) {
-                 const aiMap = new Map<number, any>(output.cronograma.map((i: any) => [i.id, i]));
-                 const newItems = planejamentoItems.map(p => {
-                    const aiItem = aiMap.get(p.id);
-                    if (aiItem) {
-                        return {
-                            ...p,
-                            duracao: aiItem.duracao,
-                            dataInicio: aiItem.dataInicio,
-                            dataFim: aiItem.dataFim,
-                            responsavel: aiItem.responsavel,
-                        };
-                    }
-                    return p;
-                });
-                handleUpdateScheduleFromAI(newItems);
-                setGeneratorModalOpen(false);
-                alert("Cronograma gerado com sucesso!");
-            }
-        } catch (e) {
-            if (!abortGeneratorRef.current) {
-                console.error(e);
-                alert("Erro ao gerar cronograma");
-            }
-        } finally {
-            if (!abortGeneratorRef.current) {
-                setGeneratorProcessing(false);
-            }
-        }
-    };
-
-    const handlePredict = async () => {
-        setPredictLoading(true);
-        try {
-            const output = await predictAndAdjustScheduleGemini(planejamentoItems, planejamentoItems, dataCorte);
-            setPredictResult(output);
-        } catch (e) { console.error(e); alert("Erro na predição"); } 
-        finally { setPredictLoading(false); }
-    };
-
-    const handleOptimize = async () => {
-        setOptimizeLoading(true);
-        try {
-            const output = await optimizeCriticalPathGemini(planejamentoItems, { 
-                dataLimiteMaxima: dataFinalProjeto || '2025-12-31', 
-                orcamentoMaximo: 1000000 
-            });
-            setOptimizeResult(output);
-        } catch (e) { console.error(e); alert("Erro na otimização"); } 
-        finally { setOptimizeLoading(false); }
-    };
-
-    const handleAnalyzeConstraints = async () => {
-        setConstraintLoading(true);
-        try {
-            const output = await manageConstraintsGemini(constraints, planejamentoItems);
-            setConstraintResult(output);
-        } catch (e) { console.error(e); alert("Erro na análise de restrições"); } 
-        finally { setConstraintLoading(false); }
-    };
-
-    const handleGenerateReport = async () => {
-        setReportLoading(true);
-        try {
-            const output = await generateExecutiveReportGemini(planejamentoItems, { spi: 0.95, cpi: 1.02 }, "executivo");
-            setReportResult(output);
-        } catch (e) { console.error(e); alert("Erro ao gerar relatório"); } 
-        finally { setReportLoading(false); }
-    };
-
-    const handleAddConstraint = () => {
-        if(newConstraint.descricao) {
-            setConstraints([...constraints, { 
-                id: Date.now().toString(), 
-                tipo: newConstraint.tipo as any || 'material', 
-                descricao: newConstraint.descricao,
-                dataAfetada: newConstraint.dataAfetada
-            }]);
-            setNewConstraint({ tipo: 'material', descricao: '', dataAfetada: '' } as any);
-        }
     };
 
     // UI Handlers
@@ -1021,6 +951,50 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
         const executado = planejamentoItems.filter(i => !i.isParent).reduce((acc, item) => acc + (item.valorTotal * (item.percentualConclusao / 100)), 0);
         return { totalOrcamento: total, totalExecutado: executado };
     }, [planejamentoItems]);
+    
+    const ganttInfo = useMemo(() => {
+        let startTs = Infinity;
+        let endTs = -Infinity;
+        let hasDates = false;
+
+        planejamentoItems.forEach(item => {
+            if (item.dataInicio) {
+                const t = new Date(item.dataInicio + 'T00:00:00').getTime();
+                if (!isNaN(t)) {
+                    if (t < startTs) startTs = t;
+                    hasDates = true;
+                }
+            }
+            if (item.dataFim) {
+                const t = new Date(item.dataFim + 'T00:00:00').getTime();
+                if (!isNaN(t)) {
+                    if (t > endTs) endTs = t;
+                    hasDates = true;
+                }
+            }
+        });
+        
+        if (!hasDates) {
+             const now = new Date();
+             now.setHours(0,0,0,0);
+             startTs = now.getTime();
+             const future = new Date(now);
+             future.setDate(future.getDate() + 30);
+             endTs = future.getTime();
+        }
+        
+        if (endTs < startTs) endTs = startTs;
+
+        const min = new Date(startTs);
+        const max = new Date(endTs);
+        
+        min.setDate(min.getDate() - 5);
+        max.setDate(max.getDate() + 5);
+        
+        const diffTime = max.getTime() - min.getTime();
+        const days = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        return { min, max, days: Math.max(days, 1) }; 
+    }, [planejamentoItems]);
 
     const renderRows = (parentId: number | null = null, level = 0): React.ReactElement[] => {
         const items = planejamentoItems.filter(item => item.pai === parentId);
@@ -1054,6 +1028,9 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
                         } : {};
 
                         switch (col.id) {
+                            case 'id':
+                                content = <span className="text-[#a0a5b0] font-mono">{item.id}</span>;
+                                break;
                             case 'nivel':
                                 content = (
                                     <div className="flex items-center gap-2" style={{ paddingLeft: level * 12 }}>
@@ -1126,6 +1103,45 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
                             case 'status':
                                 content = <StatusBadge status={status} />;
                                 break;
+                            // --- NEW COLUMNS RENDER ---
+                            case 'predecessores':
+                                content = isEditable ? <EditableCell type="array" value={item.predecessores} onCommit={(v) => handleValueCommit(item.id, 'predecessores', v)} isSelected={isColSelected} columnId={col.id} /> : (item.predecessores?.join(', ') || '-');
+                                break;
+                            case 'sucessores':
+                                content = isEditable ? <EditableCell type="array" value={item.sucessores} onCommit={(v) => handleValueCommit(item.id, 'sucessores', v)} isSelected={isColSelected} columnId={col.id} /> : (item.sucessores?.join(', ') || '-');
+                                break;
+                            case 'tipoRelacao':
+                                content = isEditable ? <EditableCell type="select" options={['FS', 'SS', 'FF', 'SF']} value={item.tipoRelacao} onCommit={(v) => handleValueCommit(item.id, 'tipoRelacao', v)} isSelected={isColSelected} columnId={col.id} /> : item.tipoRelacao;
+                                break;
+                            case 'lag':
+                                content = isEditable ? <EditableCell type="number" value={item.lag} onCommit={(v) => handleValueCommit(item.id, 'lag', v)} isSelected={isColSelected} columnId={col.id} /> : item.lag;
+                                break;
+                            case 'folga_total':
+                                content = <span>{item.folga_total}</span>; // Readonly
+                                break;
+                            case 'eh_critica':
+                                content = <span className={item.eh_critica ? 'text-red-500 font-bold' : 'text-green-500'}>{item.eh_critica ? 'Sim' : 'Não'}</span>;
+                                break;
+                            case 'observacoes':
+                                content = isEditable ? <EditableCell value={item.observacoes} onCommit={(v) => handleValueCommit(item.id, 'observacoes', v)} isSelected={isColSelected} columnId={col.id} /> : item.observacoes;
+                                break;
+                            case 'custo_por_dia':
+                                content = isEditable ? <EditableCell type="number" value={item.custo_por_dia} onCommit={(v) => handleValueCommit(item.id, 'custo_por_dia', v)} isSelected={isColSelected} columnId={col.id} /> : formatCurrency(item.custo_por_dia);
+                                break;
+                            case 'dependencia_externa':
+                                content = isEditable ? 
+                                    <input type="checkbox" checked={item.dependencia_externa} onChange={(e) => handleValueCommit(item.id, 'dependencia_externa', e.target.checked)} className="w-4 h-4 bg-[#1e2329] border-[#3a3e45] rounded" /> 
+                                    : (item.dependencia_externa ? 'Sim' : 'Não');
+                                break;
+                            case 'materiais_requeridos':
+                                content = isEditable ? <EditableCell type="array" value={item.materiais_requeridos} onCommit={(v) => handleValueCommit(item.id, 'materiais_requeridos', v)} isSelected={isColSelected} columnId={col.id} /> : (item.materiais_requeridos?.join(', ') || '-');
+                                break;
+                            case 'custoRealizado':
+                                content = <span className="font-medium">{formatCurrency(item.custoRealizado)}</span>; // Aggregated
+                                break;
+                            case 'risco_nivel':
+                                content = isEditable ? <EditableCell type="select" options={['BAIXO', 'MÉDIO', 'ALTO']} value={item.risco_nivel} onCommit={(v) => handleValueCommit(item.id, 'risco_nivel', v)} isSelected={isColSelected} columnId={col.id} /> : <span className={`text-xs px-2 py-0.5 rounded ${item.risco_nivel === 'ALTO' ? 'bg-red-500/20 text-red-400' : item.risco_nivel === 'MÉDIO' ? 'bg-yellow-500/20 text-yellow-400' : 'bg-green-500/20 text-green-400'}`}>{item.risco_nivel}</span>;
+                                break;
                         }
 
                         return (
@@ -1144,16 +1160,6 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
         });
     };
     
-    const ganttInfo = useMemo(() => {
-        const min = new Date(dataInicialProjeto);
-        const max = new Date(dataFinalProjeto);
-        min.setDate(min.getDate() - 5);
-        max.setDate(max.getDate() + 5);
-        const diffTime = max.getTime() - min.getTime();
-        const days = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        return { min, max, days: Math.max(days, 1) }; 
-    }, [dataInicialProjeto, dataFinalProjeto]);
-
     const renderGanttRows = (parentId: number | null = null, level = 0): React.ReactElement[] => {
         const items = planejamentoItems.filter(item => item.pai === parentId);
 
@@ -1194,7 +1200,7 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
                              <div 
                                 className={`absolute top-1.5 h-5 rounded opacity-80 text-[9px] text-white pl-1 overflow-hidden whitespace-nowrap shadow-sm border ${getStatus(item) === 'Atrasado' ? 'bg-red-500 border-red-700' : 'bg-[#0084ff] border-[#0066cc]'}`}
                                 style={{ 
-                                    left: Math.max(0, Math.ceil((new Date(item.dataInicio).getTime() - ganttInfo.min.getTime()) / (1000 * 60 * 60 * 24))) * 30, 
+                                    left: Math.max(0, Math.ceil((new Date(item.dataInicio + 'T00:00:00').getTime() - ganttInfo.min.getTime()) / (1000 * 60 * 60 * 24))) * 30, 
                                     width: Math.max(1, item.duracao) * 30 
                                 }}
                                 title={`${item.discriminacao} (${item.duracao}d) - ${getStatus(item)}`}
@@ -1215,62 +1221,15 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
 
     return (
         <div>
-            {/* Generator Modal */}
-            {isGeneratorModalOpen && (
-                <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[2000]">
-                    <div className="bg-[#1e2329] rounded-lg shadow-xl p-6 w-full max-w-md relative border border-[#3a3e45]">
-                        {isGeneratorProcessing && (
-                            <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-[#1e2329]/95 rounded-lg transition-opacity duration-300">
-                                <div className="relative w-16 h-16 mb-4">
-                                    <div className="absolute inset-0 border-4 border-[#3a3e45] rounded-full"></div>
-                                    <div className="absolute inset-0 border-4 border-[#0084ff] border-t-transparent rounded-full animate-spin"></div>
-                                </div>
-                                <h4 className="text-lg font-semibold text-white mb-1">Gerando Cronograma</h4>
-                                <p className="text-sm text-[#a0a5b0] mb-4">A IA está definindo datas e responsáveis...</p>
-                                <Button variant="danger" size="sm" onClick={handleStopGenerator}>
-                                    Interromper
-                                </Button>
-                            </div>
-                        )}
-
-                        <div className="flex justify-between items-center mb-4 border-b border-[#3a3e45] pb-2">
-                            <h3 className="text-xl font-bold">🤖 Gerar Cronograma com IA</h3>
-                            <button onClick={() => setGeneratorModalOpen(false)} className="text-2xl text-[#a0a5b0] hover:text-white">&times;</button>
-                        </div>
-                        
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Início do Projeto</label>
-                                <input type="date" value={dataInicialProjeto} onChange={handleStartDateChange} className="w-full bg-[#242830] border border-[#3a3e45] rounded p-2 outline-none focus:ring-2 focus:ring-[#0084ff]" />
-                            </div>
-                            <div className="flex gap-2">
-                                <div className="flex-1">
-                                    <label className="block text-sm font-medium mb-1">Duração</label>
-                                    <input type="number" value={duration} onChange={e => handleDurationChange(e.target.value === '' ? '' : parseFloat(e.target.value))} className="w-full bg-[#242830] border border-[#3a3e45] rounded p-2 outline-none focus:ring-2 focus:ring-[#0084ff]" placeholder="-" />
-                                </div>
-                                <div className="w-28">
-                                    <label className="block text-sm font-medium mb-1">Unidade</label>
-                                    <select value={durationUnit} onChange={e => handleUnitChange(e.target.value as any)} className="w-full bg-[#242830] border border-[#3a3e45] rounded p-2 outline-none focus:ring-2 focus:ring-[#0084ff]">
-                                        <option value="months">Meses</option>
-                                        <option value="days">Dias</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Fim do Projeto</label>
-                                <input type="date" value={dataFinalProjeto} onChange={handleEndDateChange} className="w-full bg-[#242830] border border-[#3a3e45] rounded p-2 outline-none focus:ring-2 focus:ring-[#0084ff]" />
-                            </div>
-                            
-                            <div className="pt-4 flex justify-end gap-2">
-                                <Button variant="secondary" onClick={() => setGeneratorModalOpen(false)}>Cancelar</Button>
-                                <Button variant="primary" onClick={handleGenerateSchedule} disabled={isGeneratorProcessing}>
-                                    ✨ Gerar Cronograma
-                                </Button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
+            {/* Advanced AI Modal */}
+            <AdvancedAIModal 
+                isOpen={aiModalOpen}
+                onClose={() => setAiModalOpen(false)}
+                planejamento={planejamentoItems}
+                profissionais={profissionaisOptions}
+                scheduleConfig={scheduleConfig}
+                onUpdateSchedule={handleUpdateScheduleFromAI}
+            />
 
             {/* Help Modal */}
             {helpModalOpen && (
@@ -1300,10 +1259,6 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
                     {[
                         { id: 'cronograma', label: 'Cronograma & Dados', icon: '📅' },
                         { id: 'gantt', label: 'Visualização Gantt', icon: '📊' },
-                        { id: 'predicao', label: 'Predição & Ajuste', icon: '🔮' },
-                        { id: 'otimizador', label: 'Otimizador CPM', icon: '🚀' },
-                        { id: 'restricoes', label: 'Gestão de Restrições', icon: '⛓️' },
-                        { id: 'relatorios', label: 'Relatórios', icon: '📈' },
                     ].map(tab => (
                         <button
                             key={tab.id}
@@ -1368,7 +1323,7 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
                                      {!isEditing ? (
                                         <>
                                          <Button onClick={handleEdit}>✏️ Editar</Button>
-                                         <Button onClick={() => setGeneratorModalOpen(true)}>🤖 Gerar com IA</Button>
+                                         <Button onClick={() => setAiModalOpen(true)}>🤖 Ferramentas IA</Button>
                                         </>
                                      ) : (
                                         <>
@@ -1405,8 +1360,13 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
                                             backgroundColor: '#242830'
                                         } : {};
                                         
-                                        const batchEditableColumns = new Set(['percent_concl', 'duracao', 'inicio', 'fim', 'responsavel', 'duracao_real', 'inicio_real', 'fim_real']);
-                                        const unhideableColumns = new Set(['nivel']);
+                                        // Columns that support batch edit via column header click
+                                        const batchEditableColumns = new Set([
+                                            'percent_concl', 'duracao', 'inicio', 'fim', 'responsavel', 
+                                            'duracao_real', 'inicio_real', 'fim_real', 'observacoes',
+                                            'predecessores', 'sucessores', 'lag', 'custo_por_dia', 'materiais_requeridos'
+                                        ]);
+                                        const unhideableColumns = new Set(['nivel', 'id']);
 
                                         return (
                                         <th 
@@ -1511,220 +1471,6 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
                         </div>
                      </div>
                 </Card>
-            )}
-
-            {activeTab === 'predicao' && (
-                <div className="space-y-6">
-                    <Card>
-                        <div className="flex items-end gap-4 p-2">
-                            <div className="flex-1">
-                                <label className="block text-xs font-bold text-[#a0a5b0] mb-1">Data de Corte (Data Date)</label>
-                                <input type="date" value={dataCorte} onChange={e => setDataCorte(e.target.value)} className="w-full bg-[#1e2329] border border-[#3a3e45] rounded p-2" />
-                            </div>
-                            <Button variant="primary" onClick={handlePredict} disabled={predictLoading}>
-                                {predictLoading ? 'Analisando...' : '🔍 Analisar Desvios'}
-                            </Button>
-                        </div>
-                    </Card>
-
-                    {predictResult && predictResult.analise ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <Card className="border-l-4 border-blue-500">
-                                <h4 className="text-lg font-bold text-white mb-4">Análise EVM</h4>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <div className="text-xs text-[#a0a5b0]">SPI (Performance de Prazo)</div>
-                                        <div className={`text-2xl font-bold ${predictResult.analise.spi < 0.9 ? 'text-red-400' : 'text-green-400'}`}>{predictResult.analise.spi?.toFixed(2)}</div>
-                                    </div>
-                                    <div>
-                                        <div className="text-xs text-[#a0a5b0]">Estimativa de Atraso</div>
-                                        <div className="text-2xl font-bold text-yellow-400">{predictResult.analise.diasAtrasoEstimado} dias</div>
-                                    </div>
-                                </div>
-                                <div className="mt-4 pt-4 border-t border-[#3a3e45]">
-                                    <div className="text-xs text-[#a0a5b0]">Tendência de Término</div>
-                                    <div className="text-xl font-bold text-white">{predictResult.analise.tendenciaFinal}</div>
-                                </div>
-                            </Card>
-
-                            <Card>
-                                <h4 className="text-lg font-bold text-white mb-4">Recomendações de Ajuste</h4>
-                                <div className="space-y-3 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
-                                    {predictResult.ajustesRecomendados?.map((adj: any, idx: number) => (
-                                        <div key={idx} className="bg-[#1e2329] p-3 rounded border border-[#3a3e45]">
-                                            <div className="flex justify-between mb-1">
-                                                <span className="font-bold text-sm text-[#0084ff]">Atividade ID {adj.id_atividade}</span>
-                                                <span className="text-xs bg-red-500/20 text-red-400 px-2 rounded">Impacto: {adj.impacto_dias}d</span>
-                                            </div>
-                                            <p className="text-sm text-white mb-1">{adj.acao}</p>
-                                            <p className="text-xs text-[#a0a5b0]">{adj.razao}</p>
-                                        </div>
-                                    ))}
-                                </div>
-                            </Card>
-                        </div>
-                    ) : (
-                        predictResult && <div className="p-4 text-center bg-[#242830] rounded text-red-400">Dados indisponíveis.</div>
-                    )}
-                </div>
-            )}
-
-            {activeTab === 'otimizador' && (
-                <div className="h-full flex flex-col">
-                    <Card>
-                         <p className="text-sm text-[#a0a5b0] mb-4">
-                            O otimizador buscará oportunidades de compressão do cronograma (Crashing/Fast-Tracking) respeitando o orçamento máximo.
-                        </p>
-                        <Button variant="primary" onClick={handleOptimize} disabled={optimizeLoading}>
-                             {optimizeLoading ? 'Otimizando...' : '🚀 Otimizar Caminho Crítico'}
-                        </Button>
-                    </Card>
-
-                    {optimizeResult && (
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
-                            <Card className="text-center">
-                                <div className="text-3xl font-bold text-green-400">{optimizeResult.compressaoAlcancada || 0} dias</div>
-                                <div className="text-sm text-[#a0a5b0]">Compressão Possível</div>
-                            </Card>
-                            <Card className="text-center">
-                                <div className="text-3xl font-bold text-yellow-400">R$ {optimizeResult.custo_adicional || 0}</div>
-                                <div className="text-sm text-[#a0a5b0]">Custo Adicional</div>
-                            </Card>
-                            <Card className="md:col-span-3">
-                                <h4 className="font-bold text-white mb-2">Estratégia Sugerida</h4>
-                                <p className="text-sm text-gray-300 mb-4">{optimizeResult.estrategia || "Nenhuma estratégia gerada."}</p>
-                                <h5 className="font-bold text-xs text-[#a0a5b0] uppercase mb-2">Detalhes das Ações</h5>
-                                <table className="w-full text-xs text-left text-gray-400">
-                                    <thead className="bg-[#1e2329] text-white">
-                                        <tr>
-                                            <th className="p-2">Tipo</th>
-                                            <th className="p-2">Impacto</th>
-                                            <th className="p-2">Risco</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {optimizeResult.detalhes?.map((d: any, i: number) => (
-                                            <tr key={i} className="border-b border-[#3a3e45]">
-                                                <td className="p-2 font-bold">{d.tipo}</td>
-                                                <td className="p-2">{d.impacto}</td>
-                                                <td className="p-2 text-yellow-500">{d.risco}</td>
-                                            </tr>
-                                        ))}
-                                        {!optimizeResult.detalhes?.length && (
-                                            <tr><td colSpan={3} className="p-2 text-center">Nenhum detalhe disponível.</td></tr>
-                                        )}
-                                    </tbody>
-                                </table>
-                            </Card>
-                        </div>
-                    )}
-                </div>
-            )}
-
-            {activeTab === 'restricoes' && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 h-full">
-                    <Card>
-                        <h4 className="font-bold text-white mb-4">Registro de Restrições</h4>
-                        <div className="space-y-2 mb-4 custom-scrollbar max-h-60 overflow-y-auto">
-                            {constraints.map(c => (
-                                <div key={c.id} className="bg-[#1e2329] p-3 rounded border-l-4 border-red-500 flex justify-between">
-                                    <div>
-                                        <div className="text-xs font-bold text-red-400 uppercase">{c.tipo}</div>
-                                        <div className="text-sm text-white">{c.descricao}</div>
-                                        {c.dataAfetada && <div className="text-xs text-[#a0a5b0]">Data: {c.dataAfetada}</div>}
-                                    </div>
-                                    <button onClick={() => setConstraints(constraints.filter(x => x.id !== c.id))} className="text-[#a0a5b0] hover:text-white">&times;</button>
-                                </div>
-                            ))}
-                            {constraints.length === 0 && <p className="text-sm text-[#a0a5b0] text-center py-4">Nenhuma restrição registrada.</p>}
-                        </div>
-                        
-                        <div className="border-t border-[#3a3e45] pt-4 space-y-3">
-                            <select 
-                                value={newConstraint.tipo} 
-                                onChange={e => setNewConstraint({...newConstraint, tipo: e.target.value as any})}
-                                className="w-full bg-[#1e2329] border border-[#3a3e45] rounded p-2 text-xs"
-                            >
-                                <option value="material">Material</option>
-                                <option value="clima">Clima</option>
-                                <option value="liberacao">Liberação</option>
-                                <option value="rh">Mão de Obra</option>
-                            </select>
-                            <input 
-                                type="text" 
-                                placeholder="Descrição da restrição..."
-                                value={newConstraint.descricao}
-                                onChange={e => setNewConstraint({...newConstraint, descricao: e.target.value})}
-                                className="w-full bg-[#1e2329] border border-[#3a3e45] rounded p-2 text-xs"
-                            />
-                            <input 
-                                type="date" 
-                                value={newConstraint.dataAfetada}
-                                onChange={e => setNewConstraint({...newConstraint, dataAfetada: e.target.value})}
-                                className="w-full bg-[#1e2329] border border-[#3a3e45] rounded p-2 text-xs"
-                            />
-                            <Button variant="secondary" size="sm" className="w-full" onClick={handleAddConstraint}>+ Adicionar Restrição</Button>
-                        </div>
-                        
-                        <Button variant="primary" className="mt-4" onClick={handleAnalyzeConstraints} disabled={constraintLoading}>
-                             {constraintLoading ? 'Analisando...' : '⚡ Analisar Impactos'}
-                        </Button>
-                    </Card>
-
-                    <Card>
-                        <h4 className="font-bold text-white mb-4">Análise de Impacto & Mitigação</h4>
-                        <div className="overflow-y-auto max-h-[500px] custom-scrollbar">
-                        {constraintResult && constraintResult.restricoes_criticas ? (
-                             constraintResult.restricoes_criticas.map((rc: any, i: number) => (
-                                <div key={i} className="mb-6 bg-[#1e2329] p-4 rounded border border-[#3a3e45]">
-                                    <h5 className="text-red-400 font-bold mb-1">{rc.tipo}: {rc.descricao}</h5>
-                                    <p className="text-xs text-[#a0a5b0] mb-3">Impacta {rc.atividades_bloqueadas.length} atividades a partir de {rc.data_impacto}</p>
-                                    
-                                    <div className="space-y-2">
-                                        <span className="text-xs font-bold text-white">Mitigações Sugeridas:</span>
-                                        {rc.mitigacoes.map((m: any, idx: number) => (
-                                            <div key={idx} className="text-xs bg-[#242830] p-2 rounded flex justify-between items-center">
-                                                <span>{m.acao}</span>
-                                                <span className={`px-2 py-0.5 rounded ${m.viabilidade === 'ALTA' ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'}`}>{m.viabilidade}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                             ))
-                        ) : (
-                            <div className="flex flex-col items-center justify-center h-40 text-[#a0a5b0] border-2 border-dashed border-[#3a3e45] rounded-lg">
-                                <p>Execute a análise para ver sugestões.</p>
-                            </div>
-                        )}
-                        </div>
-                    </Card>
-                </div>
-            )}
-
-            {activeTab === 'relatorios' && (
-                 <div className="h-full flex flex-col">
-                     <Card>
-                        <div className="flex justify-between items-center">
-                            <div>
-                                <h4 className="font-bold text-white">Relatório Executivo</h4>
-                                <p className="text-xs text-[#a0a5b0]">Gere relatórios completos em Markdown com insights da IA.</p>
-                            </div>
-                            <Button variant="primary" onClick={handleGenerateReport} disabled={reportLoading}>
-                                 {reportLoading ? 'Gerando...' : '📄 Gerar Relatório'}
-                            </Button>
-                        </div>
-                     </Card>
-
-                     <div className="flex-1 bg-[#1e2329] border border-[#3a3e45] rounded-lg p-6 overflow-y-auto font-mono text-sm text-gray-300 custom-scrollbar min-h-[400px] mt-6">
-                        {reportResult ? (
-                            <div className="whitespace-pre-wrap">{reportResult}</div>
-                        ) : (
-                            <div className="flex items-center justify-center h-full text-[#a0a5b0]">
-                                O relatório gerado aparecerá aqui.
-                            </div>
-                        )}
-                     </div>
-                 </div>
             )}
         </div>
     );

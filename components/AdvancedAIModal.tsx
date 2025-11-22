@@ -240,9 +240,12 @@ export const AdvancedAIModal: React.FC<AdvancedAIModalProps> = ({
               id: Date.now().toString(), 
               tipo: newConstraint.tipo as any || 'material', 
               descricao: newConstraint.descricao,
-              dataAfetada: newConstraint.dataAfetada
+              data_impacto: newConstraint.data_impacto || '',
+              severidade: "MÉDIA",
+              atividades_bloqueadas: [],
+              dias_atraso_estimado: 0
           }]);
-          setNewConstraint({ tipo: 'material', descricao: '', dataAfetada: '' } as any);
+          setNewConstraint({ tipo: 'material', descricao: '', data_impacto: '' } as any);
       }
   };
 
@@ -526,7 +529,7 @@ export const AdvancedAIModal: React.FC<AdvancedAIModalProps> = ({
                                     <div>
                                         <div className="text-xs font-bold text-red-400 uppercase">{c.tipo}</div>
                                         <div className="text-sm text-white">{c.descricao}</div>
-                                        {c.dataAfetada && <div className="text-xs text-[#a0a5b0]">Data: {c.dataAfetada}</div>}
+                                        {c.data_impacto && <div className="text-xs text-[#a0a5b0]">Data: {c.data_impacto}</div>}
                                     </div>
                                     <button onClick={() => setConstraints(constraints.filter(x => x.id !== c.id))} className="text-[#a0a5b0] hover:text-white">&times;</button>
                                 </div>
@@ -554,8 +557,8 @@ export const AdvancedAIModal: React.FC<AdvancedAIModalProps> = ({
                             />
                             <input 
                                 type="date" 
-                                value={newConstraint.dataAfetada}
-                                onChange={e => setNewConstraint({...newConstraint, dataAfetada: e.target.value})}
+                                value={newConstraint.data_impacto}
+                                onChange={e => setNewConstraint({...newConstraint, data_impacto: e.target.value})}
                                 className="w-full bg-[#1e2329] border border-[#3a3e45] rounded p-2 text-xs"
                             />
                             <Button variant="secondary" size="sm" className="w-full" onClick={handleAddConstraint}>+ Adicionar Restrição</Button>
