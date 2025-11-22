@@ -27,6 +27,29 @@ const formatCurrencyOrDash = (value: number): string => {
     return formatCurrency(value);
 };
 
+// Helper para navegação com Enter
+const handleEnterNavigation = (e: React.KeyboardEvent<HTMLElement>, colId: string) => {
+    e.preventDefault();
+    const currentInput = e.currentTarget;
+    const table = currentInput.closest('table');
+    if (!table) return;
+
+    // Busca todos os inputs/selects da mesma coluna na tabela
+    const allInputs = Array.from(table.querySelectorAll(`input[data-col-id="${colId}"], select[data-col-id="${colId}"]`)) as HTMLElement[];
+    
+    const currentIndex = allInputs.indexOf(currentInput);
+    if (currentIndex !== -1) {
+        // Calcula o próximo índice, voltando para o início (0) se chegar ao fim (loop)
+        const nextIndex = (currentIndex + 1) % allInputs.length;
+        const nextInput = allInputs[nextIndex];
+        
+        nextInput.focus();
+        if (nextInput instanceof HTMLInputElement) {
+            nextInput.select();
+        }
+    }
+};
+
 interface ColumnConfig {
     id: string;
     label: string;
@@ -44,7 +67,7 @@ interface UnitItem {
 
 // --- Components ---
 
-const EditableCell = ({ value, onCommit, isNumeric = false, className = "", onKeyDown, disabled = false, isSelected = false }: {
+const EditableCell = ({ value, onCommit, isNumeric = false, className = "", onKeyDown, disabled = false, isSelected = false, columnId }: {
     value: string | number;
     onCommit: (newValue: string | number) => void;
     isNumeric?: boolean;
@@ -52,6 +75,7 @@ const EditableCell = ({ value, onCommit, isNumeric = false, className = "", onKe
     onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
     disabled?: boolean;
     isSelected?: boolean;
+    columnId?: string;
 }) => {
     const [currentValue, setCurrentValue] = useState(value);
 
@@ -78,7 +102,11 @@ const EditableCell = ({ value, onCommit, isNumeric = false, className = "", onKe
         }
 
         if (e.key === 'Enter') {
-            e.currentTarget.blur();
+            if (columnId) {
+                handleEnterNavigation(e, columnId);
+            } else {
+                e.currentTarget.blur();
+            }
         } else if (e.key === 'Escape') {
             setCurrentValue(value);
             e.currentTarget.blur();
@@ -94,6 +122,7 @@ const EditableCell = ({ value, onCommit, isNumeric = false, className = "", onKe
             onKeyDown={handleLocalKeyDown}
             onFocus={e => e.target.select()}
             disabled={disabled}
+            data-col-id={columnId}
             className={`w-full border rounded-md p-1 text-xs ${className} 
                 ${disabled ? 'cursor-not-allowed bg-[#3a3e45] text-[#a0a5b0] border-[#3a3e45]' : ''}
                 ${isSelected ? 'bg-[#0084ff]/20 border-[#0084ff] text-white' : 'bg-[#242830] border-[#3a3e45]'}
@@ -103,11 +132,12 @@ const EditableCell = ({ value, onCommit, isNumeric = false, className = "", onKe
     );
 };
 
-const UnitAutocompleteCell = ({ value, onCommit, availableUnits, isSelected = false }: {
+const UnitAutocompleteCell = ({ value, onCommit, availableUnits, isSelected = false, columnId }: {
     value: string;
     onCommit: (newValue: string) => void;
     availableUnits: UnitItem[];
     isSelected?: boolean;
+    columnId?: string;
 }) => {
     const [searchTerm, setSearchTerm] = useState(value);
     const [isOpen, setIsOpen] = useState(false);
@@ -135,8 +165,6 @@ const UnitAutocompleteCell = ({ value, onCommit, availableUnits, isSelected = fa
         const handleClickOutside = (event: MouseEvent) => {
             if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
                 setIsOpen(false);
-                // On blur without selection, revert to original value or keep strict?
-                // For now, strict: if text matches a symbol exactly, keep it, else revert
                 const exactMatch = availableUnits.find(u => u.symbol.toLowerCase() === searchTerm.toLowerCase());
                 if (exactMatch) {
                      if (exactMatch.symbol !== value) onCommit(exactMatch.symbol);
@@ -156,7 +184,7 @@ const UnitAutocompleteCell = ({ value, onCommit, availableUnits, isSelected = fa
         inputRef.current?.blur();
     };
 
-    const handleKeyDown = (e: React.KeyboardEvent) => {
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'ArrowDown') {
             e.preventDefault();
             setHighlightedIndex(prev => Math.min(prev + 1, filteredUnits.length - 1));
@@ -164,9 +192,11 @@ const UnitAutocompleteCell = ({ value, onCommit, availableUnits, isSelected = fa
             e.preventDefault();
             setHighlightedIndex(prev => Math.max(prev - 1, 0));
         } else if (e.key === 'Enter') {
-            e.preventDefault();
-            if (filteredUnits.length > 0) {
+            if (isOpen && filteredUnits.length > 0) {
+                e.preventDefault();
                 handleSelect(filteredUnits[highlightedIndex]);
+            } else if (columnId) {
+                handleEnterNavigation(e, columnId);
             }
         } else if (e.key === 'Escape') {
             setIsOpen(false);
@@ -174,7 +204,6 @@ const UnitAutocompleteCell = ({ value, onCommit, availableUnits, isSelected = fa
             inputRef.current?.blur();
         } else if (e.key === 'Tab') {
             setIsOpen(false);
-             // Allow tab to move to next field, but try to commit current if valid
             const exactMatch = availableUnits.find(u => u.symbol.toLowerCase() === searchTerm.toLowerCase());
             if (exactMatch && exactMatch.symbol !== value) {
                  onCommit(exactMatch.symbol);
@@ -193,6 +222,7 @@ const UnitAutocompleteCell = ({ value, onCommit, availableUnits, isSelected = fa
                 ref={inputRef}
                 type="text"
                 value={searchTerm}
+                data-col-id={columnId}
                 onChange={e => {
                     setSearchTerm(e.target.value);
                     setIsOpen(true);
@@ -1296,6 +1326,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
             const row = (
                 <tr 
                     key={item.id} 
+                    data-row-id={item.id}
                     draggable={isEditing}
                     onDragStart={e => handleDragStart(e, item.id)}
                     onDragOver={e => e.preventDefault()}
@@ -1346,15 +1377,15 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                                 </button>
                                             ) : <div className="w-5"></div>}
                                             {isEditing 
-                                                ? <EditableCell value={item.nivel} onCommit={newValue => handleNivelChange(item.id, newValue as string)} onKeyDown={e => handleNivelKeyDown(e, item.id)} className="font-medium text-white w-16" isSelected={isColSelected}/> 
+                                                ? <EditableCell value={item.nivel} onCommit={newValue => handleNivelChange(item.id, newValue as string)} onKeyDown={e => handleNivelKeyDown(e, item.id)} className="font-medium text-white w-16" isSelected={isColSelected} columnId={col.id}/> 
                                                 : <span className="font-medium text-white">{item.nivel}</span>
                                             }
                                         </div>
                                     </td>
                                 );
-                            case 'fonte': return <td key={col.id} style={stickyStyle} className={`px-2 py-2 ${cellSelectionClass} ${finalBgClass}`}>{isEditing && isService ? <EditableCell value={item.fonte} onCommit={newValue => handleValueCommit(item.id, 'fonte', newValue)} isSelected={isColSelected}/> : (isService ? item.fonte : '')}</td>;
-                            case 'codigo': return <td key={col.id} style={stickyStyle} className={`px-2 py-2 ${cellSelectionClass} ${finalBgClass}`}>{isEditing && isService ? <EditableCell value={item.codigo} onCommit={newValue => handleValueCommit(item.id, 'codigo', newValue)} isSelected={isColSelected}/> : (isService ? item.codigo : '')}</td>;
-                            case 'discriminacao': return <td key={col.id} style={stickyStyle} className={`px-2 py-2 font-medium text-white ${cellSelectionClass} ${finalBgClass}`}>{isEditing ? <EditableCell value={item.discriminacao} onCommit={newValue => handleValueCommit(item.id, 'discriminacao', newValue)} isSelected={isColSelected}/> : item.discriminacao}</td>;
+                            case 'fonte': return <td key={col.id} style={stickyStyle} className={`px-2 py-2 ${cellSelectionClass} ${finalBgClass}`}>{isEditing && isService ? <EditableCell value={item.fonte} onCommit={newValue => handleValueCommit(item.id, 'fonte', newValue)} isSelected={isColSelected} columnId={col.id}/> : (isService ? item.fonte : '')}</td>;
+                            case 'codigo': return <td key={col.id} style={stickyStyle} className={`px-2 py-2 ${cellSelectionClass} ${finalBgClass}`}>{isEditing && isService ? <EditableCell value={item.codigo} onCommit={newValue => handleValueCommit(item.id, 'codigo', newValue)} isSelected={isColSelected} columnId={col.id}/> : (isService ? item.codigo : '')}</td>;
+                            case 'discriminacao': return <td key={col.id} style={stickyStyle} className={`px-2 py-2 font-medium text-white ${cellSelectionClass} ${finalBgClass}`}>{isEditing ? <EditableCell value={item.discriminacao} onCommit={newValue => handleValueCommit(item.id, 'discriminacao', newValue)} isSelected={isColSelected} columnId={col.id}/> : item.discriminacao}</td>;
                             case 'un': return (
                                 <td key={col.id} style={stickyStyle} className={`px-2 py-2 text-center ${cellSelectionClass} ${finalBgClass}`}>
                                     {isEditing && isService ? (
@@ -1363,13 +1394,14 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                             onCommit={(val) => handleValueCommit(item.id, 'unidade', val)}
                                             availableUnits={allUnits}
                                             isSelected={isColSelected}
+                                            columnId={col.id}
                                         />
                                     ) : (item.unidade || '-')}
                                 </td>
                             );
-                            case 'quant': return <td key={col.id} style={stickyStyle} className={`px-2 py-2 text-right ${cellSelectionClass} ${finalBgClass}`}>{isEditing && isService ? <EditableCell value={item.quantidade} onCommit={newValue => handleValueCommit(item.id, 'quantidade', newValue)} isNumeric disabled={item.unidade === '' || item.unidade === '-'} isSelected={isColSelected}/> : (isService ? formatNumberOrDash(item.quantidade) : '-')}</td>;
-                            case 'mat_unit': return <td key={col.id} style={stickyStyle} className={`px-2 py-2 text-right ${cellSelectionClass} ${finalBgClass}`}>{isEditing && isService ? <EditableCell value={item.mat_unit} onCommit={newValue => handleValueCommit(item.id, 'mat_unit', newValue)} isNumeric disabled={item.unidade === '' || item.unidade === '-'} isSelected={isColSelected}/> : (isService ? formatCurrencyOrDash(item.mat_unit) : '-')}</td>;
-                            case 'mo_unit': return <td key={col.id} style={stickyStyle} className={`px-2 py-2 text-right ${cellSelectionClass} ${finalBgClass}`}>{isEditing && isService ? <EditableCell value={item.mo_unit} onCommit={newValue => handleValueCommit(item.id, 'mo_unit', newValue)} isNumeric disabled={item.unidade === '' || item.unidade === '-'} isSelected={isColSelected}/> : (isService ? formatCurrencyOrDash(item.mo_unit) : '-')}</td>;
+                            case 'quant': return <td key={col.id} style={stickyStyle} className={`px-2 py-2 text-right ${cellSelectionClass} ${finalBgClass}`}>{isEditing && isService ? <EditableCell value={item.quantidade} onCommit={newValue => handleValueCommit(item.id, 'quantidade', newValue)} isNumeric disabled={item.unidade === '' || item.unidade === '-'} isSelected={isColSelected} columnId={col.id}/> : (isService ? formatNumberOrDash(item.quantidade) : '-')}</td>;
+                            case 'mat_unit': return <td key={col.id} style={stickyStyle} className={`px-2 py-2 text-right ${cellSelectionClass} ${finalBgClass}`}>{isEditing && isService ? <EditableCell value={item.mat_unit} onCommit={newValue => handleValueCommit(item.id, 'mat_unit', newValue)} isNumeric disabled={item.unidade === '' || item.unidade === '-'} isSelected={isColSelected} columnId={col.id}/> : (isService ? formatCurrencyOrDash(item.mat_unit) : '-')}</td>;
+                            case 'mo_unit': return <td key={col.id} style={stickyStyle} className={`px-2 py-2 text-right ${cellSelectionClass} ${finalBgClass}`}>{isEditing && isService ? <EditableCell value={item.mo_unit} onCommit={newValue => handleValueCommit(item.id, 'mo_unit', newValue)} isNumeric disabled={item.unidade === '' || item.unidade === '-'} isSelected={isColSelected} columnId={col.id}/> : (isService ? formatCurrencyOrDash(item.mo_unit) : '-')}</td>;
                             case 'mat_mo_unit': return <td key={col.id} style={stickyStyle} className={`px-2 py-2 text-right font-semibold ${finalBgClass}`}>{isService ? formatCurrencyOrDash(item.matMoUnit) : '-'}</td>;
                             case 'mat_total': return <td key={col.id} style={stickyStyle} className={`px-2 py-2 text-right ${finalBgClass}`}>{formatCurrencyOrDash(item.matUnitTotal)}</td>;
                             case 'mo_total': return <td key={col.id} style={stickyStyle} className={`px-2 py-2 text-right ${finalBgClass}`}>{formatCurrencyOrDash(item.moUnitTotal)}</td>;

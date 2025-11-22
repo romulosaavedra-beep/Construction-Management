@@ -136,3 +136,11 @@ export interface Profissional {
     email?: string;
     telefone?: string;
 }
+
+export interface ConstraintItem {
+    id: string;
+    tipo: "material" | "clima" | "liberacao" | "rh";
+    descricao: string;
+    dataAfetada?: string;
+    atividades_bloqueadas?: number[];
+}
