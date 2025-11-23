@@ -1,5 +1,5 @@
 
-export type Module = 
+export type Module =
   | 'dashboard'
   | 'orcamento'
   | 'planejamento'
@@ -62,6 +62,12 @@ export interface OrcamentoItem {
   mat_unit: number;
   mo_unit: number;
   expandido: boolean;
+  use_total_unit?: boolean;
+  sourceMetadata?: {
+    origin: 'manual' | 'ai_import';
+    originalRaw?: string;
+    confidence?: number;
+  };
 }
 
 export interface Restriction {
@@ -77,68 +83,68 @@ export interface Restriction {
 }
 
 export interface PlanejamentoItem {
-    id: number;
-    orcamentoId: number;
-    nivel: string;
-    pai: number | null;
-    discriminacao: string;
-    unidade: string;
-    quantidade: number;
-    valorTotal: number;
-    
-    // PILAR 1: SCHEDULE BUILDER
-    duracao: number; // dias úteis
-    dataInicio: string; // YYYY-MM-DD
-    dataFim: string; // YYYY-MM-DD
-    predecessores: number[];
-    sucessores: number[];
-    tipoRelacao: "FS" | "SS" | "FF" | "SF";
-    lag: number;
-    responsavel: string;
-    folga_total: number;
-    folga_livre: number;
-    eh_critica: boolean;
-    caminho_critico: boolean;
+  id: number;
+  orcamentoId: number;
+  nivel: string;
+  pai: number | null;
+  discriminacao: string;
+  unidade: string;
+  quantidade: number;
+  valorTotal: number;
 
-    // PILAR 2: PREDICTIVE ADJUSTER
-    percentualConclusao: number;
-    status: "Não iniciado" | "Em andamento" | "Atrasado" | "Concluído";
-    duracaoReal: number;
-    inicioReal: string; // Mapped to dataInicio_real
-    fimReal: string;    // Mapped to dataFim_real
-    data_update_real: string;
-    usuario_update: string;
-    observacoes: string;
-    desvio_inicio: number;
-    desvio_prazo: number;
+  // PILAR 1: SCHEDULE BUILDER
+  duracao: number; // dias úteis
+  dataInicio: string; // YYYY-MM-DD
+  dataFim: string; // YYYY-MM-DD
+  predecessores: number[];
+  sucessores: number[];
+  tipoRelacao: "FS" | "SS" | "FF" | "SF";
+  lag: number;
+  responsavel: string;
+  folga_total: number;
+  folga_livre: number;
+  eh_critica: boolean;
+  caminho_critico: boolean;
 
-    // PILAR 3: OPTIMIZE CPM ENGINE
-    custo_por_dia: number;
-    quantidade_recursos_minimo: number;
-    quantidade_recursos_maximo: number;
-    pode_fasttrack: boolean;
-    pode_crash: boolean;
-    producao_planejada: number;
-    producao_real: number;
-    indice_produtividade: number;
+  // PILAR 2: PREDICTIVE ADJUSTER
+  percentualConclusao: number;
+  status: "Não iniciado" | "Em andamento" | "Atrasado" | "Concluído";
+  duracaoReal: number;
+  inicioReal: string; // Mapped to dataInicio_real
+  fimReal: string;    // Mapped to dataFim_real
+  data_update_real: string;
+  usuario_update: string;
+  observacoes: string;
+  desvio_inicio: number;
+  desvio_prazo: number;
 
-    // PILAR 4: CONSTRAINT MANAGER
-    restricoes: Restriction[];
-    dependencia_externa: boolean;
-    materiais_requeridos: string[];
-    data_liberacao_minima: string;
+  // PILAR 3: OPTIMIZE CPM ENGINE
+  custo_por_dia: number;
+  quantidade_recursos_minimo: number;
+  quantidade_recursos_maximo: number;
+  pode_fasttrack: boolean;
+  pode_crash: boolean;
+  producao_planejada: number;
+  producao_real: number;
+  indice_produtividade: number;
 
-    // PILAR 5: REPORT GENERATOR
-    custoOrcado: number;
-    custoRealizado: number;
-    risco_nivel: "BAIXO" | "MÉDIO" | "ALTO";
-    foto_progresso: string[];
-    data_conclusao_esperada: string;
+  // PILAR 4: CONSTRAINT MANAGER
+  restricoes: Restriction[];
+  dependencia_externa: boolean;
+  materiais_requeridos: string[];
+  data_liberacao_minima: string;
 
-    // UI State
-    expandido: boolean;
-    isParent: boolean;
-    quantidadeExecutada: number; // Legacy support
+  // PILAR 5: REPORT GENERATOR
+  custoOrcado: number;
+  custoRealizado: number;
+  risco_nivel: "BAIXO" | "MÉDIO" | "ALTO";
+  foto_progresso: string[];
+  data_conclusao_esperada: string;
+
+  // UI State
+  expandido: boolean;
+  isParent: boolean;
+  quantidadeExecutada: number; // Legacy support
 }
 
 export interface MedicaoItem extends OrcamentoItem {
@@ -179,11 +185,11 @@ export interface Fornecedor {
 }
 
 export interface Profissional {
-    id: number;
-    cargo: string;
-    nome: string;
-    email?: string;
-    telefone?: string;
+  id: number;
+  cargo: string;
+  nome: string;
+  email?: string;
+  telefone?: string;
 }
 
 // Re-export for backward compatibility, aliasing Restriction

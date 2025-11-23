@@ -16,12 +16,20 @@ import Clima from './modules/Clima';
 import Settings from './modules/Settings';
 import type { Module, OrcamentoItem, PlanejamentoItem } from './types';
 import { initialOrcamentoData } from './data/mockData';
+import { BudgetService } from './services/BudgetService';
 
 const App: React.FC = () => {
   const [activeModule, setActiveModule] = useState<Module>('dashboard');
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [orcamentoData, setOrcamentoData] = useState<OrcamentoItem[]>(initialOrcamentoData);
   const [planejamentoData, setPlanejamentoData] = useState<PlanejamentoItem[]>([]);
+
+  useEffect(() => {
+    const loadedBudget = BudgetService.loadBudget();
+    if (loadedBudget) {
+      setOrcamentoData(loadedBudget);
+    }
+  }, []);
 
   useEffect(() => {
     const handleResize = () => {
@@ -52,21 +60,21 @@ const App: React.FC = () => {
 
   return (
     <>
-      <div 
+      <div
         className={`fixed inset-0 bg-black/50 z-[999] transition-opacity md:hidden ${isMobileMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`}
         onClick={() => setMobileMenuOpen(false)}
       ></div>
 
       <MobileHeader isMobileMenuOpen={isMobileMenuOpen} setMobileMenuOpen={setMobileMenuOpen} />
-      
+
       <div className="flex h-screen w-screen overflow-hidden bg-[#0f1419]">
-        <Sidebar 
-          activeModule={activeModule} 
-          setActiveModule={setActiveModule} 
+        <Sidebar
+          activeModule={activeModule}
+          setActiveModule={setActiveModule}
           isMobileMenuOpen={isMobileMenuOpen}
           setMobileMenuOpen={setMobileMenuOpen}
         />
-        
+
         <div className="flex flex-col flex-1 overflow-hidden">
           <Header />
           <main className="flex-1 overflow-y-auto overflow-x-hidden p-3 md:p-5 lg:p-8">

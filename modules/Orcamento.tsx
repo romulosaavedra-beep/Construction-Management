@@ -36,13 +36,13 @@ const handleEnterNavigation = (e: React.KeyboardEvent<HTMLElement>, colId: strin
 
     // Busca todos os inputs/selects da mesma coluna na tabela
     const allInputs = Array.from(table.querySelectorAll(`input[data-col-id="${colId}"], select[data-col-id="${colId}"]`)) as HTMLElement[];
-    
+
     const currentIndex = allInputs.indexOf(currentInput);
     if (currentIndex !== -1) {
         // Calcula o próximo índice, voltando para o início (0) se chegar ao fim (loop)
         const nextIndex = (currentIndex + 1) % allInputs.length;
         const nextInput = allInputs[nextIndex];
-        
+
         nextInput.focus();
         if (nextInput instanceof HTMLInputElement) {
             nextInput.select();
@@ -93,7 +93,7 @@ const EditableCell = ({ value, onCommit, isNumeric = false, className = "", onKe
             }
         }
     };
-    
+
     const handleLocalKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (disabled) return;
         if (onKeyDown) {
@@ -153,8 +153,8 @@ const UnitAutocompleteCell = ({ value, onCommit, availableUnits, isSelected = fa
     // Filter units based on search term
     const filteredUnits = useMemo(() => {
         const term = searchTerm.toLowerCase();
-        return availableUnits.filter(u => 
-            u.symbol.toLowerCase().includes(term) || 
+        return availableUnits.filter(u =>
+            u.symbol.toLowerCase().includes(term) ||
             u.name.toLowerCase().includes(term) ||
             u.category.toLowerCase().includes(term)
         ).slice(0, 50); // Limit results for performance
@@ -167,7 +167,7 @@ const UnitAutocompleteCell = ({ value, onCommit, availableUnits, isSelected = fa
                 setIsOpen(false);
                 const exactMatch = availableUnits.find(u => u.symbol.toLowerCase() === searchTerm.toLowerCase());
                 if (exactMatch) {
-                     if (exactMatch.symbol !== value) onCommit(exactMatch.symbol);
+                    if (exactMatch.symbol !== value) onCommit(exactMatch.symbol);
                 } else {
                     setSearchTerm(value); // Revert
                 }
@@ -206,7 +206,7 @@ const UnitAutocompleteCell = ({ value, onCommit, availableUnits, isSelected = fa
             setIsOpen(false);
             const exactMatch = availableUnits.find(u => u.symbol.toLowerCase() === searchTerm.toLowerCase());
             if (exactMatch && exactMatch.symbol !== value) {
-                 onCommit(exactMatch.symbol);
+                onCommit(exactMatch.symbol);
             }
         }
     };
@@ -252,7 +252,7 @@ const UnitAutocompleteCell = ({ value, onCommit, availableUnits, isSelected = fa
                     ))}
                 </div>
             )}
-             {isOpen && filteredUnits.length === 0 && (
+            {isOpen && filteredUnits.length === 0 && (
                 <div className="absolute top-full left-0 w-48 bg-[#242830] border border-[#3a3e45] rounded-md shadow-xl z-[100] p-2 text-center text-xs text-gray-500 mt-1">
                     Nenhuma unidade encontrada
                 </div>
@@ -264,21 +264,21 @@ const UnitAutocompleteCell = ({ value, onCommit, availableUnits, isSelected = fa
 // --- Logic Helpers ---
 
 const regenerateNiveles = (items: OrcamentoItem[]): OrcamentoItem[] => {
-  const newItems = items.map(i => ({ ...i }));
+    const newItems = items.map(i => ({ ...i }));
 
-  const processLevel = (parentId: number | null, parentNivel: string) => {
-    let siblingIndex = 1;
-    const children = newItems.filter(item => item.pai === parentId);
-    for (const child of children) {
-      const newNivel = parentNivel ? `${parentNivel}.${siblingIndex}` : `${siblingIndex}`;
-      child.nivel = newNivel;
-      siblingIndex++;
-      processLevel(child.id, child.nivel);
-    }
-  };
+    const processLevel = (parentId: number | null, parentNivel: string) => {
+        let siblingIndex = 1;
+        const children = newItems.filter(item => item.pai === parentId);
+        for (const child of children) {
+            const newNivel = parentNivel ? `${parentNivel}.${siblingIndex}` : `${siblingIndex}`;
+            child.nivel = newNivel;
+            siblingIndex++;
+            processLevel(child.id, child.nivel);
+        }
+    };
 
-  processLevel(null, '');
-  return newItems;
+    processLevel(null, '');
+    return newItems;
 }
 
 const getAllDescendantIds = (items: OrcamentoItem[], parentId: number): number[] => {
@@ -309,8 +309,8 @@ const updateHierarchy = (items: OrcamentoItem[]): OrcamentoItem[] => {
 };
 
 interface OrcamentoProps {
-  orcamentoData: OrcamentoItem[];
-  setOrcamentoData: (data: OrcamentoItem[]) => void;
+    orcamentoData: OrcamentoItem[];
+    setOrcamentoData: (data: OrcamentoItem[]) => void;
 }
 
 const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }) => {
@@ -320,14 +320,14 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
     const [draggedItemId, setDraggedItemId] = useState<number | null>(null);
     const [selectedIds, setSelectedIds] = useState(new Set<number>());
     const [selectedColumn, setSelectedColumn] = useState<string | null>(null);
-    
+
     const [history, setHistory] = useState<OrcamentoItem[][]>([]);
     const [historyIndex, setHistoryIndex] = useState(-1);
 
     const [isImportModalOpen, setImportModalOpen] = useState(false);
     const [importStep, setImportStep] = useState(1);
     const [uploadedFileContent, setUploadedFileContent] = useState<string | null>(null);
-    const [isAutoAiMapping, setIsAutoAiMapping] = useState(false);
+    const [isAutoAiMapping, setIsAutoAiMapping] = useState(true);
     const [columnMapping, setColumnMapping] = useState<{ [key: string]: { enabled: boolean; name: string } }>({
         nivel: { enabled: false, name: '' },
         fonte: { enabled: false, name: '' },
@@ -375,7 +375,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
             setAllUnits(DEFAULT_UNITS_DATA);
         }
     }, []);
-    
+
     useEffect(() => {
         try {
             const savedHidden = localStorage.getItem(LOCAL_STORAGE_KEY_HIDDEN_COLUMNS);
@@ -473,15 +473,15 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
         if (!field) return;
 
         updateOrcamento(prev => prev.map(item => {
-             const isService = item.unidade !== '' || field === 'discriminacao' || field === 'fonte' || field === 'codigo';
-             if (!isService) return item;
+            const isService = item.unidade !== '' || field === 'discriminacao' || field === 'fonte' || field === 'codigo';
+            if (!isService) return item;
 
-             let newValue: any = '';
-             if (field === 'quantidade' || field === 'mat_unit' || field === 'mo_unit') {
-                 newValue = 0;
-             }
+            let newValue: any = '';
+            if (field === 'quantidade' || field === 'mat_unit' || field === 'mo_unit') {
+                newValue = 0;
+            }
 
-             return { ...item, [field]: newValue };
+            return { ...item, [field]: newValue };
         }));
     }, [selectedColumn, isEditing, updateOrcamento]);
 
@@ -579,21 +579,21 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
             .map((col, index) => ({ col, index }))
             .filter(({ col }) => !hiddenColumns.has(col.id));
     }, [columnsConfig, hiddenColumns]);
-    
+
     const getStickyLeft = useCallback((columnIndex: number) => {
         let left = 0;
         for (let i = 0; i < columnIndex; i++) {
-             const { col, index } = visibleColumns[i];
-             if (pinnedColumns.has(col.id)) {
-                 left += columnWidths[index];
-             }
+            const { col, index } = visibleColumns[i];
+            if (pinnedColumns.has(col.id)) {
+                left += columnWidths[index];
+            }
         }
         return left;
     }, [visibleColumns, pinnedColumns, columnWidths]);
 
     const handleResizeMove = useCallback((e: MouseEvent) => {
         if (!resizingColumnRef.current) return;
-        
+
         const { index, startX, startWidth } = resizingColumnRef.current;
         const diffX = e.clientX - startX;
         const newWidth = startWidth + diffX;
@@ -662,7 +662,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
             const isParent = parentIds.has(item.id);
             const matTotal = item.quantidade * item.mat_unit;
             const moTotal = item.quantidade * item.mo_unit;
-            
+
             itemsMap.set(item.id, {
                 ...item,
                 hasChildren: isParent,
@@ -702,10 +702,10 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
             item.moUnitTotal = sumMo;
             item.matMoTotal = sumMat + sumMo;
             item.totalNivel = sumTotal;
-            
+
             return { mat: sumMat, mo: sumMo, total: sumTotal };
         };
-        
+
         localOrcamento.filter(item => item.pai === null).forEach(root => {
             const totals = calculateSubtotals(root.id);
             grandTotal += totals.total;
@@ -717,7 +717,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
 
         return Array.from(itemsMap.values());
     }, [localOrcamento]);
-    
+
     const handleAutoResize = useCallback((visibleIndex: number) => {
         const originalIndex = visibleColumns[visibleIndex].index;
         const column = columnsConfig[originalIndex];
@@ -755,7 +755,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
         if (fontWeightClass) {
             measureElement.classList.remove(fontWeightClass);
         }
-        
+
         const extraPadding = column.id === 'nivel' ? 40 : 18;
         const finalWidth = Math.max(column.minWidth, maxWidth + extraPadding);
 
@@ -776,28 +776,28 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
     }, [selectedIds, localOrcamento.length]);
 
     const handleEdit = () => {
-      const deepCopy = JSON.parse(JSON.stringify(localOrcamento));
-      setOriginalOrcamento(deepCopy);
-      setHistory([deepCopy]);
-      setHistoryIndex(0);
-      setIsEditing(true);
-      setSelectedColumn(null);
+        const deepCopy = JSON.parse(JSON.stringify(localOrcamento));
+        setOriginalOrcamento(deepCopy);
+        setHistory([deepCopy]);
+        setHistoryIndex(0);
+        setIsEditing(true);
+        setSelectedColumn(null);
     };
 
     const handleSave = () => {
-      setOrcamentoData(localOrcamento);
-      setIsEditing(false);
-      setOriginalOrcamento(null);
-      setSelectedIds(new Set());
-      setSelectedColumn(null);
-      setHistory([]);
-      setHistoryIndex(-1);
-      alert('Orçamento salvo!');
+        setOrcamentoData(localOrcamento);
+        setIsEditing(false);
+        setOriginalOrcamento(null);
+        setSelectedIds(new Set());
+        setSelectedColumn(null);
+        setHistory([]);
+        setHistoryIndex(-1);
+        alert('Orçamento salvo!');
     };
 
     const handleExit = () => {
         if (originalOrcamento) {
-          setLocalOrcamento(originalOrcamento);
+            setLocalOrcamento(originalOrcamento);
         }
         setIsEditing(false);
         setOriginalOrcamento(null);
@@ -837,30 +837,30 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
 
         let p = newParent;
         while (p) {
-            if (p.id === id) return; 
+            if (p.id === id) return;
             p = p.pai ? localOrcamento.find(i => i.id === p.pai) : null;
         }
 
         const idsToMove = new Set<number>([id, ...getAllDescendantIds(localOrcamento, id)]);
         const itemsToMove = localOrcamento.filter(i => idsToMove.has(i.id));
         const remainingItems = localOrcamento.filter(i => !idsToMove.has(i.id));
-        
+
         const mainItemToMove = itemsToMove.find(i => i.id === id);
-        if(mainItemToMove) {
+        if (mainItemToMove) {
             mainItemToMove.pai = newParentId;
         }
 
         let insertionIndex = -1;
         if (newParentId !== null) {
             const childrenOfNewParent = remainingItems.filter(i => i.pai === newParentId);
-            const lastChildOfNewParent = childrenOfNewParent[childrenOfNewParent.length -1];
+            const lastChildOfNewParent = childrenOfNewParent[childrenOfNewParent.length - 1];
 
-            if(lastChildOfNewParent) {
-                 const lastDescendantIds = getAllDescendantIds(remainingItems, lastChildOfNewParent.id);
-                 const lastId = lastDescendantIds.length > 0 ? lastDescendantIds[lastDescendantIds.length-1] : lastChildOfNewParent.id;
-                 insertionIndex = remainingItems.findIndex(i => i.id === lastId) + 1;
+            if (lastChildOfNewParent) {
+                const lastDescendantIds = getAllDescendantIds(remainingItems, lastChildOfNewParent.id);
+                const lastId = lastDescendantIds.length > 0 ? lastDescendantIds[lastDescendantIds.length - 1] : lastChildOfNewParent.id;
+                insertionIndex = remainingItems.findIndex(i => i.id === lastId) + 1;
             } else {
-                 insertionIndex = remainingItems.findIndex(i => i.id === newParentId) + 1;
+                insertionIndex = remainingItems.findIndex(i => i.id === newParentId) + 1;
             }
         } else {
             const lastRootItem = [...remainingItems].reverse().find(i => i.pai === null);
@@ -868,7 +868,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
         }
 
         if (insertionIndex === -1) insertionIndex = remainingItems.length;
-        
+
         remainingItems.splice(insertionIndex, 0, ...itemsToMove);
         updateOrcamento(updateHierarchy(remainingItems));
     };
@@ -876,13 +876,13 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
     const handleNivelKeyDown = (e: React.KeyboardEvent, itemId: number) => {
         if (e.key !== 'Tab') return;
         e.preventDefault();
-    
+
         const items = [...localOrcamento];
         const currentItem = items.find(i => i.id === itemId);
         if (!currentItem) return;
-        
+
         let newItems: OrcamentoItem[] = [];
-    
+
         if (e.shiftKey) { // Outdent (Recuar)
             const parentItem = items.find(i => i.id === currentItem.pai);
             if (!parentItem) return;
@@ -896,14 +896,14 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
             const parentAndItsDescendantsIds = [parentItem.id, ...getAllDescendantIds(remainingItems, parentItem.id)];
             const lastIdInParentFamily = parentAndItsDescendantsIds[parentAndItsDescendantsIds.length - 1];
             const insertionIndex = remainingItems.findIndex(i => i.id === lastIdInParentFamily) + 1;
-            
+
             remainingItems.splice(insertionIndex, 0, ...newBlockToMove);
             newItems = remainingItems;
-    
+
         } else { // Indent (Avançar)
             const parentId = currentItem.pai;
             const currentItemIndexInFlatArray = items.findIndex(i => i.id === itemId);
-            
+
             let precedingSibling: OrcamentoItem | undefined = undefined;
             for (let i = currentItemIndexInFlatArray - 1; i >= 0; i--) {
                 const potentialSibling = items[i];
@@ -912,44 +912,44 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                     break;
                 }
             }
-    
+
             if (!precedingSibling) return;
-    
+
             const newParent = precedingSibling;
             const blockIds = new Set([itemId, ...getAllDescendantIds(items, itemId)]);
-            
+
             const newBlockToMove = items
                 .filter(i => blockIds.has(i.id))
                 .map(item => item.id === itemId ? { ...item, pai: newParent.id } : item);
-            
+
             const remainingItems = items.filter(i => !blockIds.has(i.id));
-    
+
             const newParentAndItsDescendantsIds = [newParent.id, ...getAllDescendantIds(remainingItems, newParent.id)];
             const lastIdInNewParentFamily = newParentAndItsDescendantsIds[newParentAndItsDescendantsIds.length - 1];
             const insertionIndex = remainingItems.findIndex(i => i.id === lastIdInNewParentFamily) + 1;
-            
+
             const originalParentIds = new Set(items.map(i => i.pai).filter(p => p !== null));
             const finalRemainingItems = remainingItems.map(i => {
                 if (i.id === newParent.id) {
                     const becomesParent = !originalParentIds.has(newParent.id);
-                    return { 
-                        ...i, 
+                    return {
+                        ...i,
                         expandido: true,
                         ...(becomesParent && { unidade: '', quantidade: 0, mat_unit: 0, mo_unit: 0 })
                     };
                 }
                 return i;
             });
-            
+
             finalRemainingItems.splice(insertionIndex, 0, ...newBlockToMove);
             newItems = finalRemainingItems;
         }
-        
+
         if (newItems.length > 0) {
             updateOrcamento(updateHierarchy(newItems));
         }
     };
-    
+
     const handleDragStart = (e: React.DragEvent, itemId: number) => {
         setDraggedItemId(itemId);
         e.dataTransfer.effectAllowed = 'move';
@@ -965,7 +965,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
         const items = [...localOrcamento];
         const draggedItem = items.find(i => i.id === draggedItemId)!;
         const targetItem = items.find(i => i.id === targetItemId)!;
-        
+
         const blockIds = new Set([draggedItemId, ...getAllDescendantIds(items, draggedItemId)]);
         if (blockIds.has(targetItemId)) {
             setDraggedItemId(null);
@@ -974,16 +974,16 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
 
         const blockToMove = items.filter(i => blockIds.has(i.id));
         const remainingItems = items.filter(i => !blockIds.has(i.id));
-        
+
         const mainItemToMove = blockToMove.find(i => i.id === draggedItemId);
-        if(mainItemToMove) {
+        if (mainItemToMove) {
             mainItemToMove.pai = targetItem.pai;
         }
 
         const targetDescendantIds = getAllDescendantIds(remainingItems, targetItemId);
-        const lastRelevantId = targetDescendantIds.length > 0 ? targetDescendantIds[targetDescendantIds.length-1] : targetItemId;
+        const lastRelevantId = targetDescendantIds.length > 0 ? targetDescendantIds[targetDescendantIds.length - 1] : targetItemId;
         const insertionIndex = remainingItems.findIndex(i => i.id === lastRelevantId) + 1;
-        
+
         remainingItems.splice(insertionIndex, 0, ...blockToMove);
         updateOrcamento(updateHierarchy(remainingItems));
         setDraggedItemId(null);
@@ -1014,7 +1014,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
 
     const handleDeleteSelected = () => {
         if (selectedIds.size === 0) return;
-        
+
         let idsToDelete = new Set<number>();
         for (const id of selectedIds) {
             idsToDelete.add(id);
@@ -1025,7 +1025,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
         updateOrcamento(updateHierarchy(newOrcamento));
         setSelectedIds(new Set());
     };
-    
+
     const handleDuplicateRow = (idToDuplicate: number) => {
         const originalItem = localOrcamento.find(item => item.id === idToDuplicate);
         if (!originalItem) return;
@@ -1087,7 +1087,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
             return newSet;
         });
     };
-    
+
     const { grandTotalValue, grandTotalMaterial, grandTotalMaoDeObra } = useMemo(() => {
         const materialTotal = processedOrcamento
             .filter(item => item.unidade !== '' && item.unidade !== '-')
@@ -1135,9 +1135,9 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
         setImportStep(1);
         setUploadedFileContent(null);
         setIsAiProcessing(false);
-        setIsAutoAiMapping(false);
+        setIsAutoAiMapping(true);
     }
-    
+
     const processAiResponseIntoOrcamento = (aiData: any[]): OrcamentoItem[] => {
         if (!Array.isArray(aiData)) {
             console.error("AI response is not an array:", aiData);
@@ -1152,12 +1152,13 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
             unidade: d.unidade || '',
             quantidade: parseFloat(d.quantidade) || 0,
             mat_unit: parseFloat(d.mat_unit) || 0,
-            mo_unit: parseFloat(d.mo_unit) || 0
+            mo_unit: parseFloat(d.mo_unit) || 0,
+            use_total_unit: d.use_total_unit || false,
         }));
 
         let idCounter = 1;
         const itemsWithIds = items.map(item => ({ ...item, id: idCounter++ }));
-        
+
         const nivelMap: { [key: string]: number } = {};
         itemsWithIds.forEach(item => {
             nivelMap[item.nivel] = item.id;
@@ -1173,7 +1174,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                 expandido: true
             };
         });
-        
+
         return structuredItems;
     };
 
@@ -1183,7 +1184,6 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
     };
 
     const getStandardizedUnitsReference = () => {
-        // Use allUnits instead of re-importing defaults, ensuring we match what the user sees in Settings
         return allUnits.map(u => `Nome: "${u.name}" | Símbolo: "${u.symbol}"`).join('\n');
     };
 
@@ -1192,7 +1192,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
             alert("Nenhum arquivo enviado.");
             return;
         }
-        
+
         abortAiRef.current = false;
         setIsAiProcessing(true);
 
@@ -1222,21 +1222,100 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
             --- FIM DA LISTA DE UNIDADES ---
 
             Regras Importantes:
-            1.  **Estrutura:** Se a coluna "nível" não for fornecida, você DEVE inferir a estrutura hierárquica (níveis pai/filho) a partir da formatação do texto. Crie uma estrutura de nível numérico como "1", "1.1", "1.1.1".
+            1.  **Estrutura e Hierarquia (LÓGICA DE INFERÊNCIA AVANÇADA):** Se a coluna "nível" (ex: 1, 1.1, 2.1.3) NÃO for fornecida explicitamente no texto, você DEVE inferir a estrutura hierárquica (WBS/EAP) seguindo estritamente este critério lógico:
+                *   **Critério para Nível FILHO (Item Executável):**
+                    - Qualquer linha que POSSUA valores explícitos de **Quantidade** E **Valor Unitário** (maiores que zero).
+                    - Estes são os itens finais da composição.
+                
+                *   **Critério para Nível PAI (Agrupador/Título):**
+                    - Qualquer linha que possua uma Descrição, mas **NÃO POSSUA** Quantidade ou Valor Unitário (ou sejam vazios/zero).
+                    - Estes itens servem apenas como cabeçalhos ou categorias para os itens abaixo deles.
+                    
+                *   **Construção da Numeração:**
+                    - Ao identificar um "Pai", inicie ou aprofunde a numeração (ex: de "2" para "2.1").
+                    - Ao identificar um "Filho", ele deve herdar a numeração do último "Pai" ativo (ex: se o pai é "2.1.1", o filho será "2.1.1.1", "2.1.1.2", etc.).
+                    - A hierarquia pode ser profunda (ex: 2 -> 2.1 -> 2.1.1 -> 2.1.1.1).
+                    - **Exemplo de Lógica:**
+                        - "Fundação" (Sem qtd/valor) -> Nível 2 (Pai)
+                        - "Terraplenagem" (Sem qtd/valor) -> Nível 2.1 (Sub-Pai)
+                        - "Estacas" (Sem qtd/valor) -> Nível 2.1.1 (Sub-Pai)
+                        - "Estaca Raiz..." (COM qtd 200 e valor 1200) -> Nível 2.1.1.1 (Filho)
+
             2.  **Unidades (CRÍTICO):** Para cada linha, verifique o valor da unidade no arquivo original.
                 - Procure esse valor na tabela de referência acima (compare com "Nome" ou "Símbolo", ignorando maiúsculas/minúsculas).
                 - **SE encontrar correspondência:** Preencha o campo "unidade" OBRIGATORIAMENTE com o valor do **Símbolo** listado na tabela. Exemplo: Se o arquivo diz "Metro", e a tabela tem "Nome: Metro | Símbolo: m", você DEVE usar "m".
                 - **SE NÃO encontrar correspondência exata:** Tente padronizar para o símbolo mais próximo e comum (ex: "M2", "m2", "metro q" -> "m²").
                 - Unidades como "UN", "Unid" devem virar "un".
-            3.  **Custos:** Se existirem colunas separadas para "mat_unit" e "mo_unit", preencha-as. Se existir apenas custo unitário total, coloque em "mat_unit" e deixe "mo_unit" como 0.
-            4.  **Tipos de Dados:** "quantidade", "mat_unit", "mo_unit" devem ser números (float). "discriminacao" é string obrigatória.
-            5.  Ignore cabeçalhos e rodapés.
+            
+            3.  **FONTE e CÓDIGO (MUITO IMPORTANTE):**
+                - **Fonte:** É a ORIGEM/REFERÊNCIA de onde vem o serviço/atividade. Exemplos comuns: "SINAPI", "SICRO", "SEINFRA", "ORSE", "SBC", "Próprio", "Cotação", etc.
+                - **Código:** É o CÓDIGO IDENTIFICADOR específico da fonte. Exemplos: "73983/001", "C00123", "SUB-01234", "12345.678", etc.
+                
+                **⚠️ ATENÇÃO CRÍTICA - NÃO CONFUNDIR:**
+                - **"nível"** = Hierarquia pai/filho (ex: "1", "1.1", "1.1.1", "1.1.2", "2", "2.1") → Campo separado
+                - **"codigo"** = Identificador da fonte (ex: "73983", "C-00123") → NUNCA será hierárquico como "1.1.1"
+                - Se você encontrar valores como "1", "1.1", "1.2" → isso é "nível", NÃO é "codigo"!
+                
+                **Como identificar:**
+                a) **Colunas Separadas:** Se houver colunas com nomes como "Fonte", "Ref", "Referência", "Origem", "Base", "Tabela" → use como "fonte"
+                   E colunas como "Código", "Cód", "Cód. Ref", "Item", "Composição", "ID" → use como "codigo"
+                
+                b) **Mesma Coluna (Formato Combinado):** Se houver uma coluna com valores como:
+                   - "SINAPI 73983/001" → fonte: "SINAPI", codigo: "73983/001"
+                   - "SICRO C00123-SUB" → fonte: "SICRO", codigo: "C00123-SUB"
+                   - "SEINFRA 12345.678/9" → fonte: "SEINFRA", codigo: "12345.678/9"
+                   **Regra de Separação:** A primeira palavra em MAIÚSCULAS geralmente é a fonte, o restante é o código.
+                
+                c) **Identificação Inteligente:** Mesmo que as colunas NÃO sejam especificamente nomeadas "Fonte" ou "Código", identifique-as pelo conteúdo:
+                   - Valores curtos e geralmente em maiúsculas como "SINAPI", "SICRO" → provavelmente fonte
+                   - Valores alfanuméricos com números, traços, pontos como "73983/001", "C-123" → provavelmente código
+                
+                d) **Se NÃO houver fonte/código:** Deixe os campos vazios (""). NÃO invente valores.
+                
+                e) **Se houver dúvida:** É melhor deixar vazio do que preencher incorretamente.
+            
+            4.  **CUSTOS - DETECÇÃO INTELIGENTE (MUITO IMPORTANTE):**
+                
+                **Cenário A: Valores Separados (Material + Mão de Obra)**
+                Se o arquivo tiver colunas separadas para Material e Mão de Obra:
+                - Preencha "mat_unit" com custo unitário de material
+                - Preencha "mo_unit" com custo unitário de mão de obra
+                - use_total_unit: false (ou omita o campo)
+                
+                **Cenário B: Apenas Valor Unitário Total**
+                Se houver apenas UMA coluna de custo unitário (sem separação Material/M.O.):
+                - Coloque o valor total em "mat_unit"
+                - mo_unit: 0
+                - use_total_unit: true
+                
+                **Como detectar qual cenário:**
+                - **Cenário A**: Se houver colunas como "Material", "Mat", "Materiais", "Mat. Unit." E simultaneamente "M.O.", "Mão de Obra", "MO", "Labor", "M.O. Unit."
+                - **Cenário B**: Se houver apenas colunas como "Valor Unit.", "Preço", "Custo Unit.", "P.U.", "Unitário", "Valor", "Custo" (sem separação)
+                - **Em caso de dúvida:** Use Cenário B (valor total é mais comum)
+                
+                **Exemplos:**
+                | Entrada | mat_unit | mo_unit | use_total_unit |
+                |---------|----------|---------|----------------|
+                | Mat: 50.00, M.O: 30.00 | 50.00 | 30.00 | false |
+                | Valor Unit: 100.00 | 100.00 | 0 | true |
+                | P.U.: 75.50 | 75.50 | 0 | true |
+                | Custo: 45.00 | 45.00 | 0 | true |
+            
+            5.  **Tipos de Dados:** "quantidade", "mat_unit", "mo_unit" devem ser números (float). "discriminacao" é string obrigatória. "fonte", "codigo" e "use_total_unit" são opcionais.
+            
+            6.  Ignore cabeçalhos e rodapés.
+
+            **Exemplos de Identificação Fonte/Código:**
+            - "SINAPI 94521" → fonte: "SINAPI", codigo: "94521"
+            - Coluna "Ref: SICRO" + Coluna "Comp: 123.456" → fonte: "SICRO", codigo: "123.456"
+            - "Próprio" → fonte: "Próprio", codigo: ""
+            - Sem referência visível → fonte: "", codigo: ""
 
             Retorne APENAS o array de objetos JSON.
         `;
 
         try {
-            const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
+            const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY as string });
             const response = await ai.models.generateContent({
                 model: "gemini-2.5-flash",
                 contents: prompt,
@@ -1255,26 +1334,76 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                 quantidade: { type: Type.NUMBER },
                                 mat_unit: { type: Type.NUMBER },
                                 mo_unit: { type: Type.NUMBER },
+                                use_total_unit: { type: Type.BOOLEAN },
                             },
                         },
                     },
                 },
             });
-            
+
             if (abortAiRef.current) return;
 
             const jsonStr = response.text.trim();
             const aiData = JSON.parse(jsonStr);
             const newOrcamentoData = processAiResponseIntoOrcamento(aiData);
 
-            if(newOrcamentoData.length > 0) {
-              setOrcamentoData(newOrcamentoData); 
-              setLocalOrcamento(newOrcamentoData); 
-              
-              if (!abortAiRef.current) {
-                  resetImport();
-                  alert("Orçamento importado com sucesso!");
-              }
+            if (newOrcamentoData.length > 0) {
+                // Check if Fonte and Codigo columns have data
+                const hasFonte = newOrcamentoData.some(item => item.fonte && item.fonte.trim() !== '');
+                const hasCodigo = newOrcamentoData.some(item => item.codigo && item.codigo.trim() !== '');
+
+                // Check if all items use total unit value (no separation)
+                const allUseTotalUnit = newOrcamentoData.every(item => item.use_total_unit === true);
+                // Check if all MO units are zero (alternative condition for hiding columns)
+                const allMoUnitZero = newOrcamentoData.every(item => item.mo_unit === 0);
+
+                const shouldHideSplitColumns = allUseTotalUnit || allMoUnitZero;
+
+                // Auto-hide empty columns
+                const columnsToHide: string[] = [];
+                if (!hasFonte) columnsToHide.push('Fonte');
+                if (!hasCodigo) columnsToHide.push('Código');
+                if (shouldHideSplitColumns) {
+                    columnsToHide.push('Mat. Unit.', 'M.O. Unit.', 'Mat. Total', 'M.O. Total');
+                }
+
+                if (columnsToHide.length > 0) {
+                    setHiddenColumns(prev => {
+                        const newSet = new Set(prev);
+                        if (!hasFonte) newSet.add('fonte');
+                        if (!hasCodigo) newSet.add('codigo');
+                        if (shouldHideSplitColumns) {
+                            newSet.add('mat_unit');
+                            newSet.add('mo_unit');
+                            newSet.add('mat_total');
+                            newSet.add('mo_total');
+                        }
+                        return newSet;
+                    });
+                }
+
+                setOrcamentoData(newOrcamentoData);
+                setLocalOrcamento(newOrcamentoData);
+
+                if (!abortAiRef.current) {
+                    resetImport();
+
+                    // Show success message with auto-hide info
+                    let message = "✅ Orçamento importado com sucesso!";
+
+                    // Filter out unit columns for the generic message
+                    const genericHiddenCols = columnsToHide.filter(c => !['Mat. Unit.', 'M.O. Unit.', 'Mat. Total', 'M.O. Total'].includes(c));
+
+                    if (genericHiddenCols.length > 0) {
+                        message += `\n\nℹ️ Colunas '${genericHiddenCols.join("' e '")}' foram ocultadas automaticamente (sem dados)`;
+                    }
+
+                    if (shouldHideSplitColumns) {
+                        message += `\n\nℹ️ Colunas 'Mat. Unit.' e 'M.O. Unit.' foram ocultadas automaticamente.\nO orçamento importado usa valor unitário total (sem separação Material/M.O.).`;
+                    }
+
+                    alert(message);
+                }
             } else {
                 if (!abortAiRef.current) {
                     alert("A IA não conseguiu processar o arquivo. Verifique o mapeamento e o conteúdo do arquivo.");
@@ -1292,7 +1421,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
             }
         }
     };
-    
+
     const handleHideColumn = (columnId: string) => {
         setHiddenColumns(prev => new Set(prev).add(columnId));
     };
@@ -1309,14 +1438,14 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
         setHiddenColumns(new Set());
         setRestoreMenuOpen(false);
     };
-    
+
     const handleColumnSelect = (columnId: string) => {
         setSelectedColumn(prev => prev === columnId ? null : columnId);
     };
 
     const renderRows = (parentId: number | null = null, level = 0): React.ReactElement[] => {
         const itemsToRender = processedOrcamento.filter(item => item.pai === parentId);
-        
+
         return itemsToRender.flatMap(item => {
             const hasChildren = item.hasChildren;
             const isService = !hasChildren;
@@ -1324,8 +1453,8 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
             const rowBgClass = isService ? '' : 'bg-[rgba(42,50,60,0.3)]';
 
             const row = (
-                <tr 
-                    key={item.id} 
+                <tr
+                    key={item.id}
                     data-row-id={item.id}
                     draggable={isEditing}
                     onDragStart={e => handleDragStart(e, item.id)}
@@ -1336,27 +1465,27 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                     {visibleColumns.map(({ col }, visibleIndex) => {
                         const isPinned = pinnedColumns.has(col.id) && !isEditing;
                         const stickyLeft = isPinned ? getStickyLeft(visibleIndex) : undefined;
-                        
+
                         const stickyStyle: React.CSSProperties = isPinned ? {
                             position: 'sticky',
                             left: stickyLeft,
                             zIndex: 20,
                         } : {};
-                        
-                        const stickyCellBgClass = isService 
-                            ? `bg-[#1e2329] hover:bg-[#24282f]` 
+
+                        const stickyCellBgClass = isService
+                            ? `bg-[#1e2329] hover:bg-[#24282f]`
                             : `bg-[rgba(42,50,60,0.3)] hover:bg-[#24282f]`;
-                        
+
                         const finalBgClass = isPinned ? 'bg-[#1e2329] group-hover:bg-[#24282f]' : stickyCellBgClass;
                         const isColSelected = selectedColumn === col.id;
                         const cellSelectionClass = isColSelected ? 'bg-[#0084ff]/10' : '';
-                        
+
                         switch (col.id) {
                             case 'select':
                                 return isEditing && (
                                     <td key={col.id} className={`px-2 py-2 text-center sticky left-0 z-10 ${stickyCellBgClass}`}>
-                                        <input 
-                                            type="checkbox" 
+                                        <input
+                                            type="checkbox"
                                             checked={selectedIds.has(item.id)}
                                             onChange={() => handleSelectRow(item.id)}
                                             className="w-4 h-4 bg-[#1e2329] border-[#3a3e45] rounded focus:ring-[#0084ff] accent-[#0084ff]"
@@ -1367,29 +1496,29 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                 return (
                                     <td key={col.id} style={{ paddingLeft: `${level * 10 + 8}px`, ...stickyStyle }} className={`py-2 whitespace-nowrap text-left ${cellSelectionClass} ${finalBgClass}`}>
                                         <div className="flex items-center gap-2">
-                                           {hasChildren ? (
-                                                <button 
-                                                    onClick={() => toggleExpand(item.id)} 
+                                            {hasChildren ? (
+                                                <button
+                                                    onClick={() => toggleExpand(item.id)}
                                                     title={item.expandido ? "Recolher" : "Expandir"}
                                                     className="text-[#0084ff] text-base w-5 h-5 flex items-center justify-center"
                                                 >
                                                     {item.expandido ? '◢' : '◥'}
                                                 </button>
                                             ) : <div className="w-5"></div>}
-                                            {isEditing 
-                                                ? <EditableCell value={item.nivel} onCommit={newValue => handleNivelChange(item.id, newValue as string)} onKeyDown={e => handleNivelKeyDown(e, item.id)} className="font-medium text-white w-16" isSelected={isColSelected} columnId={col.id}/> 
+                                            {isEditing
+                                                ? <EditableCell value={item.nivel} onCommit={newValue => handleNivelChange(item.id, newValue as string)} onKeyDown={e => handleNivelKeyDown(e, item.id)} className="font-medium text-white w-16" isSelected={isColSelected} columnId={col.id} />
                                                 : <span className="font-medium text-white">{item.nivel}</span>
                                             }
                                         </div>
                                     </td>
                                 );
-                            case 'fonte': return <td key={col.id} style={stickyStyle} className={`px-2 py-2 ${cellSelectionClass} ${finalBgClass}`}>{isEditing && isService ? <EditableCell value={item.fonte} onCommit={newValue => handleValueCommit(item.id, 'fonte', newValue)} isSelected={isColSelected} columnId={col.id}/> : (isService ? item.fonte : '')}</td>;
-                            case 'codigo': return <td key={col.id} style={stickyStyle} className={`px-2 py-2 ${cellSelectionClass} ${finalBgClass}`}>{isEditing && isService ? <EditableCell value={item.codigo} onCommit={newValue => handleValueCommit(item.id, 'codigo', newValue)} isSelected={isColSelected} columnId={col.id}/> : (isService ? item.codigo : '')}</td>;
-                            case 'discriminacao': return <td key={col.id} style={stickyStyle} className={`px-2 py-2 font-medium text-white ${cellSelectionClass} ${finalBgClass}`}>{isEditing ? <EditableCell value={item.discriminacao} onCommit={newValue => handleValueCommit(item.id, 'discriminacao', newValue)} isSelected={isColSelected} columnId={col.id}/> : item.discriminacao}</td>;
+                            case 'fonte': return <td key={col.id} style={stickyStyle} className={`px-2 py-2 ${cellSelectionClass} ${finalBgClass}`}>{isEditing && isService ? <EditableCell value={item.fonte} onCommit={newValue => handleValueCommit(item.id, 'fonte', newValue)} isSelected={isColSelected} columnId={col.id} /> : (isService ? item.fonte : '')}</td>;
+                            case 'codigo': return <td key={col.id} style={stickyStyle} className={`px-2 py-2 ${cellSelectionClass} ${finalBgClass}`}>{isEditing && isService ? <EditableCell value={item.codigo} onCommit={newValue => handleValueCommit(item.id, 'codigo', newValue)} isSelected={isColSelected} columnId={col.id} /> : (isService ? item.codigo : '')}</td>;
+                            case 'discriminacao': return <td key={col.id} style={stickyStyle} className={`px-2 py-2 font-medium text-white ${cellSelectionClass} ${finalBgClass}`}>{isEditing ? <EditableCell value={item.discriminacao} onCommit={newValue => handleValueCommit(item.id, 'discriminacao', newValue)} isSelected={isColSelected} columnId={col.id} /> : item.discriminacao}</td>;
                             case 'un': return (
                                 <td key={col.id} style={stickyStyle} className={`px-2 py-2 text-center ${cellSelectionClass} ${finalBgClass}`}>
                                     {isEditing && isService ? (
-                                        <UnitAutocompleteCell 
+                                        <UnitAutocompleteCell
                                             value={item.unidade}
                                             onCommit={(val) => handleValueCommit(item.id, 'unidade', val)}
                                             availableUnits={allUnits}
@@ -1399,9 +1528,9 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                     ) : (item.unidade || '-')}
                                 </td>
                             );
-                            case 'quant': return <td key={col.id} style={stickyStyle} className={`px-2 py-2 text-right ${cellSelectionClass} ${finalBgClass}`}>{isEditing && isService ? <EditableCell value={item.quantidade} onCommit={newValue => handleValueCommit(item.id, 'quantidade', newValue)} isNumeric disabled={item.unidade === '' || item.unidade === '-'} isSelected={isColSelected} columnId={col.id}/> : (isService ? formatNumberOrDash(item.quantidade) : '-')}</td>;
-                            case 'mat_unit': return <td key={col.id} style={stickyStyle} className={`px-2 py-2 text-right ${cellSelectionClass} ${finalBgClass}`}>{isEditing && isService ? <EditableCell value={item.mat_unit} onCommit={newValue => handleValueCommit(item.id, 'mat_unit', newValue)} isNumeric disabled={item.unidade === '' || item.unidade === '-'} isSelected={isColSelected} columnId={col.id}/> : (isService ? formatCurrencyOrDash(item.mat_unit) : '-')}</td>;
-                            case 'mo_unit': return <td key={col.id} style={stickyStyle} className={`px-2 py-2 text-right ${cellSelectionClass} ${finalBgClass}`}>{isEditing && isService ? <EditableCell value={item.mo_unit} onCommit={newValue => handleValueCommit(item.id, 'mo_unit', newValue)} isNumeric disabled={item.unidade === '' || item.unidade === '-'} isSelected={isColSelected} columnId={col.id}/> : (isService ? formatCurrencyOrDash(item.mo_unit) : '-')}</td>;
+                            case 'quant': return <td key={col.id} style={stickyStyle} className={`px-2 py-2 text-right ${cellSelectionClass} ${finalBgClass}`}>{isEditing && isService ? <EditableCell value={item.quantidade} onCommit={newValue => handleValueCommit(item.id, 'quantidade', newValue)} isNumeric disabled={item.unidade === '' || item.unidade === '-'} isSelected={isColSelected} columnId={col.id} /> : (isService ? formatNumberOrDash(item.quantidade) : '-')}</td>;
+                            case 'mat_unit': return <td key={col.id} style={stickyStyle} className={`px-2 py-2 text-right ${cellSelectionClass} ${finalBgClass}`}>{isEditing && isService ? <EditableCell value={item.mat_unit} onCommit={newValue => handleValueCommit(item.id, 'mat_unit', newValue)} isNumeric disabled={item.unidade === '' || item.unidade === '-'} isSelected={isColSelected} columnId={col.id} /> : (isService ? formatCurrencyOrDash(item.mat_unit) : '-')}</td>;
+                            case 'mo_unit': return <td key={col.id} style={stickyStyle} className={`px-2 py-2 text-right ${cellSelectionClass} ${finalBgClass}`}>{isEditing && isService ? <EditableCell value={item.mo_unit} onCommit={newValue => handleValueCommit(item.id, 'mo_unit', newValue)} isNumeric disabled={item.unidade === '' || item.unidade === '-'} isSelected={isColSelected} columnId={col.id} /> : (isService ? formatCurrencyOrDash(item.mo_unit) : '-')}</td>;
                             case 'mat_mo_unit': return <td key={col.id} style={stickyStyle} className={`px-2 py-2 text-right font-semibold ${finalBgClass}`}>{isService ? formatCurrencyOrDash(item.matMoUnit) : '-'}</td>;
                             case 'mat_total': return <td key={col.id} style={stickyStyle} className={`px-2 py-2 text-right ${finalBgClass}`}>{formatCurrencyOrDash(item.matUnitTotal)}</td>;
                             case 'mo_total': return <td key={col.id} style={stickyStyle} className={`px-2 py-2 text-right ${finalBgClass}`}>{formatCurrencyOrDash(item.moUnitTotal)}</td>;
@@ -1411,11 +1540,11 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                             case 'action':
                                 return isEditing && (
                                     <td key={col.id} className={`px-2 py-2 sticky right-0 z-10 ${stickyCellBgClass}`}>
-                                       <div className="flex items-center gap-1">
+                                        <div className="flex items-center gap-1">
                                             <button title="Apagar Linha" onClick={() => handleDeleteRow(item.id)} className="hover:bg-red-500/50 p-1 rounded">🗑️</button>
                                             <button title="Duplicar Linha" onClick={() => handleDuplicateRow(item.id)} className="hover:bg-blue-500/50 p-1 rounded">📋</button>
                                             <button title="Nova Linha Abaixo" onClick={() => handleAddNewRow(item.id)} className="hover:bg-green-500/50 p-1 rounded">➕</button>
-                                       </div>
+                                        </div>
                                     </td>
                                 );
                             default: return null;
@@ -1427,7 +1556,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
             return item.expandido ? [row, ...renderRows(item.id, level + 1)] : [row];
         });
     };
-    
+
     const canUndo = historyIndex > 0;
     const canRedo = historyIndex < history.length - 1;
     const columnMappingLabels: { [key: string]: string } = {
@@ -1447,7 +1576,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
             {isImportModalOpen && (
                 <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[2000]">
                     <div className="bg-[#1e2329] rounded-lg shadow-xl p-6 w-full max-w-2xl transform transition-all relative">
-                        
+
                         {isAiProcessing && (
                             <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-[#1e2329]/95 rounded-lg transition-opacity duration-300">
                                 <div className="relative w-16 h-16 mb-4">
@@ -1466,7 +1595,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                             <h3 className="text-xl font-bold">🤖 Importar Orçamento com IA - Etapa {importStep}/2</h3>
                             <button onClick={resetImport} className="text-2xl">&times;</button>
                         </div>
-                        
+
                         {importStep === 1 && (
                             <div className="text-center">
                                 <p className="text-[#a0a5b0] mb-4">Envie seu arquivo de orçamento (.csv, .txt, .xlsx) para a IA processar.</p>
@@ -1479,14 +1608,14 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                 </div>
                             </div>
                         )}
-                        
+
                         {importStep === 2 && (
                             <div>
                                 <div className="mb-6 bg-[#242830] p-3 rounded border border-[#3a3e45] flex items-center gap-3">
-                                    <input 
-                                        type="checkbox" 
-                                        id="auto-ai" 
-                                        checked={isAutoAiMapping} 
+                                    <input
+                                        type="checkbox"
+                                        id="auto-ai"
+                                        checked={isAutoAiMapping}
                                         onChange={e => setIsAutoAiMapping(e.target.checked)}
                                         className="h-5 w-5 rounded accent-[#0084ff]"
                                     />
@@ -1499,7 +1628,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                 <div className={`transition-opacity duration-300 ${isAutoAiMapping ? 'opacity-30 pointer-events-none' : 'opacity-100'}`}>
                                     <p className="text-[#a0a5b0] mb-4">Ajude a IA a entender seu arquivo. Marque as colunas que existem e digite o nome exato delas como está no arquivo original.</p>
                                     <div className="space-y-3 max-h-[40vh] overflow-y-auto pr-2 custom-scrollbar">
-                                        {(Object.entries(columnMapping) as [string, { enabled: boolean; name: string }][]).map(([key, {enabled, name}]) => (
+                                        {(Object.entries(columnMapping) as [string, { enabled: boolean; name: string }][]).map(([key, { enabled, name }]) => (
                                             <div key={key} className="flex items-center gap-4 p-2 bg-[#242830] rounded">
                                                 <input type="checkbox" id={`check-${key}`} checked={enabled} onChange={(e) => handleMappingChange(key, 'enabled', e.target.checked)} className="h-5 w-5 rounded accent-[#0084ff]" />
                                                 <label htmlFor={`check-${key}`} className="w-48">{columnMappingLabels[key]}</label>
@@ -1522,20 +1651,24 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
             )}
             <span ref={measureCellRef} aria-hidden="true" className="text-xs absolute invisible whitespace-nowrap z-[-1]"></span>
             <PageHeader title="💰 Orçamento de Obra" subtitle="Estrutura orçamentária completa com 5 níveis hierárquicos" />
-             <Card>
+            <Card>
                 <CardHeader title="Orçamento Detalhado">
                     <div className="flex flex-wrap items-center justify-end gap-4">
+                        {!hiddenColumns.has('mat_unit') && (
+                            <>
+                                <div className="text-right">
+                                    <div className="text-xs text-[#a0a5b0]">TOTAL MATERIAIS</div>
+                                    <div className="text-lg font-bold text-blue-400">{formatCurrency(grandTotalMaterial)}</div>
+                                </div>
+                                <div className="text-right">
+                                    <div className="text-xs text-[#a0a5b0]">TOTAL MÃO DE OBRA</div>
+                                    <div className="text-lg font-bold text-yellow-400">{formatCurrency(grandTotalMaoDeObra)}</div>
+                                </div>
+                            </>
+                        )}
                         <div className="text-right">
-                            <div className="text-xs text-[#a0a5b0]">TOTAL MATERIAIS</div>
-                            <div className="text-lg font-bold text-blue-400">{formatCurrency(grandTotalMaterial)}</div>
-                        </div>
-                        <div className="text-right">
-                            <div className="text-xs text-[#a0a5b0]">TOTAL MÃO DE OBRA</div>
-                            <div className="text-lg font-bold text-yellow-400">{formatCurrency(grandTotalMaoDeObra)}</div>
-                        </div>
-                        <div className="text-right">
-                           <div className="text-xs text-[#a0a5b0]">VALOR TOTAL DO ORÇAMENTO</div>
-                           <div className="text-2xl font-bold text-green-400">{formatCurrency(grandTotalValue)}</div>
+                            <div className="text-xs text-[#a0a5b0]">VALOR TOTAL DO ORÇAMENTO</div>
+                            <div className="text-2xl font-bold text-green-400">{formatCurrency(grandTotalValue)}</div>
                         </div>
                         <div className="flex items-center gap-2">
                             {hiddenColumns.size > 0 && (
@@ -1549,7 +1682,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                                 {columnsConfig.filter(c => hiddenColumns.has(c.id)).map(c => (
                                                     <li key={c.id}>
                                                         <a href="#" onClick={(e) => { e.preventDefault(); handleShowColumn(c.id); }} className="block px-4 py-2 hover:bg-[#3a3e45]">
-                                                          {c.label}
+                                                            {c.label}
                                                         </a>
                                                     </li>
                                                 ))}
@@ -1564,12 +1697,12 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                     )}
                                 </div>
                             )}
-                             {isEditing && selectedIds.size > 0 && (
+                            {isEditing && selectedIds.size > 0 && (
                                 <Button variant="danger" onClick={handleDeleteSelected}>
                                     Apagar ({selectedIds.size})
                                 </Button>
-                             )}
-                             {isEditing ? (
+                            )}
+                            {isEditing ? (
                                 <>
                                     <Button variant="primary" onClick={handleSave}>💾 Salvar</Button>
                                     <Button variant="secondary" onClick={handleExit}>Sair sem Salvar</Button>
@@ -1578,8 +1711,8 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                 </>
                             ) : (
                                 <>
-                                  <Button onClick={handleEdit}>✏️ Editar</Button>
-                                  <Button onClick={() => setImportModalOpen(true)}>🤖 Importar com IA</Button>
+                                    <Button onClick={handleEdit}>✏️ Editar</Button>
+                                    <Button onClick={() => setImportModalOpen(true)}>🤖 Importar com IA</Button>
                                 </>
                             )}
                         </div>
@@ -1597,15 +1730,15 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                 {visibleColumns.map(({ col, index: originalIndex }, visibleIndex) => {
                                     const isSelectCol = col.id === 'select';
                                     const isActionCol = col.id === 'action';
-                                    const stickyHeaderClasses = 
+                                    const stickyHeaderClasses =
                                         isSelectCol ? 'sticky left-0 z-40 bg-[#242830]' :
-                                        isActionCol ? 'sticky right-0 z-40 bg-[#242830]' : '';
+                                            isActionCol ? 'sticky right-0 z-40 bg-[#242830]' : '';
                                     const unhideableColumns = new Set(['select', 'action', 'nivel']);
                                     // Editable columns that support batch delete
                                     const batchEditableColumns = new Set(['fonte', 'codigo', 'discriminacao', 'un', 'quant', 'mat_unit', 'mo_unit']);
                                     const isColSelected = selectedColumn === col.id;
                                     const isPinned = pinnedColumns.has(col.id) && !isEditing;
-                                    
+
                                     const stickyStyle: React.CSSProperties = isPinned ? {
                                         position: 'sticky',
                                         left: getStickyLeft(visibleIndex),
@@ -1614,80 +1747,81 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                     } : {};
 
                                     return (
-                                    <th 
-                                        key={col.id} 
-                                        style={stickyStyle}
-                                        className={`group px-2 py-3 relative text-left ${visibleIndex < visibleColumns.length - 1 ? 'border-r border-[#3a3e45]' : ''} ${stickyHeaderClasses} ${isColSelected ? 'bg-[#0084ff]/20' : ''} ${isPinned ? 'shadow-[2px_0_5px_rgba(0,0,0,0.3)]' : ''}`}
-                                    >
-                                        {/* View Mode Pin Control - Right Side */}
-                                        {!isEditing && (
-                                             <div className="absolute right-1 top-0 bottom-0 flex flex-col justify-center opacity-0 group-hover:opacity-100 transition-opacity z-50">
-                                                <button
-                                                    onClick={() => handleTogglePin(col.id)}
-                                                    className="w-5 h-5 rounded-full bg-[#3a3e45] text-white text-[10px] items-center justify-center flex hover:bg-[#0084ff] shadow-md"
-                                                    title={isPinned ? "Desafixar Coluna" : "Fixar Coluna"}
-                                                >
-                                                    <span className={!isPinned ? 'transform rotate-90' : ''}>📌</span>
-                                                </button>
-                                            </div>
-                                        )}
-
-                                        {/* Controls Container (Hide & Select) */}
-                                        {isEditing && !unhideableColumns.has(col.id) && (
-                                            <div className="absolute left-1 top-0 bottom-0 flex flex-col justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity md:flex z-20">
-                                                {batchEditableColumns.has(col.id) && (
-                                                     <button
-                                                        onClick={() => handleColumnSelect(col.id)}
-                                                        className={`w-4 h-4 rounded-full text-white text-[10px] items-center justify-center flex hover:bg-blue-500/80 ${isColSelected ? 'bg-[#0084ff] opacity-100' : 'bg-[#3a3e45]'}`}
-                                                        title={`Selecionar coluna ${col.label} (Delete para limpar)`}
+                                        <th
+                                            key={col.id}
+                                            style={stickyStyle}
+                                            className={`group px-2 py-3 relative text-left ${visibleIndex < visibleColumns.length - 1 ? 'border-r border-[#3a3e45]' : ''} ${stickyHeaderClasses} ${isColSelected ? 'bg-[#0084ff]/20' : ''} ${isPinned ? 'shadow-[2px_0_5px_rgba(0,0,0,0.3)]' : ''}`}
+                                        >
+                                            {/* View Mode Pin Control - Right Side */}
+                                            {!isEditing && (
+                                                <div className="absolute right-1 top-0 bottom-0 flex flex-col justify-center opacity-0 group-hover:opacity-100 transition-opacity z-50">
+                                                    <button
+                                                        onClick={() => handleTogglePin(col.id)}
+                                                        className="w-5 h-5 rounded-full bg-[#3a3e45] text-white text-[10px] items-center justify-center flex hover:bg-[#0084ff] shadow-md"
+                                                        title={isPinned ? "Desafixar Coluna" : "Fixar Coluna"}
                                                     >
-                                                        ▼
+                                                        <span className={!isPinned ? 'transform rotate-90' : ''}>📌</span>
                                                     </button>
-                                                )}
-                                                <button
-                                                    onClick={() => handleHideColumn(col.id)}
-                                                    className="w-4 h-4 rounded-full bg-[#3a3e45] text-white text-xs items-center justify-center flex hover:bg-red-500/80"
-                                                    title={`Ocultar ${col.label}`}
-                                                >
-                                                    &times;
-                                                </button>
-                                            </div>
-                                        )}
-                                        
-                                        {col.id === 'select' && isEditing && (
-                                            <div className="flex justify-center">
-                                                <input 
-                                                    type="checkbox" 
-                                                    ref={headerCheckboxRef}
-                                                    onChange={handleSelectAll}
-                                                    className="w-4 h-4 bg-[#1e2329] border-[#3a3e45] rounded focus:ring-[#0084ff] accent-[#0084ff]"
+                                                </div>
+                                            )}
+
+                                            {/* Controls Container (Hide & Select) */}
+                                            {isEditing && !unhideableColumns.has(col.id) && (
+                                                <div className="absolute left-1 top-0 bottom-0 flex flex-col justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity md:flex z-20">
+                                                    {batchEditableColumns.has(col.id) && (
+                                                        <button
+                                                            onClick={() => handleColumnSelect(col.id)}
+                                                            className={`w-4 h-4 rounded-full text-white text-[10px] items-center justify-center flex hover:bg-blue-500/80 ${isColSelected ? 'bg-[#0084ff] opacity-100' : 'bg-[#3a3e45]'}`}
+                                                            title={`Selecionar coluna ${col.label} (Delete para limpar)`}
+                                                        >
+                                                            ▼
+                                                        </button>
+                                                    )}
+                                                    <button
+                                                        onClick={() => handleHideColumn(col.id)}
+                                                        className="w-4 h-4 rounded-full bg-[#3a3e45] text-white text-xs items-center justify-center flex hover:bg-red-500/80"
+                                                        title={`Ocultar ${col.label}`}
+                                                    >
+                                                        &times;
+                                                    </button>
+                                                </div>
+                                            )}
+
+                                            {col.id === 'select' && isEditing && (
+                                                <div className="flex justify-center">
+                                                    <input
+                                                        type="checkbox"
+                                                        ref={headerCheckboxRef}
+                                                        onChange={handleSelectAll}
+                                                        className="w-4 h-4 bg-[#1e2329] border-[#3a3e45] rounded focus:ring-[#0084ff] accent-[#0084ff]"
+                                                    />
+                                                </div>
+                                            )}
+                                            {col.id === 'nivel' && (
+                                                <div className="flex items-center gap-2">
+                                                    <button
+                                                        title={areAllExpanded ? "Recolher Tudo" : "Expandir Tudo"}
+                                                        onClick={handleToggleExpandAll}
+                                                        className="hover:bg-blue-500/50 p-0.5 rounded text-sm mr-1"
+                                                    >
+                                                        {areAllExpanded ? '◢' : '◥'}
+                                                    </button>
+                                                    <span>{col.label}</span>
+                                                </div>
+                                            )}
+                                            {col.id !== 'select' && col.id !== 'nivel' && <span className="pr-6">{col.label}</span>}
+
+                                            {(col.resizable ?? true) && (
+                                                <div
+                                                    onMouseDown={(e) => handleResizeStart(e, visibleIndex)}
+                                                    onDoubleClick={() => handleAutoResize(visibleIndex)}
+                                                    className="absolute top-0 right-0 h-full w-2 cursor-col-resize z-10 hover:bg-blue-500/20"
+                                                    style={{ transform: 'translateX(50%)' }}
                                                 />
-                                            </div>
-                                        )}
-                                        {col.id === 'nivel' && (
-                                             <div className="flex items-center gap-2">
-                                                <button
-                                                    title={areAllExpanded ? "Recolher Tudo" : "Expandir Tudo"}
-                                                    onClick={handleToggleExpandAll}
-                                                    className="hover:bg-blue-500/50 p-0.5 rounded text-sm mr-1"
-                                                >
-                                                    {areAllExpanded ? '◢' : '◥'}
-                                                </button>
-                                                <span>{col.label}</span>
-                                            </div>
-                                        )}
-                                        {col.id !== 'select' && col.id !== 'nivel' && <span className="pr-6">{col.label}</span>}
-                                        
-                                        {(col.resizable ?? true) && (
-                                             <div
-                                                onMouseDown={(e) => handleResizeStart(e, visibleIndex)}
-                                                onDoubleClick={() => handleAutoResize(visibleIndex)}
-                                                className="absolute top-0 right-0 h-full w-2 cursor-col-resize z-10 hover:bg-blue-500/20"
-                                                style={{ transform: 'translateX(50%)' }}
-                                            />
-                                        )}
-                                    </th>
-                                )})}
+                                            )}
+                                        </th>
+                                    )
+                                })}
                             </tr>
                         </thead>
                         <tbody>
