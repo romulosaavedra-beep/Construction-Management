@@ -1,45 +1,52 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>VOBI - Gestão de Obras</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-      /* Custom scrollbar styling */
-      ::-webkit-scrollbar {
-          width: 8px;
-          height: 8px;
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SAAVEDRA - Gestão de Obras</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Custom scrollbar styling */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #1e2329;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #4a4e55;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #5a5e65;
+    }
+
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: #4a4e55 #1e2329;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translate3d(0, 20px, 0);
       }
-      ::-webkit-scrollbar-track {
-          background: #1e2329;
+
+      to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
       }
-      ::-webkit-scrollbar-thumb {
-          background: #4a4e55;
-          border-radius: 4px;
-      }
-      ::-webkit-scrollbar-thumb:hover {
-          background: #5a5e65;
-      }
-      * {
-          scrollbar-width: thin;
-          scrollbar-color: #4a4e55 #1e2329;
-      }
-      @keyframes fadeInUp {
-        from {
-          opacity: 0;
-          transform: translate3d(0, 20px, 0);
-        }
-        to {
-          opacity: 1;
-          transform: translate3d(0, 0, 0);
-        }
-      }
-      .animate-fade-in-up {
-        animation: fadeInUp 0.5s ease-out forwards;
-      }
-    </style>
+    }
+
+    .animate-fade-in-up {
+      animation: fadeInUp 0.5s ease-out forwards;
+    }
+  </style>
   <script type="importmap">
 {
   "imports": {
@@ -51,8 +58,10 @@
 }
 </script>
 </head>
-  <body class="bg-[#0f1419] text-[#e8eaed]">
-    <div id="root"></div>
-    <script type="module" src="/index.tsx"></script>
-  </body>
+
+<body class="bg-[#0f1419] text-[#e8eaed]">
+  <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+
 </html>

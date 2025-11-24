@@ -28,7 +28,7 @@ export const Header: React.FC = () => {
                     <div className="text-xs text-[#a0a5b0]">📍 São Paulo, SP - Brasil</div>
                 </div>
             </div>
-            <div className="flex items-center gap-3 bg-[#1e2329] px-4 py-2 rounded-lg">
+            <div className="flex items-center gap-3 bg-[#1e2329] px-4 py-1 rounded-lg">
                 <span className="text-2xl">☀️</span>
                 <div>
                     <div className="font-bold text-lg">26°C</div>

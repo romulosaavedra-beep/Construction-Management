@@ -8,17 +8,17 @@ import { StatusBadge } from '../components/StatusBadge';
 import type { PlanejamentoItem, Restriction } from '../types';
 import { profissionaisData } from '../data/mockData';
 import { formatCurrency, formatDate, addWorkingDays, calculateDurationInWorkingDays, WorkScheduleConfig } from '../utils/formatters';
-import { 
-    generateScheduleWithGemini, 
-    predictAndAdjustScheduleGemini, 
-    optimizeCriticalPathGemini, 
-    manageConstraintsGemini, 
+import {
+    generateScheduleWithGemini,
+    predictAndAdjustScheduleGemini,
+    optimizeCriticalPathGemini,
+    manageConstraintsGemini,
     generateExecutiveReportGemini
 } from '../services/aiPlannerService';
 import { AdvancedAIModal } from '../components/AdvancedAIModal';
 
 interface PlanejamentoProps {
-    orcamentoData: any[]; 
+    orcamentoData: any[];
     savedData: PlanejamentoItem[];
     onSave: (data: PlanejamentoItem[]) => void;
 }
@@ -73,20 +73,20 @@ const formatDateOrDash = (dateStr: string) => {
 
 const getStatus = (item: PlanejamentoItem): string => {
     if (item.percentualConclusao >= 100) return 'Concluído';
-    
+
     if (item.dataInicio && item.dataFim) {
         const hoje = new Date();
-        hoje.setHours(0,0,0,0);
+        hoje.setHours(0, 0, 0, 0);
         const dataFim = new Date(item.dataFim + 'T00:00:00');
         const dataInicio = new Date(item.dataInicio + 'T00:00:00');
-        
+
         if (hoje > dataFim) return 'Atrasado';
         if (item.percentualConclusao > 0) return 'Em andamento';
         if (hoje >= dataInicio) return 'No prazo';
     }
-    
+
     if (item.percentualConclusao > 0) return 'Em andamento';
-    
+
     return 'Não iniciado';
 };
 
@@ -96,7 +96,7 @@ const recalculateTree = (items: PlanejamentoItem[], config: WorkScheduleConfig):
 
     const processNode = (parentId: number | null) => {
         const children = items.filter(i => i.pai === parentId);
-        if (children.length === 0) return; 
+        if (children.length === 0) return;
 
         children.forEach(child => processNode(child.id));
         const freshChildren = children.map(c => itemMap.get(c.id)!);
@@ -149,18 +149,18 @@ const recalculateTree = (items: PlanejamentoItem[], config: WorkScheduleConfig):
                 } else {
                     parent.duracaoReal = 0;
                 }
-                
+
                 // Aggregations
                 parent.custoRealizado = totalCustoRealizado;
                 parent.custoOrcado = totalValue; // Matches valorTotal aggregation logic
-                
+
                 if (totalValue > 0) {
                     parent.percentualConclusao = totalWeightedProgress / totalValue;
                 } else {
                     const sumPct = freshChildren.reduce((acc, c) => acc + c.percentualConclusao, 0);
                     parent.percentualConclusao = freshChildren.length > 0 ? sumPct / freshChildren.length : 0;
                 }
-                
+
                 // Determine parent status based on children/progress
                 parent.status = getStatus(parent) as any;
             }
@@ -178,7 +178,7 @@ const handleEnterNavigation = (e: React.KeyboardEvent<HTMLElement>, colId: strin
     if (!table) return;
 
     const allInputs = Array.from(table.querySelectorAll(`input[data-col-id="${colId}"], select[data-col-id="${colId}"]`)) as HTMLElement[];
-    
+
     const currentIndex = allInputs.indexOf(currentInput);
     if (currentIndex !== -1) {
         const nextIndex = (currentIndex + 1) % allInputs.length;
@@ -217,7 +217,7 @@ const EditableCell = ({ value, onCommit, type = 'text', className = "", onKeyDow
 
     const handleBlur = () => {
         if (disabled) return;
-        
+
         let commitValue: any = currentValue;
 
         if (type === 'number') {
@@ -255,28 +255,28 @@ const EditableCell = ({ value, onCommit, type = 'text', className = "", onKeyDow
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-         let newVal = e.target.value;
-         if (type === 'number') {
-             if (newVal === '' || newVal === '-') {
-                 setCurrentValue(newVal);
-                 return;
-             }
-             if (step) {
-                 const stepStr = String(step);
-                 if (stepStr.includes('.')) {
-                     const maxDecimals = stepStr.split('.')[1].length;
-                     const regex = new RegExp(`^-?\\d*(\\.\\d{0,${maxDecimals}})?$`);
-                     if (!regex.test(newVal)) return;
-                 }
-             }
-             if (max !== undefined) {
-                 const numVal = parseFloat(newVal);
-                 if (!isNaN(numVal) && numVal > max) return;
-             }
-         }
-         setCurrentValue(newVal);
+        let newVal = e.target.value;
+        if (type === 'number') {
+            if (newVal === '' || newVal === '-') {
+                setCurrentValue(newVal);
+                return;
+            }
+            if (step) {
+                const stepStr = String(step);
+                if (stepStr.includes('.')) {
+                    const maxDecimals = stepStr.split('.')[1].length;
+                    const regex = new RegExp(`^-?\\d*(\\.\\d{0,${maxDecimals}})?$`);
+                    if (!regex.test(newVal)) return;
+                }
+            }
+            if (max !== undefined) {
+                const numVal = parseFloat(newVal);
+                if (!isNaN(numVal) && numVal > max) return;
+            }
+        }
+        setCurrentValue(newVal);
     };
-    
+
     const handleLocalKeyDown = (e: React.KeyboardEvent<any>) => {
         if (disabled) return;
         if (onKeyDown) {
@@ -354,7 +354,7 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
     const [planejamentoItems, setPlanejamentoItems] = useState<PlanejamentoItem[]>([]);
     const [isEditing, setIsEditing] = useState(false);
     const [originalItems, setOriginalItems] = useState<PlanejamentoItem[] | null>(null);
-    
+
     const [history, setHistory] = useState<PlanejamentoItem[][]>([]);
     const [historyIndex, setHistoryIndex] = useState(-1);
 
@@ -372,7 +372,7 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
                 if (saved) {
                     const parsed = JSON.parse(saved);
                     if (Array.isArray(parsed) && parsed.length > 0) {
-                         currentProfs = parsed;
+                        currentProfs = parsed;
                     }
                 }
             } catch (e) { console.error(e); }
@@ -397,7 +397,7 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
         { id: 'inicio', label: 'Data Início', initialWidth: 100, minWidth: 90, align: 'center' },
         { id: 'fim', label: 'Data Fim', initialWidth: 100, minWidth: 90, align: 'center' },
         { id: 'responsavel', label: 'Responsável', initialWidth: 180, minWidth: 150, align: 'left' },
-        
+
         // Pilar 1: Logic & CPM
         { id: 'predecessores', label: 'Predecessores', initialWidth: 100, minWidth: 80, align: 'left' },
         { id: 'sucessores', label: 'Sucessores', initialWidth: 100, minWidth: 80, align: 'left' },
@@ -415,7 +415,7 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
 
         // Pilar 3: Optimization
         { id: 'custo_por_dia', label: 'Custo/Dia (R$)', initialWidth: 100, minWidth: 90, align: 'right' },
-        
+
         // Pilar 4: Constraints
         { id: 'dependencia_externa', label: 'Dep. Externa', initialWidth: 80, minWidth: 70, align: 'center' },
         { id: 'materiais_requeridos', label: 'Materiais Req.', initialWidth: 150, minWidth: 120, align: 'left' },
@@ -452,7 +452,7 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
             setPlanejamentoItems(prevItems => {
                 const sourceData = savedData.length > 0 ? savedData : prevItems;
                 const existingItemsMap = new Map<number, PlanejamentoItem>(sourceData.map(i => [i.id, i]));
-                
+
                 const newItems = orcamentoData.map(orcItem => {
                     const existing = existingItemsMap.get(orcItem.id);
                     const valorTotal = (orcItem.mat_unit + orcItem.mo_unit) * orcItem.quantidade;
@@ -469,7 +469,7 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
                         valorTotal: valorTotal,
                         isParent: isParent,
                         expandido: existing ? existing.expandido : true,
-                        
+
                         // Pilar 1 Default
                         duracao: existing?.duracao || 0,
                         dataInicio: existing?.dataInicio || '',
@@ -496,7 +496,7 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
                         observacoes: existing?.observacoes || '',
                         desvio_inicio: existing?.desvio_inicio || 0,
                         desvio_prazo: existing?.desvio_prazo || 0,
-                        
+
                         // Pilar 3 Default
                         custo_por_dia: existing?.custo_por_dia || 0,
                         quantidade_recursos_minimo: existing?.quantidade_recursos_minimo || 0,
@@ -521,7 +521,7 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
                         data_conclusao_esperada: existing?.data_conclusao_esperada || ''
                     };
                 });
-                
+
                 return recalculateTree(newItems, scheduleConfig);
             });
         }
@@ -535,9 +535,9 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
                 if (Array.isArray(parsed)) {
                     setColumnWidths(parsed);
                 }
-            } catch(e) { setColumnWidths(columnsConfig.map(c => c.initialWidth)); }
+            } catch (e) { setColumnWidths(columnsConfig.map(c => c.initialWidth)); }
         } else {
-             setColumnWidths(columnsConfig.map(c => c.initialWidth));
+            setColumnWidths(columnsConfig.map(c => c.initialWidth));
         }
 
         const savedPinned = localStorage.getItem(LOCAL_STORAGE_KEY_PLAN_PINNED);
@@ -546,7 +546,7 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
                 setPinnedColumns(new Set(JSON.parse(savedPinned)));
             } catch (e) { console.error(e); }
         } else {
-             setPinnedColumns(new Set()); 
+            setPinnedColumns(new Set());
         }
 
         const savedHidden = localStorage.getItem(LOCAL_STORAGE_KEY_PLAN_HIDDEN);
@@ -575,7 +575,7 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
         } catch (e) { console.error(e); }
     }, [hiddenColumns]);
 
-     useEffect(() => {
+    useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (
                 isRestoreMenuOpen &&
@@ -647,7 +647,7 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
 
         updateItems(prev => {
             const newItems = prev.map(item => {
-                if (item.isParent) return item; 
+                if (item.isParent) return item;
                 let newValue: any = '';
                 if (field === 'duracao' || field === 'percentualConclusao' || field === 'duracaoReal' || field === 'lag' || field === 'custo_por_dia') {
                     newValue = 0;
@@ -709,9 +709,9 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
     };
 
     const calculateDateLogic = (
-        currentItem: PlanejamentoItem, 
-        field: string, 
-        val: any, 
+        currentItem: PlanejamentoItem,
+        field: string,
+        val: any,
         prefix: '' | 'Real'
     ) => {
         let duracao = prefix === '' ? currentItem.duracao : currentItem.duracaoReal;
@@ -723,7 +723,7 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
         if (field === `dataFim${prefix}` || field === `fim${prefix}`) fim = val;
 
         if (field === `duracao${prefix}` && duracao === 0) {
-             return {
+            return {
                 [`duracao${prefix}`]: 0,
                 [prefix === '' ? 'dataInicio' : 'inicioReal']: '',
                 [prefix === '' ? 'dataFim' : 'fimReal']: ''
@@ -731,13 +731,13 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
         }
 
         const fieldName = field.replace(prefix, '').toLowerCase();
-        
+
         if (fieldName.includes('inicio') && duracao > 0 && inicio) {
             fim = addWorkingDays(inicio, duracao, scheduleConfig);
-        } 
+        }
         else if (fieldName.includes('fim') && inicio && fim) {
             duracao = calculateDurationInWorkingDays(inicio, fim, scheduleConfig);
-        } 
+        }
         else if (fieldName.includes('duracao') && inicio && duracao > 0) {
             fim = addWorkingDays(inicio, duracao, scheduleConfig);
         }
@@ -757,11 +757,11 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
             const updatedList = prev.map(item => {
                 if (item.id === id) {
                     let safeValue = value;
-                    
+
                     // Strict Validation for Predecessors/Successors
                     if (field === 'predecessores' || field === 'sucessores') {
                         const rawArray = Array.isArray(safeValue) ? safeValue : [];
-                        
+
                         // Logic: Parse Int -> Clamp Max -> Filter > 0 -> Filter Self -> Unique
                         safeValue = rawArray
                             .map((refId: any) => {
@@ -769,10 +769,10 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
                                 // or parse strings like "1"
                                 const num = parseInt(String(refId).trim(), 10);
                                 if (isNaN(num)) return null;
-                                
+
                                 // Clamp to Max ID ("se digitar algo maior que o último ID... retorna o último ID")
                                 if (num > maxId) return maxId;
-                                
+
                                 return num;
                             })
                             .filter((num: number | null) => {
@@ -792,7 +792,7 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
                         }
                         else if (field === 'duracao' || field === 'duracaoReal') safeValue = Number(safeValue.toFixed(1));
                     }
-                    
+
                     let updates: any = { [field]: safeValue };
                     if (['duracao', 'dataInicio', 'dataFim'].includes(field)) {
                         updates = { ...updates, ...calculateDateLogic(item, field, safeValue, '') };
@@ -804,7 +804,7 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
                 }
                 return item;
             });
-            
+
             return recalculateTree(updatedList, scheduleConfig);
         });
     };
@@ -827,7 +827,7 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
             return newSet;
         });
     };
-    
+
     const handleHideColumn = (columnId: string) => {
         setHiddenColumns(prev => new Set(prev).add(columnId));
     };
@@ -848,7 +848,7 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
     const handleColumnSelect = (columnId: string) => {
         setSelectedColumn(prev => prev === columnId ? null : columnId);
     };
-    
+
     const visibleColumns = useMemo(() => {
         return columnsConfig
             .map((col, index) => ({ col, index }))
@@ -858,10 +858,10 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
     const getStickyLeft = useCallback((columnIndex: number) => {
         let left = 0;
         for (let i = 0; i < columnIndex; i++) {
-             const { col, index } = visibleColumns[i];
-             if (pinnedColumns.has(col.id)) {
-                 left += columnWidths[index] || col.initialWidth;
-             }
+            const { col, index } = visibleColumns[i];
+            if (pinnedColumns.has(col.id)) {
+                left += columnWidths[index] || col.initialWidth;
+            }
         }
         return left;
     }, [visibleColumns, pinnedColumns, columnWidths]);
@@ -886,10 +886,10 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
         const { index, startX, startWidth } = resizingColumnRef.current;
         const diffX = e.clientX - startX;
         const newWidth = Math.max(columnsConfig[index].minWidth, startWidth + diffX);
-        
+
         setColumnWidths(prev => {
             const next = [...prev];
-            while(next.length <= index) next.push(columnsConfig[next.length].initialWidth);
+            while (next.length <= index) next.push(columnsConfig[next.length].initialWidth);
             next[index] = newWidth;
             return next;
         });
@@ -907,7 +907,7 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
         const originalIndex = visibleColumns[visibleIndex].index;
         const column = columnsConfig[originalIndex];
         if (!measureCellRef.current) return;
-        
+
         const measureElement = measureCellRef.current;
         measureElement.className = 'text-xs absolute invisible whitespace-nowrap z-[-1] font-medium';
         measureElement.textContent = column.label;
@@ -919,7 +919,7 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
             else if (column.id === 'discriminacao') text = item.discriminacao;
             else if (column.id === 'responsavel') text = item.responsavel;
             else if (column.id === 'inicio') text = formatDate(item.dataInicio);
-            
+
             if (text) {
                 measureElement.textContent = text;
                 maxWidth = Math.max(maxWidth, measureElement.offsetWidth);
@@ -929,7 +929,7 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
         const newWidth = maxWidth + 20;
         setColumnWidths(prev => {
             const next = [...prev];
-            while(next.length <= originalIndex) next.push(columnsConfig[next.length].initialWidth);
+            while (next.length <= originalIndex) next.push(columnsConfig[next.length].initialWidth);
             next[originalIndex] = Math.max(column.minWidth, newWidth);
             return next;
         });
@@ -951,7 +951,7 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
         const executado = planejamentoItems.filter(i => !i.isParent).reduce((acc, item) => acc + (item.valorTotal * (item.percentualConclusao / 100)), 0);
         return { totalOrcamento: total, totalExecutado: executado };
     }, [planejamentoItems]);
-    
+
     const ganttInfo = useMemo(() => {
         let startTs = Infinity;
         let endTs = -Infinity;
@@ -973,50 +973,50 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
                 }
             }
         });
-        
+
         if (!hasDates) {
-             const now = new Date();
-             now.setHours(0,0,0,0);
-             startTs = now.getTime();
-             const future = new Date(now);
-             future.setDate(future.getDate() + 30);
-             endTs = future.getTime();
+            const now = new Date();
+            now.setHours(0, 0, 0, 0);
+            startTs = now.getTime();
+            const future = new Date(now);
+            future.setDate(future.getDate() + 30);
+            endTs = future.getTime();
         }
-        
+
         if (endTs < startTs) endTs = startTs;
 
         const min = new Date(startTs);
         const max = new Date(endTs);
-        
+
         min.setDate(min.getDate() - 5);
         max.setDate(max.getDate() + 5);
-        
+
         const diffTime = max.getTime() - min.getTime();
         const days = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        return { min, max, days: Math.max(days, 1) }; 
+        return { min, max, days: Math.max(days, 1) };
     }, [planejamentoItems]);
 
     const renderRows = (parentId: number | null = null, level = 0): React.ReactElement[] => {
         const items = planejamentoItems.filter(item => item.pai === parentId);
-        
+
         return items.flatMap(item => {
             const isParent = item.isParent;
             const isService = !isParent;
             const rowBgClass = isService ? '' : 'bg-[rgba(42,50,60,0.3)]';
             const status = getStatus(item);
-            
+
             const row = (
                 <tr key={item.id} data-row-id={item.id} className={`border-b border-[#3a3e45] hover:bg-[#24282f] text-xs ${rowBgClass}`}>
-                    {visibleColumns.map(({col, index}, visibleIndex) => {
+                    {visibleColumns.map(({ col, index }, visibleIndex) => {
                         let content: React.ReactNode = null;
                         const isEditable = isEditing && !isParent;
-                        
+
                         const isPinned = pinnedColumns.has(col.id) && !isEditing;
                         const stickyLeft = isPinned ? getStickyLeft(visibleIndex) : undefined;
-                        const stickyCellBgClass = isService 
-                            ? `bg-[#1e2329] hover:bg-[#24282f]` 
+                        const stickyCellBgClass = isService
+                            ? `bg-[#1e2329] hover:bg-[#24282f]`
                             : `bg-[rgba(42,50,60,0.3)] hover:bg-[#24282f]`;
-                        
+
                         const finalBgClass = isPinned ? 'bg-[#1e2329] group-hover:bg-[#24282f]' : stickyCellBgClass;
                         const isColSelected = selectedColumn === col.id;
                         const cellSelectionClass = isColSelected ? 'bg-[#0084ff]/10' : '';
@@ -1041,8 +1041,8 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
                                     </div>
                                 );
                                 break;
-                            case 'discriminacao': 
-                                content = <span className="font-medium text-white">{item.discriminacao}</span>; 
+                            case 'discriminacao':
+                                content = <span className="font-medium text-white">{item.discriminacao}</span>;
                                 break;
                             case 'un':
                                 content = <span className="text-[#a0a5b0]">{item.unidade || '-'}</span>;
@@ -1050,24 +1050,24 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
                             case 'quantidade':
                                 content = <span className="text-[#a0a5b0]">{formatNumberOrDash(item.quantidade)}</span>;
                                 break;
-                            case 'percent_concl': 
-                                content = isEditable ? 
-                                    <EditableCell type="number" value={item.percentualConclusao} onCommit={(v) => handleValueCommit(item.id, 'percentualConclusao', v)} isSelected={isColSelected} columnId={col.id} step="0.01" min={0} max={100} /> 
+                            case 'percent_concl':
+                                content = isEditable ?
+                                    <EditableCell type="number" value={item.percentualConclusao} onCommit={(v) => handleValueCommit(item.id, 'percentualConclusao', v)} isSelected={isColSelected} columnId={col.id} step="0.01" min={0} max={100} />
                                     : `${item.percentualConclusao.toFixed(2)}%`;
                                 break;
-                            case 'duracao': 
-                                content = isEditable ? 
-                                    <EditableCell type="number" value={item.duracao} onCommit={(v) => handleValueCommit(item.id, 'duracao', v)} isSelected={isColSelected} columnId={col.id} step="0.1" min={0} /> 
+                            case 'duracao':
+                                content = isEditable ?
+                                    <EditableCell type="number" value={item.duracao} onCommit={(v) => handleValueCommit(item.id, 'duracao', v)} isSelected={isColSelected} columnId={col.id} step="0.1" min={0} />
                                     : formatNumberOrDash(item.duracao, 1);
                                 break;
                             case 'inicio':
                                 content = isEditable ?
-                                    <EditableCell type="date" value={item.dataInicio} onCommit={(v) => handleValueCommit(item.id, 'dataInicio', v)} disabled={item.duracao === 0} isSelected={isColSelected} columnId={col.id}/>
+                                    <EditableCell type="date" value={item.dataInicio} onCommit={(v) => handleValueCommit(item.id, 'dataInicio', v)} disabled={item.duracao === 0} isSelected={isColSelected} columnId={col.id} />
                                     : formatDateOrDash(item.dataInicio);
                                 break;
                             case 'fim':
                                 content = isEditable ?
-                                    <EditableCell type="date" value={item.dataFim} onCommit={(v) => handleValueCommit(item.id, 'dataFim', v)} disabled={item.duracao === 0} isSelected={isColSelected} columnId={col.id}/>
+                                    <EditableCell type="date" value={item.dataFim} onCommit={(v) => handleValueCommit(item.id, 'dataFim', v)} disabled={item.duracao === 0} isSelected={isColSelected} columnId={col.id} />
                                     : formatDateOrDash(item.dataFim);
                                 break;
                             case 'responsavel':
@@ -1076,18 +1076,18 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
                                     : item.responsavel;
                                 break;
                             case 'duracao_real':
-                                content = isEditable ? 
-                                    <EditableCell type="number" value={item.duracaoReal} onCommit={(v) => handleValueCommit(item.id, 'duracaoReal', v)} isSelected={isColSelected} columnId={col.id} step="0.1" min={0} /> 
+                                content = isEditable ?
+                                    <EditableCell type="number" value={item.duracaoReal} onCommit={(v) => handleValueCommit(item.id, 'duracaoReal', v)} isSelected={isColSelected} columnId={col.id} step="0.1" min={0} />
                                     : formatNumberOrDash(item.duracaoReal, 1);
                                 break;
                             case 'inicio_real':
                                 content = isEditable ?
-                                    <EditableCell type="date" value={item.inicioReal} onCommit={(v) => handleValueCommit(item.id, 'inicioReal', v)} disabled={item.duracaoReal === 0} isSelected={isColSelected} columnId={col.id}/>
+                                    <EditableCell type="date" value={item.inicioReal} onCommit={(v) => handleValueCommit(item.id, 'inicioReal', v)} disabled={item.duracaoReal === 0} isSelected={isColSelected} columnId={col.id} />
                                     : formatDateOrDash(item.inicioReal);
                                 break;
                             case 'fim_real':
                                 content = isEditable ?
-                                    <EditableCell type="date" value={item.fimReal} onCommit={(v) => handleValueCommit(item.id, 'fimReal', v)} disabled={item.duracaoReal === 0} isSelected={isColSelected} columnId={col.id}/>
+                                    <EditableCell type="date" value={item.fimReal} onCommit={(v) => handleValueCommit(item.id, 'fimReal', v)} disabled={item.duracaoReal === 0} isSelected={isColSelected} columnId={col.id} />
                                     : formatDateOrDash(item.fimReal);
                                 break;
                             case 'progresso':
@@ -1129,8 +1129,8 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
                                 content = isEditable ? <EditableCell type="number" value={item.custo_por_dia} onCommit={(v) => handleValueCommit(item.id, 'custo_por_dia', v)} isSelected={isColSelected} columnId={col.id} /> : formatCurrency(item.custo_por_dia);
                                 break;
                             case 'dependencia_externa':
-                                content = isEditable ? 
-                                    <input type="checkbox" checked={item.dependencia_externa} onChange={(e) => handleValueCommit(item.id, 'dependencia_externa', e.target.checked)} className="w-4 h-4 bg-[#1e2329] border-[#3a3e45] rounded" /> 
+                                content = isEditable ?
+                                    <input type="checkbox" checked={item.dependencia_externa} onChange={(e) => handleValueCommit(item.id, 'dependencia_externa', e.target.checked)} className="w-4 h-4 bg-[#1e2329] border-[#3a3e45] rounded" />
                                     : (item.dependencia_externa ? 'Sim' : 'Não');
                                 break;
                             case 'materiais_requeridos':
@@ -1159,7 +1159,7 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
             return [row];
         });
     };
-    
+
     const renderGanttRows = (parentId: number | null = null, level = 0): React.ReactElement[] => {
         const items = planejamentoItems.filter(item => item.pai === parentId);
 
@@ -1171,43 +1171,43 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
                     <div className="w-[100px] flex-shrink-0 p-2 text-xs border-r border-[#3a3e45] flex items-center sticky left-0 bg-[#1e2329] z-20">
                         <div style={{ paddingLeft: level * 12 }} className="flex items-center gap-2 overflow-hidden w-full">
                             {isParent ? (
-                                <button 
-                                    onClick={() => toggleExpand(item.id)} 
+                                <button
+                                    onClick={() => toggleExpand(item.id)}
                                     className="text-[#0084ff] text-base w-5 h-5 flex items-center justify-center flex-shrink-0"
                                     title={item.expandido ? "Recolher" : "Expandir"}
                                 >
                                     {item.expandido ? '◢' : '◥'}
                                 </button>
                             ) : <div className="w-5 flex-shrink-0"></div>}
-                             <span className={`truncate ${isParent ? 'font-bold text-white' : 'text-[#a0a5b0]'}`}>
-                                 {item.nivel}
-                             </span>
+                            <span className={`truncate ${isParent ? 'font-bold text-white' : 'text-[#a0a5b0]'}`}>
+                                {item.nivel}
+                            </span>
                         </div>
                     </div>
-                    
+
                     <div className="w-[250px] flex-shrink-0 p-2 text-xs border-r border-[#3a3e45] flex items-center sticky left-[100px] bg-[#1e2329] z-20 shadow-[2px_0_5px_rgba(0,0,0,0.3)] flex items-center">
-                         <span className={`truncate ${isParent ? 'font-bold text-white' : 'text-[#a0a5b0]'}`} title={item.discriminacao}>
-                             {item.discriminacao}
-                         </span>
+                        <span className={`truncate ${isParent ? 'font-bold text-white' : 'text-[#a0a5b0]'}`} title={item.discriminacao}>
+                            {item.discriminacao}
+                        </span>
                     </div>
 
                     <div className="relative flex-grow h-8 min-w-[300px]">
-                         {Array.from({length: ganttInfo.days}).map((_, i) => (
-                            <div key={i} className="absolute top-0 bottom-0 border-r border-[#3a3e45]/20" style={{left: (i+1)*30}}></div>
-                         ))}
-                         
-                         {!isParent && item.dataInicio && item.dataFim && (
-                             <div 
+                        {Array.from({ length: ganttInfo.days }).map((_, i) => (
+                            <div key={i} className="absolute top-0 bottom-0 border-r border-[#3a3e45]/20" style={{ left: (i + 1) * 30 }}></div>
+                        ))}
+
+                        {!isParent && item.dataInicio && item.dataFim && (
+                            <div
                                 className={`absolute top-1.5 h-5 rounded opacity-80 text-[9px] text-white pl-1 overflow-hidden whitespace-nowrap shadow-sm border ${getStatus(item) === 'Atrasado' ? 'bg-red-500 border-red-700' : 'bg-[#0084ff] border-[#0066cc]'}`}
-                                style={{ 
-                                    left: Math.max(0, Math.ceil((new Date(item.dataInicio + 'T00:00:00').getTime() - ganttInfo.min.getTime()) / (1000 * 60 * 60 * 24))) * 30, 
-                                    width: Math.max(1, item.duracao) * 30 
+                                style={{
+                                    left: Math.max(0, Math.ceil((new Date(item.dataInicio + 'T00:00:00').getTime() - ganttInfo.min.getTime()) / (1000 * 60 * 60 * 24))) * 30,
+                                    width: Math.max(1, item.duracao) * 30
                                 }}
                                 title={`${item.discriminacao} (${item.duracao}d) - ${getStatus(item)}`}
-                             >
-                                 {item.duracao}d
-                             </div>
-                         )}
+                            >
+                                {item.duracao}d
+                            </div>
+                        )}
                     </div>
                 </div>
             );
@@ -1222,7 +1222,7 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
     return (
         <div>
             {/* Advanced AI Modal */}
-            <AdvancedAIModal 
+            <AdvancedAIModal
                 isOpen={aiModalOpen}
                 onClose={() => setAiModalOpen(false)}
                 planejamento={planejamentoItems}
@@ -1235,7 +1235,7 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
             {helpModalOpen && (
                 <div className="fixed inset-0 bg-black/60 z-[2050] flex items-center justify-center p-4">
                     <div className="bg-[#242830] border border-[#3a3e45] p-6 rounded-lg max-w-lg shadow-2xl relative animate-in fade-in zoom-in duration-200">
-                        <button 
+                        <button
                             onClick={() => setHelpModalOpen(false)}
                             className="absolute top-3 right-3 text-gray-400 hover:text-white"
                         >
@@ -1274,13 +1274,13 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
                     </button>
                 </nav>
             </div>
-            
+
             {activeTab === 'cronograma' && (
                 <Card>
                     <CardHeader title="Cronograma Detalhado">
                         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 w-full">
-                             {/* Metrics */}
-                             <div className="flex gap-6 self-center lg:self-end mb-2 lg:mb-0 mr-auto">
+                            {/* Metrics */}
+                            <div className="flex gap-6 self-center lg:self-end mb-2 lg:mb-0 mr-auto">
                                 <div className="text-right">
                                     <div className="text-xs text-[#a0a5b0]">EXECUTADO</div>
                                     <div className="text-lg font-bold text-green-400">{formatCurrency(totalExecutado)}</div>
@@ -1289,11 +1289,11 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
                                     <div className="text-xs text-[#a0a5b0]">ORÇADO</div>
                                     <div className="text-lg font-bold text-blue-400">{formatCurrency(totalOrcamento)}</div>
                                 </div>
-                             </div>
-                            
-                             <div className="flex flex-col items-end gap-2">
-                                 <div className="flex items-center gap-2">
-                                     {hiddenColumns.size > 0 && (
+                            </div>
+
+                            <div className="flex flex-col items-end gap-2">
+                                <div className="flex items-center gap-2">
+                                    {hiddenColumns.size > 0 && (
                                         <div className="relative">
                                             <Button ref={restoreButtonRef} variant="secondary" onClick={() => setRestoreMenuOpen(!isRestoreMenuOpen)}>
                                                 Reexibir ({hiddenColumns.size})
@@ -1304,7 +1304,7 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
                                                         {columnsConfig.filter(c => hiddenColumns.has(c.id)).map(c => (
                                                             <li key={c.id}>
                                                                 <a href="#" onClick={(e) => { e.preventDefault(); handleShowColumn(c.id); }} className="block px-4 py-2 hover:bg-[#3a3e45]">
-                                                                {c.label}
+                                                                    {c.label}
                                                                 </a>
                                                             </li>
                                                         ))}
@@ -1320,37 +1320,37 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
                                         </div>
                                     )}
 
-                                     {!isEditing ? (
+                                    {!isEditing ? (
                                         <>
-                                         <Button onClick={handleEdit}>✏️ Editar</Button>
-                                         <Button onClick={() => setAiModalOpen(true)}>🤖 Ferramentas IA</Button>
+                                            <Button onClick={handleEdit}>✏️ Editar</Button>
+                                            <Button onClick={() => setAiModalOpen(true)}>🤖 Ferramentas IA</Button>
                                         </>
-                                     ) : (
+                                    ) : (
                                         <>
                                             <Button variant="primary" onClick={handleSaveData}>💾 Salvar</Button>
                                             <Button variant="secondary" onClick={handleExit}>Cancelar</Button>
                                             <Button size="sm" variant="secondary" onClick={handleUndo} disabled={historyIndex <= 0} title="Desfazer (Ctrl+Z)">↩️</Button>
                                             <Button size="sm" variant="secondary" onClick={handleRedo} disabled={historyIndex >= history.length - 1} title="Refazer (Ctrl+Y)">↪️</Button>
                                         </>
-                                     )}
-                                 </div>
-                             </div>
+                                    )}
+                                </div>
+                            </div>
                         </div>
                     </CardHeader>
 
                     <div className="overflow-x-auto border rounded-md border-[#3a3e45]">
                         <table className="w-full text-left text-[#a0a5b0] table-fixed border-collapse">
-                             <colgroup>
-                                {visibleColumns.map(({col, index}) => (
+                            <colgroup>
+                                {visibleColumns.map(({ col, index }) => (
                                     <col key={col.id} style={{ width: columnWidths[index] || col.initialWidth }} />
                                 ))}
                             </colgroup>
                             <thead className="text-xs text-[#e8eaed] uppercase bg-[#242830] sticky top-0 z-30 shadow-sm">
                                 <tr>
-                                    {visibleColumns.map(({col, index: originalIndex}, visibleIndex) => {
+                                    {visibleColumns.map(({ col, index: originalIndex }, visibleIndex) => {
                                         const isPinned = pinnedColumns.has(col.id) && !isEditing;
                                         const isColSelected = selectedColumn === col.id;
-                                        
+
                                         const stickyLeft = isPinned ? getStickyLeft(visibleIndex) : undefined;
 
                                         const stickyStyle: React.CSSProperties = isPinned ? {
@@ -1359,76 +1359,77 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
                                             zIndex: 30,
                                             backgroundColor: '#242830'
                                         } : {};
-                                        
+
                                         // Columns that support batch edit via column header click
                                         const batchEditableColumns = new Set([
-                                            'percent_concl', 'duracao', 'inicio', 'fim', 'responsavel', 
+                                            'percent_concl', 'duracao', 'inicio', 'fim', 'responsavel',
                                             'duracao_real', 'inicio_real', 'fim_real', 'observacoes',
                                             'predecessores', 'sucessores', 'lag', 'custo_por_dia', 'materiais_requeridos'
                                         ]);
                                         const unhideableColumns = new Set(['nivel', 'id']);
 
                                         return (
-                                        <th 
-                                            key={col.id} 
-                                            style={stickyStyle}
-                                            className={`group px-2 py-3 relative text-left border-r border-[#3a3e45] select-none ${isColSelected ? 'bg-[#0084ff]/20' : ''} ${isPinned ? 'shadow-[2px_0_5px_rgba(0,0,0,0.3)]' : ''}`}
-                                        >
-                                            {!isEditing && (
-                                                 <div className="absolute right-1 top-0 bottom-0 flex flex-col justify-center opacity-0 group-hover:opacity-100 transition-opacity z-50">
-                                                    <button
-                                                        onClick={() => handleTogglePin(col.id)}
-                                                        className="w-5 h-5 rounded-full bg-[#3a3e45] text-white text-[10px] items-center justify-center flex hover:bg-[#0084ff] shadow-md"
-                                                        title={isPinned ? "Desafixar Coluna" : "Fixar Coluna"}
-                                                    >
-                                                        <span className={!isPinned ? 'transform rotate-90' : ''}>📌</span>
-                                                    </button>
-                                                </div>
-                                            )}
-
-                                            {isEditing && !unhideableColumns.has(col.id) && (
-                                                <div className="absolute left-1 top-0 bottom-0 flex flex-col justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity md:flex z-20">
-                                                    {batchEditableColumns.has(col.id) && (
-                                                         <button
-                                                            onClick={() => handleColumnSelect(col.id)}
-                                                            className={`w-4 h-4 rounded-full text-white text-[10px] items-center justify-center flex hover:bg-blue-500/80 ${isColSelected ? 'bg-[#0084ff] opacity-100' : 'bg-[#3a3e45]'}`}
-                                                            title={`Selecionar coluna ${col.label} (Delete para limpar)`}
+                                            <th
+                                                key={col.id}
+                                                style={stickyStyle}
+                                                className={`group px-2 py-3 relative text-left border-r border-[#3a3e45] select-none ${isColSelected ? 'bg-[#0084ff]/20' : ''} ${isPinned ? 'shadow-[2px_0_5px_rgba(0,0,0,0.3)]' : ''}`}
+                                            >
+                                                {!isEditing && (
+                                                    <div className="absolute right-1 top-0 bottom-0 flex flex-col justify-center opacity-0 group-hover:opacity-100 transition-opacity z-50">
+                                                        <button
+                                                            onClick={() => handleTogglePin(col.id)}
+                                                            className="w-5 h-5 rounded-full bg-[#3a3e45] text-white text-[10px] items-center justify-center flex hover:bg-[#0084ff] shadow-md"
+                                                            title={isPinned ? "Desafixar Coluna" : "Fixar Coluna"}
                                                         >
-                                                            ▼
+                                                            <span className={!isPinned ? 'transform rotate-90' : ''}>📌</span>
+                                                        </button>
+                                                    </div>
+                                                )}
+
+                                                {isEditing && !unhideableColumns.has(col.id) && (
+                                                    <div className="absolute left-1 top-0 bottom-0 flex flex-col justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity md:flex z-20">
+                                                        {batchEditableColumns.has(col.id) && (
+                                                            <button
+                                                                onClick={() => handleColumnSelect(col.id)}
+                                                                className={`w-4 h-4 rounded-full text-white text-[10px] items-center justify-center flex hover:bg-blue-500/80 ${isColSelected ? 'bg-[#0084ff] opacity-100' : 'bg-[#3a3e45]'}`}
+                                                                title={`Selecionar coluna ${col.label} (Delete para limpar)`}
+                                                            >
+                                                                ▼
+                                                            </button>
+                                                        )}
+                                                        <button
+                                                            onClick={() => handleHideColumn(col.id)}
+                                                            className="w-4 h-4 rounded-full bg-[#3a3e45] text-white text-xs items-center justify-center flex hover:bg-red-500/80"
+                                                            title={`Ocultar ${col.label}`}
+                                                        >
+                                                            &times;
+                                                        </button>
+                                                    </div>
+                                                )}
+
+                                                <div className="flex items-center gap-1 pr-4">
+                                                    {col.id === 'nivel' && (
+                                                        <button
+                                                            onClick={handleExpandAll}
+                                                            title={areAllExpanded ? "Recolher Tudo" : "Expandir Tudo"}
+                                                            className="hover:bg-blue-500/50 p-0.5 rounded text-sm mr-1"
+                                                        >
+                                                            {areAllExpanded ? '◢' : '◥'}
                                                         </button>
                                                     )}
-                                                    <button
-                                                        onClick={() => handleHideColumn(col.id)}
-                                                        className="w-4 h-4 rounded-full bg-[#3a3e45] text-white text-xs items-center justify-center flex hover:bg-red-500/80"
-                                                        title={`Ocultar ${col.label}`}
-                                                    >
-                                                        &times;
-                                                    </button>
+                                                    <span className={col.id !== 'nivel' ? "pr-6" : ""}>{col.label}</span>
                                                 </div>
-                                            )}
-                                            
-                                            <div className="flex items-center gap-1 pr-4">
-                                                {col.id === 'nivel' && (
-                                                    <button 
-                                                        onClick={handleExpandAll} 
-                                                        title={areAllExpanded ? "Recolher Tudo" : "Expandir Tudo"}
-                                                        className="hover:bg-blue-500/50 p-0.5 rounded text-sm mr-1"
-                                                    >
-                                                        {areAllExpanded ? '◢' : '◥'}
-                                                    </button>
+
+                                                {(col.resizable ?? true) && (
+                                                    <div
+                                                        onMouseDown={(e) => handleResizeStart(e, visibleIndex)}
+                                                        onDoubleClick={() => handleAutoResize(visibleIndex)}
+                                                        className="absolute top-0 right-0 h-full w-1 cursor-col-resize hover:bg-[#0084ff] z-20"
+                                                    />
                                                 )}
-                                                <span className={col.id !== 'nivel' ? "pr-6" : ""}>{col.label}</span>
-                                            </div>
-                                            
-                                            {(col.resizable ?? true) && (
-                                                <div
-                                                    onMouseDown={(e) => handleResizeStart(e, visibleIndex)}
-                                                    onDoubleClick={() => handleAutoResize(visibleIndex)}
-                                                    className="absolute top-0 right-0 h-full w-1 cursor-col-resize hover:bg-[#0084ff] z-20"
-                                                />
-                                            )}
-                                        </th>
-                                    )})}
+                                            </th>
+                                        )
+                                    })}
                                 </tr>
                             </thead>
                             <tbody>
@@ -1441,13 +1442,13 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
 
             {activeTab === 'gantt' && (
                 <Card>
-                     <CardHeader title="Visualização Gantt Chart" />
-                     <div className="overflow-x-auto relative custom-scrollbar">
+                    <CardHeader title="Visualização Gantt Chart" />
+                    <div className="overflow-x-auto relative custom-scrollbar">
                         <div className="min-w-full flex flex-col">
                             <div className="flex sticky top-0 z-10 bg-[#242830] border-b border-[#3a3e45]">
                                 <div className="w-[100px] flex-shrink-0 px-2 py-3 border-r border-[#3a3e45] font-bold text-xs text-[#e8eaed] sticky left-0 bg-[#242830] z-30 flex items-center justify-start gap-1 pl-2 uppercase">
-                                    <button 
-                                        onClick={handleExpandAll} 
+                                    <button
+                                        onClick={handleExpandAll}
                                         title={areAllExpanded ? "Recolher Tudo" : "Expandir Tudo"}
                                         className="hover:bg-blue-500/50 p-0.5 rounded text-sm mr-1"
                                     >
@@ -1458,18 +1459,18 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
                                 <div className="w-[250px] flex-shrink-0 px-2 py-3 border-r border-[#3a3e45] font-bold text-xs text-[#e8eaed] sticky left-[100px] bg-[#242830] z-30 shadow-[2px_0_5px_rgba(0,0,0,0.3)] flex items-center uppercase">
                                     ATIVIDADE
                                 </div>
-                                {Array.from({length: ganttInfo.days}).map((_, i) => {
+                                {Array.from({ length: ganttInfo.days }).map((_, i) => {
                                     const d = new Date(ganttInfo.min);
                                     d.setDate(d.getDate() + i);
                                     return <div key={i} className="w-[30px] flex-shrink-0 text-[9px] text-center border-r border-[#3a3e45] p-1 text-[#a0a5b0] flex flex-col justify-center items-center bg-[#242830]">
                                         <div>{d.getDate()}</div>
-                                        <div>{d.getMonth()+1}</div>
+                                        <div>{d.getMonth() + 1}</div>
                                     </div>
                                 })}
                             </div>
                             {renderGanttRows()}
                         </div>
-                     </div>
+                    </div>
                 </Card>
             )}
         </div>

@@ -10,6 +10,7 @@ import { formatCurrency } from '../utils/formatters';
 import { initialOrcamentoData, DEFAULT_UNITS_DATA } from '../data/mockData';
 import { GoogleGenAI, Type } from "@google/genai";
 import { useConfirm } from '../utils/useConfirm';
+import { exportToCsv, exportToExcel } from '../utils/exportOrcamento';
 
 const LOCAL_STORAGE_KEY_VIEW = 'vobi-orcamento-column-widths-view';
 const LOCAL_STORAGE_KEY_EDIT = 'vobi-orcamento-column-widths-edit';
@@ -1451,6 +1452,21 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
         }
     };
 
+    const handleExportCsv = () => {
+        exportToCsv(localOrcamento, 'orcamento_vobi');
+        toast.success('Exportação CSV iniciada!');
+    };
+
+    const handleExportExcel = async () => {
+        try {
+            await exportToExcel(localOrcamento, 'orcamento_vobi', hiddenColumns);
+            toast.success('Exportação Excel iniciada!');
+        } catch (error) {
+            console.error('Erro ao exportar Excel:', error);
+            toast.error('Erro ao exportar Excel');
+        }
+    };
+
     const handleHideColumn = (columnId: string) => {
         setHiddenColumns(prev => new Set(prev).add(columnId));
     };
@@ -1741,6 +1757,8 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                 </>
                             ) : (
                                 <>
+                                    <Button variant="secondary" onClick={handleExportCsv} title="Exportar CSV">📄 CSV</Button>
+                                    <Button variant="secondary" onClick={handleExportExcel} title="Exportar Excel">📊 Excel</Button>
                                     <Button onClick={handleEdit}>✏️ Editar</Button>
                                     <Button onClick={() => setImportModalOpen(true)}>🤖 Importar com IA</Button>
                                 </>
