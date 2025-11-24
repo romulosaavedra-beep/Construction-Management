@@ -1320,6 +1320,10 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                 model: "gemini-2.5-flash",
                 contents: prompt,
                 config: {
+                    temperature: 0.1, // Baixa criatividade, alta precisão para dados estruturados
+                    topP: 0.95,       // Amostragem focada
+                    topK: 40,         // Padrão para equilíbrio
+                    maxOutputTokens: 16384, // Garante resposta completa para orçamentos grandes
                     responseMimeType: "application/json",
                     responseSchema: {
                         type: Type.ARRAY,
