@@ -1,16 +1,19 @@
-
+﻿
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
+import toast from 'react-hot-toast';
 import type { OrcamentoItem } from '../types';
 import { PageHeader } from '../components/PageHeader';
 import { Card, CardHeader } from '../components/Card';
 import { Button } from '../components/Button';
+import { ConfirmDialog } from '../components/ConfirmDialog';
 import { formatCurrency } from '../utils/formatters';
 import { initialOrcamentoData, DEFAULT_UNITS_DATA } from '../data/mockData';
 import { GoogleGenAI, Type } from "@google/genai";
+import { useConfirm } from '../utils/useConfirm';
 
 const LOCAL_STORAGE_KEY_VIEW = 'vobi-orcamento-column-widths-view';
 const LOCAL_STORAGE_KEY_EDIT = 'vobi-orcamento-column-widths-edit';
-const LOCAL_STORAGE_KEY_HIDDEN_COLUMNS = 'vobi-orcamento-hidden-columns';
+const LOCAL_STORAGE_KEY_HIDDEN_COLUMNS = 'vobi-orcamento-hidden-columns-v2';
 const LOCAL_STORAGE_KEY_PINNED_COLUMNS = 'vobi-orcamento-pinned-columns';
 const LOCAL_STORAGE_KEY_UNITS = 'vobi-settings-units';
 
@@ -340,10 +343,14 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
         mat_mo_unit: { enabled: false, name: '' },
     });
     const [isAiProcessing, setIsAiProcessing] = useState(false);
-    const [hiddenColumns, setHiddenColumns] = useState<Set<string>>(new Set());
+    const [hiddenColumns, setHiddenColumns] = useState<Set<string>>(new Set(['mat_mo_total']));
     const [pinnedColumns, setPinnedColumns] = useState<Set<string>>(new Set());
     const [isRestoreMenuOpen, setRestoreMenuOpen] = useState(false);
     const [allUnits, setAllUnits] = useState<UnitItem[]>([]);
+    const [areSettingsLoaded, setAreSettingsLoaded] = useState(false);
+
+    // Hook para diálogos de confirmação centralizados
+    const { confirm, alert, dialogState, handleConfirm, handleCancel } = useConfirm();
 
     const headerCheckboxRef = useRef<HTMLInputElement>(null);
     const resizingColumnRef = useRef<{ index: number; startX: number; startWidth: number; } | null>(null);
@@ -381,6 +388,9 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
             const savedHidden = localStorage.getItem(LOCAL_STORAGE_KEY_HIDDEN_COLUMNS);
             if (savedHidden) {
                 setHiddenColumns(new Set(JSON.parse(savedHidden)));
+            } else {
+                // Se não houver salvo, usa o estado inicial (que já tem mat_mo_total) e salva
+                localStorage.setItem(LOCAL_STORAGE_KEY_HIDDEN_COLUMNS, JSON.stringify(Array.from(hiddenColumns)));
             }
             const savedPinned = localStorage.getItem(LOCAL_STORAGE_KEY_PINNED_COLUMNS);
             if (savedPinned) {
@@ -388,26 +398,30 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
             } else {
                 setPinnedColumns(new Set());
             }
+            setAreSettingsLoaded(true);
         } catch (e) {
             console.error("Could not load column settings", e);
+            setAreSettingsLoaded(true);
         }
     }, []);
 
     useEffect(() => {
+        if (!areSettingsLoaded) return;
         try {
             localStorage.setItem(LOCAL_STORAGE_KEY_HIDDEN_COLUMNS, JSON.stringify(Array.from(hiddenColumns)));
         } catch (e) {
             console.error("Could not save hidden columns", e);
         }
-    }, [hiddenColumns]);
+    }, [hiddenColumns, areSettingsLoaded]);
 
     useEffect(() => {
+        if (!areSettingsLoaded) return;
         try {
             localStorage.setItem(LOCAL_STORAGE_KEY_PINNED_COLUMNS, JSON.stringify(Array.from(pinnedColumns)));
         } catch (e) {
             console.error("Could not save pinned columns", e);
         }
-    }, [pinnedColumns]);
+    }, [pinnedColumns, areSettingsLoaded]);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -792,10 +806,21 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
         setSelectedColumn(null);
         setHistory([]);
         setHistoryIndex(-1);
-        alert('Orçamento salvo!');
+        toast.success('Orçamento salvo com sucesso!');
     };
 
-    const handleExit = () => {
+    const handleExit = async () => {
+        const confirmExit = await confirm({
+            title: 'Confirmar Saída',
+            message: 'Tem certeza que deseja sair sem salvar? Todas as alterações serão perdidas.',
+            confirmText: 'Sair sem Salvar',
+            cancelText: 'Cancelar'
+        });
+
+        if (!confirmExit) {
+            return;
+        }
+
         if (originalOrcamento) {
             setLocalOrcamento(originalOrcamento);
         }
@@ -1189,7 +1214,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
 
     const handleAiImport = async () => {
         if (!uploadedFileContent) {
-            alert("Nenhum arquivo enviado.");
+            await alert({ message: "Nenhum arquivo enviado." });
             return;
         }
 
@@ -1317,7 +1342,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
         try {
             const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY as string });
             const response = await ai.models.generateContent({
-                model: "gemini-2.5-flash",
+                model: "gemini-2.5-pro",
                 contents: prompt,
                 config: {
                     temperature: 0.1, // Baixa criatividade, alta precisão para dados estruturados
@@ -1403,21 +1428,21 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                     }
 
                     if (shouldHideSplitColumns) {
-                        message += `\n\nℹ️ Colunas 'Mat. Unit.' e 'M.O. Unit.' foram ocultadas automaticamente.\nO orçamento importado usa valor unitário total (sem separação Material/M.O.).`;
+                        message += `\n\nℹ️ Colunas 'Mat. Unit.' e 'M.O. Unit.' foram ocultadas automaticamente. O orçamento importado usa valor unitário total (sem separação Material/M.O.).`;
                     }
 
-                    alert(message);
+                    await alert({ message });
                 }
             } else {
                 if (!abortAiRef.current) {
-                    alert("A IA não conseguiu processar o arquivo. Verifique o mapeamento e o conteúdo do arquivo.");
+                    await alert({ message: "A IA não conseguiu processar o arquivo. Verifique o mapeamento e o conteúdo do arquivo." });
                 }
             }
 
         } catch (error) {
             if (!abortAiRef.current) {
                 console.error("Erro ao chamar a API Gemini:", error);
-                alert("Ocorreu um erro ao processar o arquivo com a IA. Verifique o console para mais detalhes.");
+                await alert({ message: "Ocorreu um erro ao processar o arquivo com a IA. Verifique o console para mais detalhes." });
             }
         } finally {
             if (!abortAiRef.current) {
@@ -1439,7 +1464,8 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
     };
 
     const handleShowAllColumns = () => {
-        setHiddenColumns(new Set());
+        // Mantém mat_mo_total oculta por padrão, a menos que o usuário a exiba individualmente
+        setHiddenColumns(new Set(['mat_mo_total']));
         setRestoreMenuOpen(false);
     };
 
@@ -1769,10 +1795,11 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                                 </div>
                                             )}
 
-                                            {/* Controls Container (Hide & Select) */}
-                                            {isEditing && !unhideableColumns.has(col.id) && (
+                                            {/* Hide Control - Left Side (Visible in both modes) */}
+                                            {!unhideableColumns.has(col.id) && (
                                                 <div className="absolute left-1 top-0 bottom-0 flex flex-col justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity md:flex z-20">
-                                                    {batchEditableColumns.has(col.id) && (
+                                                    {/* Selection Control (Editing Mode Only) */}
+                                                    {isEditing && batchEditableColumns.has(col.id) && (
                                                         <button
                                                             onClick={() => handleColumnSelect(col.id)}
                                                             className={`w-4 h-4 rounded-full text-white text-[10px] items-center justify-center flex hover:bg-blue-500/80 ${isColSelected ? 'bg-[#0084ff] opacity-100' : 'bg-[#3a3e45]'}`}
@@ -1781,6 +1808,8 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                                             ▼
                                                         </button>
                                                     )}
+
+                                                    {/* Hide Button (Always visible on hover) */}
                                                     <button
                                                         onClick={() => handleHideColumn(col.id)}
                                                         className="w-4 h-4 rounded-full bg-[#3a3e45] text-white text-xs items-center justify-center flex hover:bg-red-500/80"
@@ -1834,6 +1863,18 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                     </table>
                 </div>
             </Card>
+
+            {/* Diálogo de Confirmação Centralizado */}
+            <ConfirmDialog
+                isOpen={dialogState.isOpen}
+                title={dialogState.title}
+                message={dialogState.message}
+                type={dialogState.type}
+                confirmText={dialogState.confirmText}
+                cancelText={dialogState.cancelText}
+                onConfirm={handleConfirm}
+                onCancel={handleCancel}
+            />
         </div>
     );
 };
