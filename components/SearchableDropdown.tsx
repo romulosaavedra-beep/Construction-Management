@@ -71,7 +71,7 @@ export const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
                     </span>
                 </button>
 
-                {isOpen && (
+                {isOpen && !disabled && (
                     <div className="absolute z-50 w-full mt-1 bg-[#242830] border border-[#3a3e45] rounded-md shadow-lg max-h-60 overflow-hidden">
                         <div className="p-2 border-b border-[#3a3e45]">
                             <input

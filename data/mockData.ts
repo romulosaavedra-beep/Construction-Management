@@ -41,53 +41,53 @@ export const etapasData: Etapa[] = [
 ];
 
 export const diarioRegistrosData: DiarioRegistro[] = [
-    { 
-      id: 1, 
-      data: "2025-11-10", 
-      etapa: "2.1 - Formas", 
-      servicos: [
-        { id: 1, servico: "Forma de madeira para pilar", quantidadeExecutada: 50, quantidadePrevista: 450, unidade: 'm²', equipe: 10},
-        { id: 2, servico: "Forma de madeira para viga", quantidadeExecutada: 80, quantidadePrevista: 600, unidade: 'm²', equipe: 10},
-      ],
-      observacoes: "Execução conforme cronograma, equipe completa.", 
-      responsavel: "Eng. Carlos Silva", 
-      clima: "Ensolarado", 
-      recursos: ["Serra Circular"], 
-      status: "Finalizado" 
+    {
+        id: 1,
+        data: "2025-11-10",
+        etapa: "2.1 - Formas",
+        servicos: [
+            { id: 1, servico: "Forma de madeira para pilar", quantidadeExecutada: 50, quantidadePrevista: 450, unidade: 'm²', equipe: 10 },
+            { id: 2, servico: "Forma de madeira para viga", quantidadeExecutada: 80, quantidadePrevista: 600, unidade: 'm²', equipe: 10 },
+        ],
+        observacoes: "Execução conforme cronograma, equipe completa.",
+        responsavel: "Eng. Carlos Silva",
+        clima: "Ensolarado",
+        recursos: ["Serra Circular"],
+        status: "Finalizado"
     },
-    { 
-      id: 2, 
-      data: "2025-11-09", 
-      etapa: "1.1 - Serviços Preliminares", 
-      servicos: [
-        { id: 1, servico: "Locação da obra", quantidadeExecutada: 1200, quantidadePrevista: 1200, unidade: 'm²', equipe: 4}
-      ],
-      observacoes: "Finalização da locação da obra. Tudo ok para iniciar a escavação.", 
-      responsavel: "Mestre Paulo", 
-      clima: "Nublado", 
-      recursos: [], 
-      status: "Finalizado" 
+    {
+        id: 2,
+        data: "2025-11-09",
+        etapa: "1.1 - Serviços Preliminares",
+        servicos: [
+            { id: 1, servico: "Locação da obra", quantidadeExecutada: 1200, quantidadePrevista: 1200, unidade: 'm²', equipe: 4 }
+        ],
+        observacoes: "Finalização da locação da obra. Tudo ok para iniciar a escavação.",
+        responsavel: "Mestre Paulo",
+        clima: "Nublado",
+        recursos: [],
+        status: "Finalizado"
     },
-    { 
-      id: 3, 
-      data: "2025-11-08", 
-      etapa: "1.1 - Serviços Preliminares", 
-      servicos: [
-        { id: 1, servico: "Limpeza do terreno", quantidadeExecutada: 1500, quantidadePrevista: 1500, unidade: 'm²', equipe: 5}
-      ],
-      observacoes: "Terreno completamente limpo.", 
-      responsavel: "Mestre Paulo", 
-      clima: "Ensolarado", 
-      recursos: ["Escavadeira"], 
-      status: "Finalizado" 
+    {
+        id: 3,
+        data: "2025-11-08",
+        etapa: "1.1 - Serviços Preliminares",
+        servicos: [
+            { id: 1, servico: "Limpeza do terreno", quantidadeExecutada: 1500, quantidadePrevista: 1500, unidade: 'm²', equipe: 5 }
+        ],
+        observacoes: "Terreno completamente limpo.",
+        responsavel: "Mestre Paulo",
+        clima: "Ensolarado",
+        recursos: ["Escavadeira"],
+        status: "Finalizado"
     }
 ];
 
 export const profissionaisData: Profissional[] = [
-    { id: 1, cargo: 'Engenheiro Civil', nome: 'Carlos Silva', email: 'carlos.silva@exemplo.com', telefone: '(11) 99999-1234' },
-    { id: 2, cargo: 'Engenheiro Civil', nome: 'Marina Costa', email: 'marina.costa@exemplo.com', telefone: '(11) 98888-5678' },
-    { id: 3, cargo: 'Mestre de Obras', nome: 'Paulo Souza', email: 'paulo.obras@exemplo.com', telefone: '(11) 97777-1111' },
-    { id: 4, cargo: 'Fiscal de Obra', nome: 'João Santos', email: 'joao.santos@exemplo.com', telefone: '(11) 96666-2222' }
+    { id: 1, cargo: 'Engenheiro Civil', nome: 'Carlos Silva', email: 'carlos.silva@exemplo.com', telefone: '(11) 99999-1234', atividades: 'Responsável técnico pela execução da obra, gestão de cronograma, controle de qualidade e coordenação das equipes de campo.' },
+    { id: 2, cargo: 'Engenheiro Civil', nome: 'Marina Costa', email: 'marina.costa@exemplo.com', telefone: '(11) 98888-5678', atividades: 'Focada em orçamentação, levantamento de quantitativos, cotações técnicas e controle de custos (Orçado x Realizado).' },
+    { id: 3, cargo: 'Mestre de Obras', nome: 'Paulo Souza', email: 'paulo.obras@exemplo.com', telefone: '(11) 97777-1111', atividades: 'Supervisão direta dos pedreiros e serventes, controle de entrada e saída de materiais e garantia da segurança no canteiro.' },
+    { id: 4, cargo: 'Fiscal de Obra', nome: 'João Santos', email: 'joao.santos@exemplo.com', telefone: '(11) 96666-2222', atividades: 'Vistoria diária dos serviços executados, medição de empreiteiros e elaboração de relatórios fotográficos de avanço.' }
 ];
 
 export const unidadesData: string[] = ['m²', 'm³', 'm', 'un', 'kg', 'ton', 'sc', 'lata', 'balde', 'L'];
@@ -95,9 +95,9 @@ export const recursosData: string[] = ['Escavadeira', 'Betoneira', 'Guindaste', 
 
 export const comprasData: Compra[] = [
     { id: "SOL-20251111-001", data_solicitacao: "2025-11-11", responsavel: "Eng. Carlos Silva", item: "Cimento CP-V 50kg", quantidade: 200, unidade: "sc", data_necessaria: "2025-11-20", etapa: "Fundação", status: "Solicitado", fornecedor: "-", cotacoes: [] },
-    { id: "SOL-20251110-001", data_solicitacao: "2025-11-10", responsavel: "Mestre Paulo", item: "Tijolos Cerâmicos 6 furos", quantidade: 50000, unidade: "un", data_necessaria: "2025-11-15", etapa: "Alvenaria", status: "Cotado", fornecedor: "Brasital", cotacoes: [{fornecedor: "Brasital", preco: 0.70, prazo: 3}] },
-    { id: "SOL-20251109-001", data_solicitacao: "2025-11-09", responsavel: "Eng. Carlos Silva", item: "Concreto Usinado 30MPa", quantidade: 850, unidade: "m³", data_necessaria: "2025-11-14", etapa: "Estrutura", status: "Aprovado", fornecedor: "Concremat", cotacoes: [{fornecedor: "Concremat", preco: 450.00, prazo: 2}] },
-    { id: "SOL-20251108-001", data_solicitacao: "2025-11-08", responsavel: "Eng. Marina", item: "Aço CA-50", quantidade: 80, unidade: "ton", data_necessaria: "2025-11-12", etapa: "Estrutura", status: "Recebido", fornecedor: "Gerdau", cotacoes: [{fornecedor: "Gerdau", preco: 3500.00, prazo: 2}] }
+    { id: "SOL-20251110-001", data_solicitacao: "2025-11-10", responsavel: "Mestre Paulo", item: "Tijolos Cerâmicos 6 furos", quantidade: 50000, unidade: "un", data_necessaria: "2025-11-15", etapa: "Alvenaria", status: "Cotado", fornecedor: "Brasital", cotacoes: [{ fornecedor: "Brasital", preco: 0.70, prazo: 3 }] },
+    { id: "SOL-20251109-001", data_solicitacao: "2025-11-09", responsavel: "Eng. Carlos Silva", item: "Concreto Usinado 30MPa", quantidade: 850, unidade: "m³", data_necessaria: "2025-11-14", etapa: "Estrutura", status: "Aprovado", fornecedor: "Concremat", cotacoes: [{ fornecedor: "Concremat", preco: 450.00, prazo: 2 }] },
+    { id: "SOL-20251108-001", data_solicitacao: "2025-11-08", responsavel: "Eng. Marina", item: "Aço CA-50", quantidade: 80, unidade: "ton", data_necessaria: "2025-11-12", etapa: "Estrutura", status: "Recebido", fornecedor: "Gerdau", cotacoes: [{ fornecedor: "Gerdau", preco: 3500.00, prazo: 2 }] }
 ];
 
 export const fornecedoresData: Fornecedor[] = [

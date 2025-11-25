@@ -46,6 +46,34 @@
     .animate-fade-in-up {
       animation: fadeInUp 0.5s ease-out forwards;
     }
+
+    /* --- ESTILOS PARA REDIMENSIONAMENTO DE COLUNAS (PUXADORES) --- */
+    th {
+      position: relative;
+      /* Necessário para posicionar o puxador */
+    }
+
+    .resizer {
+      position: absolute;
+      right: 0;
+      top: 0;
+      height: 100%;
+      width: 5px;
+      /* Área clicável de 5px */
+      cursor: col-resize;
+      /* Cursor de redimensionamento */
+      user-select: none;
+      touch-action: none;
+      z-index: 10;
+    }
+
+    /* Feedback visual ao passar o mouse ou arrastar */
+    .resizer:hover,
+    .resizing {
+      background-color: #0084ff;
+      /* Cor azul de destaque */
+      opacity: 1;
+    }
   </style>
   <script type="importmap">
 {

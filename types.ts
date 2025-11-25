@@ -190,6 +190,7 @@ export interface Profissional {
   nome: string;
   email?: string;
   telefone?: string;
+  atividades: string;
 }
 
 // Re-export for backward compatibility, aliasing Restriction
