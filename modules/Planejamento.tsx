@@ -1252,7 +1252,7 @@ const Planejamento: React.FC<PlanejamentoProps> = ({ orcamentoData, savedData, o
             )}
 
             <span ref={measureCellRef} aria-hidden="true" className="text-xs absolute invisible whitespace-nowrap z-[-1]"></span>
-            <PageHeader title="📅 Planejamento de Obra" subtitle="Cronograma Inteligente, Gantt e Ferramentas Avançadas de IA" />
+            <PageHeader title="📅 Planejamento de Obra" subtitle="Cronograma Inteligente, Gantt e Ferramentas Avançadas" />
 
             <div className="border-b border-[#3a3e45] mb-6 overflow-x-auto">
                 <nav className="flex space-x-2">

@@ -10,8 +10,10 @@
   },
   "dependencies": {
     "@google/genai": "^1.29.1",
+    "@types/lodash.debounce": "^4.0.9",
     "exceljs": "^4.4.0",
     "file-saver": "^2.0.5",
+    "lodash.debounce": "^4.0.8",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-hot-toast": "^2.6.0"

@@ -1696,7 +1696,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                 </div>
             )}
             <span ref={measureCellRef} aria-hidden="true" className="text-xs absolute invisible whitespace-nowrap z-[-1]"></span>
-            <PageHeader title="💰 Orçamento de Obra" subtitle="Estrutura orçamentária completa com 5 níveis hierárquicos" />
+            <PageHeader title="💰 Orçamento de Obra" subtitle="Estrutura orçamentária completa" />
             <Card>
                 <CardHeader title="Orçamento Detalhado">
                     <div className="flex flex-wrap items-center justify-end gap-4">

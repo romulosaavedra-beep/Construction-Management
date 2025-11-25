@@ -1,10 +1,22 @@
 
+
 import React, { useState, useMemo, useEffect } from 'react';
 import { PageHeader } from '../components/PageHeader';
 import { Card, CardHeader } from '../components/Card';
 import { Button } from '../components/Button';
-import { profissionaisData, fornecedoresData, recursosData, DEFAULT_UNITS_DATA, locationDb } from '../data/mockData';
+import { SearchableDropdown } from '../components/SearchableDropdown';
+import { profissionaisData, fornecedoresData, recursosData, DEFAULT_UNITS_DATA } from '../data/mockData';
+import {
+    fetchAddressByCEP,
+    fetchCitiesByUF,
+    fetchNeighborhoodsByCity,
+    fetchStreetsByNeighborhood,
+    maskCEP,
+    ViaCEPResponse,
+    BRAZILIAN_STATES
+} from '../services/AddressService';
 import type { Profissional, Fornecedor } from '../types';
+
 
 type SettingsTab = 'geral' | 'profissionais' | 'fornecedores' | 'unidades' | 'recursos';
 
@@ -19,9 +31,18 @@ interface GeneralSettings {
     impostos: number;
     custosIndiretos: number;
     bdi: number;
-    pais: string;
-    estado: string;
+    // Endereço (Brasil)
+    cep: string;
+    logradouro: string;
+    numero: string;
+    complemento: string;
+    bairro: string;
     cidade: string;
+    estado: string; // UF
+    // Informações da Obra
+    nomeObra: string;
+    empresa: string;
+    cliente: string;
     // Configuração de Calendário
     scheduleType: string;
     workOnHolidays: boolean;
@@ -78,32 +99,51 @@ const Settings: React.FC = () => {
     const [activeTab, setActiveTab] = useState<SettingsTab>('geral');
 
     // --- General Settings State ---
+    // --- General Settings State ---
     const [generalSettings, setGeneralSettings] = useState<GeneralSettings>(() => {
         if (typeof window !== 'undefined') {
             const saved = localStorage.getItem(LOCAL_STORAGE_KEY_GENERAL);
             if (saved) {
-                try { return JSON.parse(saved); } catch (e) { console.error(e); }
+                try {
+                    return JSON.parse(saved);
+                } catch (e) {
+                    console.error('Error parsing general settings:', e);
+                }
             }
         }
         return {
             impostos: 5.0,
             custosIndiretos: 8.0,
             bdi: 25.0,
-            pais: '',
-            estado: '',
+            cep: '',
+            logradouro: '',
+            numero: '',
+            complemento: '',
+            bairro: '',
             cidade: '',
+            estado: '',
+            nomeObra: '',
+            empresa: '',
+            cliente: '',
             scheduleType: 'mon_fri',
             workOnHolidays: false,
             workOnRegionalHolidays: false
         };
     });
 
-    // Listas para os Selects de Localização
-    const countries = Object.keys(locationDb);
-    const states = generalSettings.pais ? Object.keys(locationDb[generalSettings.pais] || {}) : [];
-    const cities = (generalSettings.pais && generalSettings.estado)
-        ? (locationDb[generalSettings.pais][generalSettings.estado] || [])
-        : [];
+    // Address State
+    const [isLoadingCEP, setIsLoadingCEP] = useState(false);
+    const [cepError, setCepError] = useState<string>('');
+    const [addressSuggestions, setAddressSuggestions] = useState<ViaCEPResponse[]>([]);
+    const [showSuggestions, setShowSuggestions] = useState(false);
+
+    // Cascading Address State
+    const [availableCities, setAvailableCities] = useState<string[]>([]);
+    const [availableNeighborhoods, setAvailableNeighborhoods] = useState<string[]>([]);
+    const [availableStreets, setAvailableStreets] = useState<ViaCEPResponse[]>([]);
+    const [isLoadingCities, setIsLoadingCities] = useState(false);
+    const [isLoadingNeighborhoods, setIsLoadingNeighborhoods] = useState(false);
+    const [isLoadingStreets, setIsLoadingStreets] = useState(false);
 
     // Profissionais State com Persistência
     const [profissionais, setProfissionais] = useState<Profissional[]>(() => {
@@ -180,23 +220,144 @@ const Settings: React.FC = () => {
         setGeneralSettings(prev => ({ ...prev, [field]: value }));
     };
 
-    const handleCountryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const newCountry = e.target.value;
-        setGeneralSettings(prev => ({
-            ...prev,
-            pais: newCountry,
-            estado: '', // Reset dependent fields
-            cidade: ''
-        }));
+    // --- Handlers for Address ---
+    const handleCEPChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newCep = maskCEP(e.target.value);
+        handleGeneralChange('cep', newCep);
+        setCepError('');
+
+        if (newCep.replace(/\D/g, '').length === 8) {
+            setIsLoadingCEP(true);
+            try {
+                const data = await fetchAddressByCEP(newCep);
+                if (data) {
+                    // Auto-preenche todos os campos
+                    setGeneralSettings(prev => ({
+                        ...prev,
+                        cep: newCep,
+                        estado: data.uf,
+                        cidade: data.localidade,
+                        bairro: data.bairro,
+                        logradouro: data.logradouro
+                    }));
+
+                    // Carrega as listas em cascata
+                    await loadCitiesForUF(data.uf);
+                    await loadNeighborhoodsForCity(data.uf, data.localidade);
+                } else {
+                    setCepError('CEP não encontrado.');
+                }
+            } catch (error) {
+                setCepError('Erro ao buscar CEP.');
+            } finally {
+                setIsLoadingCEP(false);
+            }
+        }
     };
 
-    const handleStateChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const newState = e.target.value;
+    const handleUFChange = async (uf: string) => {
+        handleGeneralChange('estado', uf);
+        // Limpa campos dependentes
+        handleGeneralChange('cidade', '');
+        handleGeneralChange('bairro', '');
+        handleGeneralChange('logradouro', '');
+        handleGeneralChange('numero', '');
+        handleGeneralChange('complemento', '');
+        setAvailableNeighborhoods([]);
+        setAvailableStreets([]);
+
+        if (uf) {
+            await loadCitiesForUF(uf);
+        } else {
+            setAvailableCities([]);
+        }
+    };
+
+    const handleCityChange = async (cidade: string) => {
+        handleGeneralChange('cidade', cidade);
+        // Limpa campos dependentes
+        handleGeneralChange('bairro', '');
+        handleGeneralChange('logradouro', '');
+        handleGeneralChange('numero', '');
+        handleGeneralChange('complemento', '');
+        setAvailableStreets([]);
+
+        if (cidade && generalSettings.estado) {
+            await loadNeighborhoodsForCity(generalSettings.estado, cidade);
+        } else {
+            setAvailableNeighborhoods([]);
+        }
+    };
+
+    const handleNeighborhoodChange = (bairro: string) => {
+        handleGeneralChange('bairro', bairro);
+        // Limpa campos dependentes
+        handleGeneralChange('logradouro', '');
+        handleGeneralChange('numero', '');
+        handleGeneralChange('complemento', '');
+        setAvailableStreets([]);
+    };
+
+    const handleLogradouroChange = async (value: string) => {
+        handleGeneralChange('logradouro', value);
+
+        if (value.length >= 3 && generalSettings.estado && generalSettings.cidade && generalSettings.bairro) {
+            setIsLoadingStreets(true);
+            try {
+                const streets = await fetchStreetsByNeighborhood(
+                    generalSettings.estado,
+                    generalSettings.cidade,
+                    generalSettings.bairro,
+                    value
+                );
+                setAvailableStreets(streets);
+                setShowSuggestions(streets.length > 0);
+            } catch (error) {
+                console.error('Erro ao buscar logradouros:', error);
+            } finally {
+                setIsLoadingStreets(false);
+            }
+        } else {
+            setAvailableStreets([]);
+            setShowSuggestions(false);
+        }
+    };
+
+    const loadCitiesForUF = async (uf: string) => {
+        setIsLoadingCities(true);
+        try {
+            const cities = await fetchCitiesByUF(uf);
+            setAvailableCities(cities);
+        } catch (error) {
+            console.error('Erro ao carregar cidades:', error);
+            setAvailableCities([]);
+        } finally {
+            setIsLoadingCities(false);
+        }
+    };
+
+    const loadNeighborhoodsForCity = async (uf: string, cidade: string) => {
+        setIsLoadingNeighborhoods(true);
+        try {
+            const neighborhoods = await fetchNeighborhoodsByCity(uf, cidade);
+            setAvailableNeighborhoods(neighborhoods);
+        } catch (error) {
+            console.error('Erro ao carregar bairros:', error);
+            setAvailableNeighborhoods([]);
+        } finally {
+            setIsLoadingNeighborhoods(false);
+        }
+    };
+
+    const handleStreetSuggestionSelect = (suggestion: ViaCEPResponse) => {
         setGeneralSettings(prev => ({
             ...prev,
-            estado: newState,
-            cidade: '' // Reset dependent fields
+            cep: suggestion.cep,
+            logradouro: suggestion.logradouro,
+            bairro: suggestion.bairro
         }));
+        setShowSuggestions(false);
+        setAvailableStreets([]);
     };
 
     const handleSaveGeneral = () => {
@@ -350,43 +511,178 @@ const Settings: React.FC = () => {
                             <Button variant="primary" onClick={handleSaveGeneral}>💾 Salvar Configurações Gerais</Button>
                         </div>
                         <Card>
-                            <CardHeader title="Localização da Obra" />
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">País *</label>
-                                    <select
-                                        value={generalSettings.pais}
-                                        onChange={handleCountryChange}
-                                        className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none text-sm"
-                                    >
-                                        <option value="">Selecione...</option>
-                                        {countries.map(c => <option key={c} value={c}>{c}</option>)}
-                                    </select>
+                            <CardHeader title="🏗️ Informações da Obra" />
+                            <div className="space-y-6">
+                                {/* Seção 1: Dados Gerais */}
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">Nome da Obra</label>
+                                        <input
+                                            type="text"
+                                            value={generalSettings.nomeObra}
+                                            onChange={e => handleGeneralChange('nomeObra', e.target.value)}
+                                            placeholder="Digite o nome da obra..."
+                                            className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none text-sm"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">Empresa</label>
+                                        <input
+                                            type="text"
+                                            value={generalSettings.empresa}
+                                            onChange={e => handleGeneralChange('empresa', e.target.value)}
+                                            placeholder="Nome da empresa contratada..."
+                                            className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none text-sm"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">Cliente</label>
+                                        <input
+                                            type="text"
+                                            value={generalSettings.cliente}
+                                            onChange={e => handleGeneralChange('cliente', e.target.value)}
+                                            placeholder="Nome do cliente contratante..."
+                                            className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none text-sm"
+                                        />
+                                    </div>
                                 </div>
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">Estado (UF) *</label>
-                                    <select
-                                        value={generalSettings.estado}
-                                        onChange={handleStateChange}
-                                        disabled={!generalSettings.pais}
-                                        className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        <option value="">Selecione...</option>
-                                        {states.map(s => <option key={s} value={s}>{s}</option>)}
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">Cidade *</label>
-                                    <select
-                                        value={generalSettings.cidade}
-                                        onChange={e => handleGeneralChange('cidade', e.target.value)}
-                                        disabled={!generalSettings.estado}
-                                        className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        <option value="">Selecione...</option>
-                                        {cities.map(c => <option key={c} value={c}>{c}</option>)}
-                                    </select>
-                                    <p className="text-[10px] text-[#a0a5b0] mt-1">Define clima e feriados regionais.</p>
+
+                                <hr className="border-[#3a3e45]" />
+
+                                {/* Seção 2: Endereço (Macro -> Micro) */}
+                                <div className="space-y-4">
+                                    <h4 className="text-sm font-semibold text-[#e8eaed] mb-2">Localização da Obra</h4>
+
+                                    {/* Linha 1: CEP, UF, Cidade, Bairro */}
+                                    <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+                                        {/* CEP - 3 colunas (25%) */}
+                                        <div className="md:col-span-3">
+                                            <label className="block text-sm font-medium mb-1">CEP</label>
+                                            <div className="relative">
+                                                <input
+                                                    type="text"
+                                                    value={generalSettings.cep}
+                                                    onChange={handleCEPChange}
+                                                    placeholder="00000-000"
+                                                    maxLength={9}
+                                                    className={`w-full bg-[#1e2329] border ${cepError ? 'border-red-500' : 'border-[#3a3e45]'} rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none text-sm pr-10`}
+                                                />
+                                                {isLoadingCEP && (
+                                                    <div className="absolute right-3 top-2.5">
+                                                        <div className="animate-spin h-4 w-4 border-2 border-[#0084ff] border-t-transparent rounded-full"></div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            {cepError && <p className="text-xs text-red-500 mt-1">{cepError}</p>}
+                                        </div>
+
+                                        {/* UF - 2 colunas (~17%) */}
+                                        <div className="md:col-span-2">
+                                            <SearchableDropdown
+                                                label="UF"
+                                                options={BRAZILIAN_STATES}
+                                                value={generalSettings.estado}
+                                                onChange={handleUFChange}
+                                                placeholder="UF"
+                                                required={true}
+                                            />
+                                        </div>
+
+                                        {/* Cidade - 4 colunas (~33%) */}
+                                        <div className="md:col-span-4">
+                                            <SearchableDropdown
+                                                label="Cidade"
+                                                options={availableCities}
+                                                value={generalSettings.cidade}
+                                                onChange={handleCityChange}
+                                                placeholder={isLoadingCities ? "Carregando..." : "Selecione a cidade"}
+                                                disabled={!generalSettings.estado || isLoadingCities}
+                                                required={true}
+                                            />
+                                        </div>
+
+                                        {/* Bairro - 3 colunas (25%) */}
+                                        <div className="md:col-span-3">
+                                            <SearchableDropdown
+                                                label="Bairro"
+                                                options={availableNeighborhoods}
+                                                value={generalSettings.bairro}
+                                                onChange={handleNeighborhoodChange}
+                                                placeholder={isLoadingNeighborhoods ? "Carregando..." : "Selecione o bairro"}
+                                                disabled={!generalSettings.cidade || isLoadingNeighborhoods}
+                                                required={true}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Linha 2: Logradouro, Número, Complemento */}
+                                    <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+                                        {/* Logradouro - 6 colunas (50%) */}
+                                        <div className="md:col-span-6 relative">
+                                            <label className="block text-sm font-medium mb-1">
+                                                Logradouro (Rua, Av, etc) <span className="text-red-500">*</span>
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={generalSettings.logradouro}
+                                                onChange={(e) => handleLogradouroChange(e.target.value)}
+                                                placeholder="Digite o endereço..."
+                                                disabled={!generalSettings.bairro}
+                                                className={`w-full bg-[#1e2329] border ${!generalSettings.logradouro ? 'border-red-500' : 'border-[#3a3e45]'
+                                                    } rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none text-sm ${!generalSettings.bairro ? 'opacity-50 cursor-not-allowed' : ''
+                                                    }`}
+                                                autoComplete="off"
+                                            />
+                                            {/* Autocomplete Suggestions */}
+                                            {showSuggestions && availableStreets.length > 0 && (
+                                                <div className="absolute z-10 w-full bg-[#242830] border border-[#3a3e45] rounded-md mt-1 shadow-lg max-h-60 overflow-y-auto">
+                                                    {availableStreets.map((suggestion, index) => (
+                                                        <div
+                                                            key={index}
+                                                            className="p-2 hover:bg-[#3a3e45] cursor-pointer text-sm"
+                                                            onClick={() => handleStreetSuggestionSelect(suggestion)}
+                                                        >
+                                                            <span className="font-medium">{suggestion.logradouro}</span>
+                                                            <span className="text-[#a0a5b0] text-xs ml-2">
+                                                                {suggestion.bairro} - CEP: {suggestion.cep}
+                                                            </span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                            {isLoadingStreets && (
+                                                <p className="text-xs text-[#a0a5b0] mt-1">Buscando logradouros...</p>
+                                            )}
+                                        </div>
+
+                                        {/* Número - 2 colunas (~17%) */}
+                                        <div className="md:col-span-2">
+                                            <label className="block text-sm font-medium mb-1">Número</label>
+                                            <input
+                                                type="text"
+                                                value={generalSettings.numero}
+                                                onChange={e => handleGeneralChange('numero', e.target.value)}
+                                                placeholder="Nº"
+                                                disabled={!generalSettings.logradouro}
+                                                className={`w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none text-sm ${!generalSettings.logradouro ? 'opacity-50 cursor-not-allowed' : ''
+                                                    }`}
+                                            />
+                                        </div>
+
+                                        {/* Complemento - 4 colunas (~33%) */}
+                                        <div className="md:col-span-4">
+                                            <label className="block text-sm font-medium mb-1">Complemento</label>
+                                            <input
+                                                type="text"
+                                                value={generalSettings.complemento}
+                                                onChange={e => handleGeneralChange('complemento', e.target.value)}
+                                                placeholder="Apto, Bloco, etc."
+                                                disabled={!generalSettings.logradouro}
+                                                className={`w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none text-sm ${!generalSettings.logradouro ? 'opacity-50 cursor-not-allowed' : ''
+                                                    }`}
+                                            />
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </Card>
@@ -412,10 +708,7 @@ const Settings: React.FC = () => {
                                     </p>
                                 </div>
                                 <div>
-                                    {/* Label invisível para criar o espaçamento e alinhar o topo dos checkboxes com o topo do input à esquerda */}
-                                    <label className="block text-sm font-medium mb-1 invisible">
-                                        Spacer
-                                    </label>
+                                    <label className="block text-sm font-medium mb-1 invisible">Spacer</label>
                                     <div className="flex flex-col gap-3">
                                         <div className="flex items-center gap-3">
                                             <input
@@ -488,7 +781,7 @@ const Settings: React.FC = () => {
                                 <p>Sistema de Gestão de Obras</p>
                             </div>
                         </Card>
-                    </div>
+                    </div >
                 );
             case 'profissionais':
                 return (
