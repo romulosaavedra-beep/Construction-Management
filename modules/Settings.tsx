@@ -1,8 +1,11 @@
 import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
+import toast from 'react-hot-toast';
 import { PageHeader } from '../components/PageHeader';
 import { Card, CardHeader } from '../components/Card';
 import { Button } from '../components/Button';
 import { SearchableDropdown } from '../components/SearchableDropdown';
+import { ConfirmDialog } from '../components/ConfirmDialog';
+import { useConfirm } from '../utils/useConfirm';
 import { fornecedoresData, recursosData, DEFAULT_UNITS_DATA } from '../data/mockData';
 import {
     fetchAddressByCEP,
@@ -193,6 +196,9 @@ const Settings: React.FC = () => {
         }
         return {};
     });
+
+    // --- Confirm Dialog Hook ---
+    const { confirm, alert: customAlert, dialogState, handleConfirm, handleCancel } = useConfirm();
 
     // --- Persistência ---
     useEffect(() => { localStorage.setItem(LOCAL_STORAGE_KEY_UNITS, JSON.stringify(units)); }, [units]);
@@ -492,7 +498,7 @@ const Settings: React.FC = () => {
 
     const handleSaveGeneral = () => {
         localStorage.setItem(LOCAL_STORAGE_KEY_GENERAL, JSON.stringify(generalSettings));
-        alert("Configurações gerais salvas com sucesso!");
+        toast.success("Configurações gerais salvas com sucesso!");
     };
 
     // --- Profissionais Handlers ---
@@ -509,8 +515,18 @@ const Settings: React.FC = () => {
         setIsAddingNewRole(false);
         if (p.cargo && !roles.includes(p.cargo)) setRoles(prev => [...prev, p.cargo].sort());
     };
-    const handleDeleteProfissional = (id: number) => {
-        if (window.confirm('Remover profissional?')) setProfissionais(prev => prev.filter(p => p.id !== id));
+    const handleDeleteProfissional = async (id: number) => {
+        const shouldDelete = await confirm({
+            title: 'Remover Profissional',
+            message: 'Tem certeza que deseja remover este profissional?',
+            confirmText: 'Remover',
+            cancelText: 'Cancelar'
+        });
+
+        if (shouldDelete) {
+            setProfissionais(prev => prev.filter(p => p.id !== id));
+            toast.success('Profissional removido com sucesso!');
+        }
     };
     const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setPhoneError("");
@@ -520,7 +536,10 @@ const Settings: React.FC = () => {
     const handleSaveProfissional = (e: React.FormEvent) => {
         e.preventDefault();
         setPhoneError("");
-        if (!currentProfissional.nome || !currentProfissional.cargo || !currentProfissional.atividades) return alert("Nome, Cargo e Atividades são obrigatórios.");
+        if (!currentProfissional.nome || !currentProfissional.cargo || !currentProfissional.atividades) {
+            toast.error("Nome, Cargo e Atividades são obrigatórios.");
+            return;
+        }
         const rawPhone = (currentProfissional.telefone || '').replace(/\D/g, '');
         if (rawPhone.length > 0) {
             if (rawPhone.length !== 11) return setPhoneError("Celular deve ter 11 dígitos.");
@@ -528,9 +547,11 @@ const Settings: React.FC = () => {
         }
         if (currentProfissional.id) {
             setProfissionais(prev => prev.map(p => p.id === currentProfissional.id ? { ...p, ...currentProfissional } as Profissional : p));
+            toast.success('Profissional atualizado com sucesso!');
         } else {
             const newId = Math.max(0, ...profissionais.map(p => p.id)) + 1;
             setProfissionais(prev => [...prev, { ...currentProfissional, id: newId } as Profissional]);
+            toast.success('Profissional adicionado com sucesso!');
         }
         setIsProfissionalModalOpen(false);
     };
@@ -546,16 +567,39 @@ const Settings: React.FC = () => {
     // --- Units Handlers ---
     const handleAddUnit = () => {
         if (newUnit.symbol && newUnit.name) {
-            const newItem: UnitItem = { ...newUnit, category: 'Usuário', id: generateId() };
+            const newItem: UnitItem = { ...newUnit, category: '@Usuário', id: generateId() };
             setUnits([newItem, ...units]);
             setNewUnit({ category: '', name: '', symbol: '' });
-        } else alert('Preencha Nome e Símbolo.');
+            toast.success('Unidade adicionada com sucesso!');
+        } else {
+            toast.error('Preencha Nome e Símbolo.');
+        }
     };
-    const handleRemoveUnit = (id: string) => {
-        if (window.confirm('Remover unidade?')) setUnits(prev => prev.filter(u => u.id !== id));
+    const handleRemoveUnit = async (id: string) => {
+        const shouldDelete = await confirm({
+            title: 'Remover Unidade',
+            message: 'Tem certeza que deseja remover esta unidade?',
+            confirmText: 'Remover',
+            cancelText: 'Cancelar'
+        });
+
+        if (shouldDelete) {
+            setUnits(prev => prev.filter(u => u.id !== id));
+            toast.success('Unidade removida com sucesso!');
+        }
     };
-    const handleResetUnits = () => {
-        if (window.confirm('Restaurar padrão?')) setUnits(DEFAULT_UNITS_DATA.map(u => ({ ...u, id: generateId() })));
+    const handleResetUnits = async () => {
+        const shouldReset = await confirm({
+            title: 'Restaurar Padrão',
+            message: 'Isso irá restaurar a lista completa original de unidades. Todas as unidades personalizadas serão perdidas. Deseja continuar?',
+            confirmText: 'Restaurar',
+            cancelText: 'Cancelar'
+        });
+
+        if (shouldReset) {
+            setUnits(DEFAULT_UNITS_DATA.map(u => ({ ...u, id: generateId() })));
+            toast.success('Unidades restauradas para o padrão!');
+        }
     };
 
     // --- Navegação com ENTER ---
@@ -738,7 +782,7 @@ const Settings: React.FC = () => {
             case 'fornecedores':
                 return (
                     <Card>
-                        <CardHeader title="Fornecedores"><Button variant="primary" onClick={() => alert('Adicionar')}>+ Adicionar</Button></CardHeader>
+                        <CardHeader title="Fornecedores"><Button variant="primary" onClick={() => toast.success('Funcionalidade em desenvolvimento')}>+ Adicionar</Button></CardHeader>
                         <div className="overflow-x-auto">
                             <table className="w-full text-sm">
                                 <thead className="text-xs text-[#e8eaed] uppercase bg-[#242830]">
@@ -813,7 +857,7 @@ const Settings: React.FC = () => {
                 );
 
             case 'recursos':
-                return <Card><CardHeader title="Recursos"><Button variant="primary" onClick={() => alert('Add')}>+ Adicionar</Button></CardHeader><div className="flex flex-wrap gap-2">{recursos.map((r, i) => <span key={i} className="bg-[#242830] px-3 py-1 rounded-full text-sm">{r}</span>)}</div></Card>;
+                return <Card><CardHeader title="Recursos"><Button variant="primary" onClick={() => toast.success('Funcionalidade em desenvolvimento')}>+ Adicionar</Button></CardHeader><div className="flex flex-wrap gap-2">{recursos.map((r, i) => <span key={i} className="bg-[#242830] px-3 py-1 rounded-full text-sm">{r}</span>)}</div></Card>;
             default: return null;
         }
     };
@@ -862,6 +906,17 @@ const Settings: React.FC = () => {
             )}
             <div className="border-b border-[#3a3e45] mb-6"><nav className="flex space-x-4 overflow-x-auto pb-1">{tabs.map(tab => <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`px-3 py-2 font-medium text-sm rounded-t-lg whitespace-nowrap ${activeTab === tab.id ? 'text-[#0084ff] border-b-2 border-[#0084ff]' : 'text-[#a0a5b0] hover:text-white'}`}>{tab.label}</button>)}</nav></div>
             {renderContent()}
+
+            <ConfirmDialog
+                isOpen={dialogState.isOpen}
+                title={dialogState.title}
+                message={dialogState.message}
+                onConfirm={handleConfirm}
+                onCancel={handleCancel}
+                confirmText={dialogState.confirmText}
+                cancelText={dialogState.cancelText}
+                type={dialogState.type}
+            />
         </div>
     );
 };
