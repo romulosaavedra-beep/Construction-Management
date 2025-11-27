@@ -15,7 +15,7 @@ interface ProfessionalsSettingsProps {
 }
 
 export const ProfessionalsSettings: React.FC<ProfessionalsSettingsProps> = ({ projectId }) => {
-    const { professionals, loading, addProfessional, updateProfessional, deleteProfessional } = useProfessionals(projectId);
+    const { professionals, loading, addProfessional, updateProfessional, deleteProfessional, deleteProfessionals } = useProfessionals(projectId);
     const { colWidths, updateColumnWidth } = useColumnWidths('vobi-settings-col-widths');
     const { confirm, alert, dialogState, handleConfirm, handleCancel } = useConfirm();
 
@@ -24,6 +24,7 @@ export const ProfessionalsSettings: React.FC<ProfessionalsSettingsProps> = ({ pr
     const [phoneError, setPhoneError] = useState("");
     const [sortConfig, setSortConfig] = useState<{ key: keyof Profissional; direction: 'asc' | 'desc' } | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
     const [isCreatingRole, setIsCreatingRole] = useState(false);
     const [newRole, setNewRole] = useState('');
     const [customRoles, setCustomRoles] = useState<string[]>([]);
@@ -121,8 +122,52 @@ export const ProfessionalsSettings: React.FC<ProfessionalsSettingsProps> = ({ pr
 
         if (shouldDelete) {
             await deleteProfessional(id);
+            const idStr = String(id);
+            if (selectedIds.has(idStr)) {
+                const newSelected = new Set(selectedIds);
+                newSelected.delete(idStr);
+                setSelectedIds(newSelected);
+            }
         }
     };
+
+    const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.checked) {
+            const allIds = filteredAndSortedProfessionals.map(p => String(p.id));
+            setSelectedIds(new Set(allIds));
+        } else {
+            setSelectedIds(new Set());
+        }
+    };
+
+    const handleSelectRow = (id: string | number) => {
+        const idStr = String(id);
+        const newSelected = new Set(selectedIds);
+        if (newSelected.has(idStr)) {
+            newSelected.delete(idStr);
+        } else {
+            newSelected.add(idStr);
+        }
+        setSelectedIds(newSelected);
+    };
+
+    const handleBulkDelete = async () => {
+        const shouldDelete = await confirm({
+            title: 'Excluir Profissionais',
+            message: `Tem certeza que deseja excluir ${selectedIds.size} profissionais selecionados?`,
+            confirmText: 'Excluir',
+            cancelText: 'Cancelar'
+        });
+
+        if (shouldDelete) {
+            await deleteProfessionals(Array.from(selectedIds));
+            setSelectedIds(new Set());
+        }
+    };
+
+    const totalCount = filteredAndSortedProfessionals.length;
+    const isAllSelected = totalCount > 0 && selectedIds.size === totalCount;
+    const isIndeterminate = selectedIds.size > 0 && selectedIds.size < totalCount;
 
     const handleAddRole = () => {
         if (!newRole.trim()) return;
@@ -197,37 +242,103 @@ export const ProfessionalsSettings: React.FC<ProfessionalsSettingsProps> = ({ pr
                     </div>
                 </CardHeader>
                 <div className="overflow-x-auto">
-                    <table className="w-full text-sm text-left text-[#a0a5b0]">
-                        <thead className="text-xs text-[#e8eaed] uppercase bg-[#242830]">
-                            <tr>
-                                <ResizableTh tableId="prof" colKey="cargo" initialWidth="15%" onSort={() => requestSort('cargo')} sortIndicator={getSortIndicator('cargo')} colWidths={colWidths} onUpdateWidth={updateColumnWidth}>Cargo</ResizableTh>
-                                <ResizableTh tableId="prof" colKey="nome" initialWidth="15%" onSort={() => requestSort('nome')} sortIndicator={getSortIndicator('nome')} colWidths={colWidths} onUpdateWidth={updateColumnWidth}>Nome</ResizableTh>
-                                <ResizableTh tableId="prof" colKey="email" initialWidth="15%" onSort={() => requestSort('email')} sortIndicator={getSortIndicator('email')} colWidths={colWidths} onUpdateWidth={updateColumnWidth}>Email</ResizableTh>
-                                <ResizableTh tableId="prof" colKey="telefone" initialWidth="12%" onSort={() => requestSort('telefone')} sortIndicator={getSortIndicator('telefone')} colWidths={colWidths} onUpdateWidth={updateColumnWidth}>Telefone</ResizableTh>
-                                <ResizableTh tableId="prof" colKey="atividades" onSort={() => requestSort('atividades')} sortIndicator={getSortIndicator('atividades')} colWidths={colWidths} onUpdateWidth={updateColumnWidth}>Atividades</ResizableTh>
-                                <th className="px-4 py-3 w-[80px] text-center border-l border-[#3a3e45]">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {loading ? (
-                                <tr><td colSpan={6} className="text-center py-6">Carregando...</td></tr>
-                            ) : filteredAndSortedProfessionals.map(p => (
-                                <tr key={p.id} className="border-b border-[#3a3e45] hover:bg-[#24282f]">
-                                    <td className="px-4 py-3 whitespace-nowrap overflow-hidden text-ellipsis">{p.cargo}</td>
-                                    <td className="px-4 py-3 font-medium text-white whitespace-nowrap overflow-hidden text-ellipsis">{p.nome}</td>
-                                    <td className="px-4 py-3 whitespace-nowrap overflow-hidden text-ellipsis">{p.email || '-'}</td>
-                                    <td className="px-4 py-3 font-mono text-xs whitespace-nowrap">{p.telefone || '-'}</td>
-                                    <td className="px-4 py-3 whitespace-normal break-words">{p.atividades || '-'}</td>
-                                    <td className="px-4 py-3 text-center whitespace-nowrap">
-                                        <div className="flex justify-center gap-2">
-                                            <button onClick={() => handleEdit(p)} className="text-[#a0a5b0] hover:text-white p-1" title="Editar">✏️</button>
-                                            <button onClick={() => handleDelete(p.id)} className="text-red-400 hover:text-red-500 p-1" title="Excluir">🗑️</button>
-                                        </div>
-                                    </td>
+                    <div className="max-h-[600px] overflow-y-auto custom-scrollbar">
+                        <table className="w-full text-sm text-left text-[#a0a5b0]">
+                            {/* HEADER */}
+                            <thead className="text-xs text-[#e8eaed] uppercase bg-[#242830] sticky top-0 z-30">
+                                <tr>
+                                    {/* CHECKBOX: Sticky Left */}
+                                    <th className="px-4 py-3 w-[40px] text-center border-b border-[#3a3e45] sticky left-0 z-30 bg-[#242830]">
+                                        <input
+                                            type="checkbox"
+                                            className="rounded border-[#3a3e45] bg-[#1e2329] text-[#0084ff] focus:ring-[#0084ff] focus:ring-offset-0 focus:ring-offset-[#242830]"
+                                            checked={isAllSelected}
+                                            ref={input => {
+                                                if (input) input.indeterminate = isIndeterminate;
+                                            }}
+                                            onChange={handleSelectAll}
+                                            disabled={totalCount === 0}
+                                        />
+                                    </th>
+
+                                    {/* CARGO */}
+                                    <ResizableTh tableId="prof" colKey="cargo" initialWidth="15%" onSort={() => requestSort('cargo')} sortIndicator={getSortIndicator('cargo')} colWidths={colWidths} onUpdateWidth={updateColumnWidth}>Cargo</ResizableTh>
+
+                                    {/* NOME */}
+                                    <ResizableTh tableId="prof" colKey="nome" initialWidth="20%" onSort={() => requestSort('nome')} sortIndicator={getSortIndicator('nome')} colWidths={colWidths} onUpdateWidth={updateColumnWidth}>Nome</ResizableTh>
+
+                                    {/* EMAIL */}
+                                    <ResizableTh tableId="prof" colKey="email" initialWidth="20%" onSort={() => requestSort('email')} sortIndicator={getSortIndicator('email')} colWidths={colWidths} onUpdateWidth={updateColumnWidth}>Email</ResizableTh>
+
+                                    {/* TELEFONE: Curto */}
+                                    <ResizableTh tableId="prof" colKey="telefone" initialWidth="1%" onSort={() => requestSort('telefone')} sortIndicator={getSortIndicator('telefone')} colWidths={colWidths} onUpdateWidth={updateColumnWidth}>Telefone</ResizableTh>
+
+                                    {/* ATIVIDADES: Ocupa o resto do espaço */}
+                                    <ResizableTh tableId="prof" colKey="atividades" initialWidth="40%" onSort={() => requestSort('atividades')} sortIndicator={getSortIndicator('atividades')} colWidths={colWidths} onUpdateWidth={updateColumnWidth} className="!border-r-0">Atividades</ResizableTh>
+
+                                    {/* AÇÕES: Sticky Right */}
+                                    <th className="px-4 py-3 w-[1%] whitespace-nowrap text-center border-b border-[#3a3e45] sticky right-0 z-30 bg-[#242830]">
+                                        {selectedIds.size > 0 ? (
+                                            <button
+                                                onClick={handleBulkDelete}
+                                                className="text-red-400 hover:text-red-300 text-xs font-bold uppercase"
+                                            >
+                                                Apagar ({selectedIds.size})
+                                            </button>
+                                        ) : (
+                                            "Ações"
+                                        )}
+                                    </th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+
+                            {/* BODY */}
+                            <tbody>
+                                {loading ? (
+                                    <tr><td colSpan={7} className="text-center py-6">Carregando...</td></tr>
+                                ) : filteredAndSortedProfessionals.map(p => {
+                                    // Lógica de Cores Opacas para Colunas Fixas
+                                    const stickyBgClass = selectedIds.has(String(p.id))
+                                        ? 'bg-[#1a2736]' // Cor de fundo quando selecionado
+                                        : 'bg-[#1e2329] group-hover:bg-[#24282f]'; // Cor normal / hover
+
+                                    return (
+                                        <tr key={p.id} className={`group border-b border-[#3a3e45] hover:bg-[#24282f] transition-colors ${selectedIds.has(String(p.id)) ? 'bg-[#0084ff]/10' : ''}`}>
+
+                                            {/* CHECKBOX BODY: Sticky Left */}
+                                            <td className={`px-4 py-3 text-center sticky left-0 z-20 ${stickyBgClass}`}>
+                                                <input
+                                                    type="checkbox"
+                                                    className="rounded border-[#3a3e45] bg-[#1e2329] text-[#0084ff] focus:ring-[#0084ff] focus:ring-offset-0 focus:ring-offset-[#242830]"
+                                                    checked={selectedIds.has(String(p.id))}
+                                                    onChange={() => handleSelectRow(p.id)}
+                                                />
+                                            </td>
+
+                                            {/* Colunas Fluidas (max-w-[1px]) */}
+                                            <td className="px-4 py-3 whitespace-nowrap overflow-hidden text-ellipsis max-w-[1px]">{p.cargo}</td>
+                                            <td className="px-4 py-3 font-medium text-white whitespace-nowrap overflow-hidden text-ellipsis max-w-[1px]">{p.nome}</td>
+                                            <td className="px-4 py-3 whitespace-nowrap overflow-hidden text-ellipsis max-w-[1px]">{p.email || '-'}</td>
+
+                                            {/* Coluna Curta (w-[1%]) */}
+                                            <td className="px-4 py-3 font-mono text-xs whitespace-nowrap w-[1%]">{p.telefone || '-'}</td>
+
+                                            {/* Atividades: Fluida e Truncada (mudança de break-words para ellipsis para manter padrão) */}
+                                            <td className="px-4 py-3 whitespace-nowrap overflow-hidden text-ellipsis max-w-[1px]" title={p.atividades}>{p.atividades || '-'}</td>
+
+                                            {/* AÇÕES BODY: Sticky Right */}
+                                            <td className={`px-4 py-3 text-center whitespace-nowrap w-[1%] sticky right-0 z-20 ${stickyBgClass}`}>
+                                                <div className="flex justify-center gap-2">
+                                                    <button onClick={() => handleEdit(p)} className="text-[#a0a5b0] hover:text-white p-1" title="Editar">✏️</button>
+                                                    <button onClick={() => handleDelete(p.id)} className="text-red-400 hover:text-red-500 p-1" title="Excluir">🗑️</button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
                     {!loading && professionals.length === 0 && <div className="text-center py-6 text-[#a0a5b0]">Nenhum profissional cadastrado.</div>}
                     {!loading && professionals.length > 0 && filteredAndSortedProfessionals.length === 0 && <div className="text-center py-6 text-[#a0a5b0]">Nenhum resultado encontrado para "{searchTerm}".</div>}
                 </div>

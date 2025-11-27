@@ -101,7 +101,7 @@ const Settings: React.FC = () => {
                             <UnitsSettings projectId={settings.id} />
                         </div>
                         <div className="w-full">
-                            <ResourcesSettings />
+                            <ResourcesSettings projectId={settings.id} />
                         </div>
                     </div>
                 );

@@ -75,6 +75,23 @@ export const GeneralSettings: React.FC<GeneralSettingsProps> = ({ settings, onUp
         const newCep = maskCEP(e.target.value);
         handleChange('cep', newCep);
         setCepError('');
+
+        if (!newCep) {
+            handleUpdateWrapper({
+                ...settings,
+                cep: '',
+                estado: '',
+                cidade: '',
+                bairro: '',
+                logradouro: '',
+                numero: '',
+                complemento: ''
+            });
+            setAvailableCities([]);
+            setStreetSuggestions([]);
+            return;
+        }
+
         if (newCep.replace(/\D/g, '').length === 8) {
             setIsLoadingCEP(true);
             try {

@@ -16,23 +16,35 @@ export const useResources = (projectId?: string) => {
     const fetchResources = useCallback(async () => {
         try {
             setLoading(true);
-            let query = supabase
-                .from('resources')
+
+            // 1. Fetch default resources (System Standard)
+            const { data: defaultData, error: defaultError } = await supabase
+                .from('default_resources')
                 .select('*')
                 .order('name');
 
+            if (defaultError) throw defaultError;
+
+            let customData: ResourceItem[] = [];
+
+            // 2. Fetch custom resources (Project Specific)
             if (projectId) {
-                // Fetch project-specific resources AND global resources (project_id is null)
-                query = query.or(`project_id.eq.${projectId},project_id.is.null`);
-            } else {
-                // If no project selected, only fetch global resources
-                query = query.is('project_id', null);
+                const { data, error } = await supabase
+                    .from('resources')
+                    .select('*')
+                    .eq('project_id', projectId)
+                    .order('name');
+
+                if (error) throw error;
+                customData = data || [];
             }
 
-            const { data, error } = await query;
+            // Combine and sort by name
+            const allResources = [...(defaultData || []), ...customData].sort((a, b) =>
+                a.name.localeCompare(b.name)
+            );
 
-            if (error) throw error;
-            setResources(data || []);
+            setResources(allResources);
         } catch (error) {
             console.error('Erro ao buscar recursos:', error);
             toast.error('Erro ao carregar recursos');
@@ -46,6 +58,11 @@ export const useResources = (projectId?: string) => {
     }, [fetchResources]);
 
     const addResource = async (resource: Omit<ResourceItem, 'id'>) => {
+        if (!projectId) {
+            toast.error('Projeto não identificado');
+            return;
+        }
+
         try {
             const { data, error } = await supabase
                 .from('resources')
@@ -55,7 +72,7 @@ export const useResources = (projectId?: string) => {
 
             if (error) throw error;
 
-            setResources(prev => [...prev, data]);
+            setResources(prev => [...prev, data].sort((a, b) => a.name.localeCompare(b.name)));
             toast.success('Recurso adicionado com sucesso!');
             return data;
         } catch (error) {
@@ -66,6 +83,11 @@ export const useResources = (projectId?: string) => {
     };
 
     const updateResource = async (resource: ResourceItem) => {
+        if (!resource.project_id) {
+            toast.error('Recursos padrão não podem ser editados.');
+            return;
+        }
+
         try {
             const { error } = await supabase
                 .from('resources')
@@ -101,12 +123,31 @@ export const useResources = (projectId?: string) => {
         }
     };
 
+    const deleteResources = async (ids: string[]) => {
+        try {
+            const { error } = await supabase
+                .from('resources')
+                .delete()
+                .in('id', ids);
+
+            if (error) throw error;
+
+            setResources(prev => prev.filter(r => !ids.includes(r.id)));
+            toast.success('Recursos removidos com sucesso!');
+        } catch (error) {
+            console.error('Erro ao remover recursos:', error);
+            toast.error('Erro ao remover recursos');
+            throw error;
+        }
+    };
+
     return {
         resources,
         loading,
         addResource,
         updateResource,
         deleteResource,
+        deleteResources,
         refreshResources: fetchResources
     };
 };

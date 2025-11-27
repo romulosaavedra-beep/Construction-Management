@@ -120,6 +120,23 @@ export const useSuppliers = (projectId?: string) => {
         }
     };
 
+    const deleteSuppliers = async (ids: (string | number)[]) => {
+        try {
+            const { error } = await supabase
+                .from('suppliers')
+                .delete()
+                .in('id', ids);
+
+            if (error) throw error;
+
+            setSuppliers(prev => prev.filter(s => !ids.includes(s.id)));
+            toast.success('Fornecedores removidos!');
+        } catch (error) {
+            console.error('Error deleting suppliers:', error);
+            toast.error('Erro ao remover fornecedores.');
+        }
+    };
+
     useEffect(() => {
         if (projectId) {
             fetchSuppliers();
@@ -131,6 +148,7 @@ export const useSuppliers = (projectId?: string) => {
         loading,
         addSupplier,
         updateSupplier,
-        deleteSupplier
+        deleteSupplier,
+        deleteSuppliers
     };
 };
