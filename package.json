@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@google/genai": "^1.29.1",
+    "@supabase/supabase-js": "^2.85.0",
     "@types/lodash.debounce": "^4.0.9",
     "exceljs": "^4.4.0",
     "file-saver": "^2.0.5",

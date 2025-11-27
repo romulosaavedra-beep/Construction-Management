@@ -9,6 +9,7 @@ interface SearchableDropdownProps {
     required?: boolean;
     label?: string;
     className?: string;
+    onAddNew?: (newValue: string) => void;
 }
 
 export const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
@@ -19,7 +20,8 @@ export const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
     disabled = false,
     required = false,
     label,
-    className = ''
+    className = '',
+    onAddNew
 }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
@@ -45,6 +47,15 @@ export const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
         onChange(option);
         setIsOpen(false);
         setSearchTerm('');
+    };
+
+    const handleAddNew = () => {
+        if (onAddNew && searchTerm.trim()) {
+            onAddNew(searchTerm.trim());
+            onChange(searchTerm.trim());
+            setIsOpen(false);
+            setSearchTerm('');
+        }
     };
 
     return (
@@ -97,7 +108,17 @@ export const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
                                 ))
                             ) : (
                                 <div className="p-2 text-sm text-[#a0a5b0] text-center">
-                                    Nenhum resultado encontrado
+                                    {onAddNew && searchTerm.trim() ? (
+                                        <button
+                                            type="button"
+                                            onClick={handleAddNew}
+                                            className="text-[#0084ff] hover:underline w-full text-left"
+                                        >
+                                            + Criar "{searchTerm}"
+                                        </button>
+                                    ) : (
+                                        'Nenhum resultado encontrado'
+                                    )}
                                 </div>
                             )}
                         </div>

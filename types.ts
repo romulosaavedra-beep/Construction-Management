@@ -169,28 +169,36 @@ export interface Compra {
   data_necessaria: string;
   etapa: string;
   justificativa?: string;
-  status: 'Solicitado' | 'Cotado' | 'Aprovado' | 'Recebido';
-  fornecedor: string;
-  cotacoes: Cotacao[];
 }
 
 export interface Fornecedor {
+  id: string | number;
   nome: string;
-  vendedor: string;
-  cnpj: string;
-  telefone: string;
-  email: string;
-  cidade: string;
-  estado: string;
+  contato?: string;
+  email?: string;
+  telefone?: string;
+  cnpj?: string;
+  endereco?: string;
+  cidade?: string;
+  estado?: string;
+  link?: string;
 }
 
 export interface Profissional {
-  id: number;
+  id: string | number;
   cargo: string;
   nome: string;
   email?: string;
   telefone?: string;
   atividades: string;
+}
+
+export interface UnitItem {
+  id: string;
+  project_id?: string;
+  category: string;
+  name: string;
+  symbol: string;
 }
 
 // Re-export for backward compatibility, aliasing Restriction
