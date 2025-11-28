@@ -8,27 +8,42 @@ export const useUnits = (projectId?: string) => {
     const [loading, setLoading] = useState(false);
 
     const fetchUnits = useCallback(async () => {
-        if (!projectId) return;
-        setLoading(true);
         try {
-            const { data, error } = await supabase
-                .from('units')
+            setLoading(true);
+
+            // 1. Fetch default units (System Standard)
+            const { data: defaultData, error: defaultError } = await supabase
+                .from('default_units')
                 .select('*')
-                .or(`project_id.eq.${projectId},project_id.is.null`)
                 .order('category')
                 .order('name');
 
-            if (error) throw error;
+            if (defaultError) throw defaultError;
 
-            const mapped: UnitItem[] = data.map(u => ({
-                id: u.id,
-                project_id: u.project_id,
-                category: u.category,
-                name: u.name,
-                symbol: u.symbol
-            }));
+            let customData: UnitItem[] = [];
 
-            setUnits(mapped);
+            // 2. Fetch custom units (Project Specific)
+            if (projectId) {
+                const { data, error } = await supabase
+                    .from('units')
+                    .select('*')
+                    .eq('project_id', projectId)
+                    .order('category')
+                    .order('name');
+
+                if (error) throw error;
+                customData = data || [];
+            }
+
+            // Combine and sort by category, then name
+            const allUnits = [...(defaultData || []), ...customData].sort((a, b) => {
+                if (a.category !== b.category) {
+                    return a.category.localeCompare(b.category);
+                }
+                return a.name.localeCompare(b.name);
+            });
+
+            setUnits(allUnits);
         } catch (error) {
             console.error('Error fetching units:', error);
             toast.error('Erro ao carregar unidades.');
@@ -38,7 +53,11 @@ export const useUnits = (projectId?: string) => {
     }, [projectId]);
 
     const addUnit = async (unit: Omit<UnitItem, 'id'>) => {
-        if (!projectId) return;
+        if (!projectId) {
+            toast.error('Projeto não identificado');
+            return;
+        }
+
         try {
             const { data, error } = await supabase
                 .from('units')
@@ -55,12 +74,18 @@ export const useUnits = (projectId?: string) => {
 
             const newUnit: UnitItem = {
                 id: data.id,
+                project_id: data.project_id,
                 category: data.category,
                 name: data.name,
                 symbol: data.symbol
             };
 
-            setUnits(prev => [...prev, newUnit]);
+            setUnits(prev => [...prev, newUnit].sort((a, b) => {
+                if (a.category !== b.category) {
+                    return a.category.localeCompare(b.category);
+                }
+                return a.name.localeCompare(b.name);
+            }));
             toast.success('Unidade adicionada!');
         } catch (error) {
             console.error('Error adding unit:', error);
@@ -69,6 +94,11 @@ export const useUnits = (projectId?: string) => {
     };
 
     const updateUnit = async (unit: UnitItem) => {
+        if (!unit.project_id) {
+            toast.error('Unidades padrão não podem ser editadas.');
+            return;
+        }
+
         try {
             const { error } = await supabase
                 .from('units')
@@ -106,10 +136,25 @@ export const useUnits = (projectId?: string) => {
         }
     };
 
-    useEffect(() => {
-        if (projectId) {
-            fetchUnits();
+    const deleteUnits = async (ids: string[]) => {
+        try {
+            const { error } = await supabase
+                .from('units')
+                .delete()
+                .in('id', ids);
+
+            if (error) throw error;
+
+            setUnits(prev => prev.filter(u => !ids.includes(u.id)));
+            toast.success('Unidades removidas!');
+        } catch (error) {
+            console.error('Error deleting units:', error);
+            toast.error('Erro ao remover unidades.');
         }
+    };
+
+    useEffect(() => {
+        fetchUnits();
     }, [projectId, fetchUnits]);
 
     return {
@@ -117,6 +162,7 @@ export const useUnits = (projectId?: string) => {
         loading,
         addUnit,
         updateUnit,
-        deleteUnit
+        deleteUnit,
+        deleteUnits
     };
 };

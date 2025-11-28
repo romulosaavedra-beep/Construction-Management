@@ -33,10 +33,17 @@ export const useProjects = () => {
     }, []);
 
     const createProject = async (name: string) => {
+        // Check for duplicate name
+        const nameExists = projects.some(p => p.name.trim().toLowerCase() === name.trim().toLowerCase());
+        if (nameExists) {
+            toast.error('Já existe um projeto com este nome.');
+            return null;
+        }
+
         try {
             const { data, error } = await supabase
                 .from('projects')
-                .insert([{ name, settings: {} }]) // Initialize with empty settings
+                .insert([{ name: name.trim(), settings: {} }]) // Initialize with empty settings
                 .select('id, name, company, created_at')
                 .single();
 

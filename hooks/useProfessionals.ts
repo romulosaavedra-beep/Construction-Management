@@ -112,6 +112,23 @@ export const useProfessionals = (projectId?: string) => {
         }
     };
 
+    const deleteProfessionals = async (ids: (string | number)[]) => {
+        try {
+            const { error } = await supabase
+                .from('professionals')
+                .delete()
+                .in('id', ids);
+
+            if (error) throw error;
+
+            setProfessionals(prev => prev.filter(p => !ids.includes(p.id)));
+            toast.success('Profissionais removidos!');
+        } catch (error) {
+            console.error('Error deleting professionals:', error);
+            toast.error('Erro ao remover profissionais.');
+        }
+    };
+
     useEffect(() => {
         if (projectId) {
             fetchProfessionals();
@@ -123,6 +140,7 @@ export const useProfessionals = (projectId?: string) => {
         loading,
         addProfessional,
         updateProfessional,
-        deleteProfessional
+        deleteProfessional,
+        deleteProfessionals
     };
 };

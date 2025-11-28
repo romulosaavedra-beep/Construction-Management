@@ -12,7 +12,7 @@ interface ResourcesSettingsProps {
 }
 
 export const ResourcesSettings: React.FC<ResourcesSettingsProps> = ({ projectId }) => {
-    const { resources, loading, addResource, updateResource, deleteResource } = useResources(projectId);
+    const { resources, loading, addResource, updateResource, deleteResource, deleteResources } = useResources(projectId);
     const { colWidths, updateColumnWidth } = useColumnWidths('vobi-settings-sort-resources');
     const { confirm, dialogState, handleConfirm, handleCancel } = useConfirm();
 
@@ -20,6 +20,7 @@ export const ResourcesSettings: React.FC<ResourcesSettingsProps> = ({ projectId 
     const [currentResource, setCurrentResource] = useState<Partial<ResourceItem>>({});
     const [sortConfig, setSortConfig] = useState<{ key: keyof ResourceItem; direction: 'asc' | 'desc' } | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
     // Extract unique categories for dropdown
     const categories = useMemo(() => {
@@ -87,18 +88,67 @@ export const ResourcesSettings: React.FC<ResourcesSettingsProps> = ({ projectId 
 
         if (shouldDelete) {
             await deleteResource(id);
+            if (selectedIds.has(id)) {
+                const newSelected = new Set(selectedIds);
+                newSelected.delete(id);
+                setSelectedIds(newSelected);
+            }
         }
     };
+
+    const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.checked) {
+            const userResources = filteredAndSortedResources.filter(r => r.project_id).map(r => r.id);
+            setSelectedIds(new Set(userResources));
+        } else {
+            setSelectedIds(new Set());
+        }
+    };
+
+    const handleSelectRow = (id: string) => {
+        const newSelected = new Set(selectedIds);
+        if (newSelected.has(id)) {
+            newSelected.delete(id);
+        } else {
+            newSelected.add(id);
+        }
+        setSelectedIds(newSelected);
+    };
+
+    const handleBulkDelete = async () => {
+        const shouldDelete = await confirm({
+            title: 'Excluir Recursos',
+            message: `Tem certeza que deseja excluir ${selectedIds.size} recursos selecionados?`,
+            confirmText: 'Excluir',
+            cancelText: 'Cancelar'
+        });
+
+        if (shouldDelete) {
+            await deleteResources(Array.from(selectedIds));
+            setSelectedIds(new Set());
+        }
+    };
+
+    const userResourcesCount = filteredAndSortedResources.filter(r => r.project_id).length;
+    const isAllSelected = userResourcesCount > 0 && selectedIds.size === userResourcesCount;
+    const isIndeterminate = selectedIds.size > 0 && selectedIds.size < userResourcesCount;
 
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
 
         if (!currentResource.name || !currentResource.category) return;
 
-        if (currentResource.id) {
-            await updateResource(currentResource as ResourceItem);
+        let resourceToSave = { ...currentResource };
+
+        // Add '@' prefix to category for new resources if not present
+        if (!resourceToSave.id && !resourceToSave.category.startsWith('@')) {
+            resourceToSave.category = `@${resourceToSave.category}`;
+        }
+
+        if (resourceToSave.id) {
+            await updateResource(resourceToSave as ResourceItem);
         } else {
-            await addResource(currentResource as Omit<ResourceItem, 'id'>);
+            await addResource(resourceToSave as Omit<ResourceItem, 'id'>);
         }
         setIsModalOpen(false);
     };
@@ -121,32 +171,117 @@ export const ResourcesSettings: React.FC<ResourcesSettingsProps> = ({ projectId 
                 <div className="overflow-x-auto">
                     <div className="max-h-[600px] overflow-y-auto custom-scrollbar">
                         <table className="w-full text-sm text-left text-[#a0a5b0]">
-                            <thead className="text-xs text-[#e8eaed] uppercase bg-[#242830] sticky top-0 z-10">
+                            {/* HEADER */}
+                            <thead className="text-xs text-[#e8eaed] uppercase bg-[#242830] sticky top-0 z-30">
                                 <tr>
-                                    <ResizableTh tableId="resources" colKey="category" initialWidth="40%" onSort={() => requestSort('category')} sortIndicator={getSortIndicator('category')} colWidths={colWidths} onUpdateWidth={updateColumnWidth}>Categoria</ResizableTh>
-                                    <ResizableTh tableId="resources" colKey="name" initialWidth="40%" onSort={() => requestSort('name')} sortIndicator={getSortIndicator('name')} colWidths={colWidths} onUpdateWidth={updateColumnWidth}>Nome</ResizableTh>
-                                    <th className="px-4 py-3 w-[100px] text-center border-l border-[#3a3e45]">Ações</th>
+                                    {/* CHECKBOX: Sticky Left */}
+                                    <th className="px-4 py-3 w-[40px] text-center border-b border-[#3a3e45] sticky left-0 z-30 bg-[#242830]">
+                                        <input
+                                            type="checkbox"
+                                            className="rounded border-[#3a3e45] bg-[#1e2329] text-[#0084ff] focus:ring-[#0084ff] focus:ring-offset-0 focus:ring-offset-[#242830]"
+                                            checked={isAllSelected}
+                                            ref={input => {
+                                                if (input) input.indeterminate = isIndeterminate;
+                                            }}
+                                            onChange={handleSelectAll}
+                                            disabled={userResourcesCount === 0}
+                                        />
+                                    </th>
+
+                                    {/* CATEGORIA */}
+                                    <ResizableTh
+                                        tableId="resources"
+                                        colKey="category"
+                                        initialWidth="50%"
+                                        onSort={() => requestSort('category')}
+                                        sortIndicator={getSortIndicator('category')}
+                                        colWidths={colWidths}
+                                        onUpdateWidth={updateColumnWidth}
+                                    >
+                                        Categoria
+                                    </ResizableTh>
+
+                                    {/* NOME: Adicionado !border-r-0 para remover a borda direita */}
+                                    <ResizableTh
+                                        tableId="resources"
+                                        colKey="name"
+                                        initialWidth="50%"
+                                        onSort={() => requestSort('name')}
+                                        sortIndicator={getSortIndicator('name')}
+                                        colWidths={colWidths}
+                                        onUpdateWidth={updateColumnWidth}
+                                        className="!border-r-0"
+                                    >
+                                        Nome
+                                    </ResizableTh>
+
+                                    {/* AÇÕES: Sticky Right + Sem bordas laterais */}
+                                    <th className="px-4 py-3 w-[1%] whitespace-nowrap text-center border-b border-[#3a3e45] sticky right-0 z-30 bg-[#242830]">
+                                        {selectedIds.size > 0 ? (
+                                            <button
+                                                onClick={handleBulkDelete}
+                                                className="text-red-400 hover:text-red-300 text-xs font-bold uppercase"
+                                            >
+                                                Apagar ({selectedIds.size})
+                                            </button>
+                                        ) : (
+                                            "Ações"
+                                        )}
+                                    </th>
                                 </tr>
                             </thead>
+
+                            {/* BODY */}
                             <tbody>
                                 {loading ? (
-                                    <tr><td colSpan={3} className="text-center py-6">Carregando...</td></tr>
-                                ) : filteredAndSortedResources.map(r => (
-                                    <tr key={r.id} className="border-b border-[#3a3e45] hover:bg-[#24282f]">
-                                        <td className="px-4 py-3 whitespace-nowrap overflow-hidden text-ellipsis">{r.category}</td>
-                                        <td className="px-4 py-3 font-medium text-white whitespace-nowrap overflow-hidden text-ellipsis">{r.name}</td>
-                                        <td className="px-4 py-3 text-center whitespace-nowrap">
-                                            {r.project_id ? (
-                                                <div className="flex justify-center gap-2">
-                                                    <button onClick={() => handleEdit(r)} className="text-[#a0a5b0] hover:text-white p-1" title="Editar">✏️</button>
-                                                    <button onClick={() => handleDelete(r.id)} className="text-red-400 hover:text-red-500 p-1" title="Excluir">🗑️</button>
-                                                </div>
-                                            ) : (
-                                                <span className="text-[#4a4e55] text-xs italic">Padrão</span>
-                                            )}
-                                        </td>
-                                    </tr>
-                                ))}
+                                    <tr><td colSpan={4} className="text-center py-6">Carregando...</td></tr>
+                                ) : filteredAndSortedResources.map(r => {
+                                    // Lógica de Cores Opacas para Colunas Fixas
+                                    // Normal: #1e2329 (Cor do Card)
+                                    // Hover: #262b33 (Um pouco mais claro que o card)
+                                    // Selected: #1a2736 (Azulado escuro opaco)
+                                    const stickyBgClass = selectedIds.has(r.id)
+                                        ? 'bg-[#1a2736]'
+                                        : 'bg-[#1e2329] group-hover:bg-[#262b33]';
+
+                                    return (
+                                        <tr key={r.id} className={`group border-b border-[#3a3e45] hover:bg-[#262b33] transition-colors ${selectedIds.has(r.id) ? 'bg-[#0084ff]/10' : ''}`}>
+
+                                            {/* CHECKBOX BODY: Sticky Left */}
+                                            <td className={`px-4 py-3 text-center sticky left-0 z-20 ${stickyBgClass}`}>
+                                                {r.project_id && (
+                                                    <input
+                                                        type="checkbox"
+                                                        className="rounded border-[#3a3e45] bg-[#1e2329] text-[#0084ff] focus:ring-[#0084ff] focus:ring-offset-0 focus:ring-offset-[#242830]"
+                                                        checked={selectedIds.has(r.id)}
+                                                        onChange={() => handleSelectRow(r.id)}
+                                                    />
+                                                )}
+                                            </td>
+
+                                            <td className="px-4 py-3 whitespace-nowrap overflow-hidden text-ellipsis max-w-[1px]">
+                                                {r.category}
+                                            </td>
+
+                                            {/* NOME: Sem borda direita visualmente devido à sobreposição ou remoção no header */}
+                                            <td className="px-4 py-3 font-medium text-white whitespace-nowrap overflow-hidden text-ellipsis max-w-[1px]">
+                                                {r.name}
+                                            </td>
+
+                                            {/* AÇÕES BODY: Sticky Right */}
+                                            <td className={`px-4 py-3 text-center whitespace-nowrap w-[1%] sticky right-0 z-20 ${stickyBgClass}`}>
+                                                {r.project_id ? (
+                                                    <div className="flex justify-center gap-2">
+                                                        <button onClick={() => handleEdit(r)} className="text-[#a0a5b0] hover:text-white p-1" title="Editar">✏️</button>
+                                                        <button onClick={() => handleDelete(r.id)} className="text-red-400 hover:text-red-500 p-1" title="Excluir">🗑️</button>
+                                                    </div>
+                                                ) : (
+                                                    <span className="text-[#4a4e55] text-xs italic">Padrão</span>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
                             </tbody>
                         </table>
                     </div>
