@@ -18,15 +18,18 @@ export const ResourcesSettings: React.FC<ResourcesSettingsProps> = ({ projectId 
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentResource, setCurrentResource] = useState<Partial<ResourceItem>>({});
-    const [sortConfig, setSortConfig] = useState<{ key: keyof ResourceItem; direction: 'asc' | 'desc' } | null>(null);
+    const [sortConfig, setSortConfig] = useState<{ key: keyof ResourceItem; direction: 'asc' | 'desc' } | null>({ key: 'category', direction: 'asc' });
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+    const [isCreatingCategory, setIsCreatingCategory] = useState(false);
+    const [newCategory, setNewCategory] = useState('');
+    const [customCategories, setCustomCategories] = useState<string[]>([]);
 
     // Extract unique categories for dropdown
     const categories = useMemo(() => {
         const cats = new Set(resources.map(r => r.category).filter(Boolean));
-        return Array.from(cats).sort();
-    }, [resources]);
+        return Array.from(new Set([...cats, ...customCategories])).sort();
+    }, [resources, customCategories]);
 
     const filteredAndSortedResources = useMemo(() => {
         let items = [...resources];
@@ -133,6 +136,19 @@ export const ResourcesSettings: React.FC<ResourcesSettingsProps> = ({ projectId 
     const isAllSelected = userResourcesCount > 0 && selectedIds.size === userResourcesCount;
     const isIndeterminate = selectedIds.size > 0 && selectedIds.size < userResourcesCount;
 
+    const handleAddCategory = () => {
+        if (!newCategory.trim()) return;
+        const formatted = newCategory.trim().startsWith('@') ? newCategory.trim() : `@${newCategory.trim()}`;
+        if (categories.includes(formatted)) {
+            alert('Esta categoria já existe.');
+            return;
+        }
+        setCustomCategories(prev => [...prev, formatted]);
+        setCurrentResource({ ...currentResource, category: formatted });
+        setNewCategory('');
+        setIsCreatingCategory(false);
+    };
+
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -157,13 +173,13 @@ export const ResourcesSettings: React.FC<ResourcesSettingsProps> = ({ projectId 
         <>
             <Card>
                 <CardHeader title="Recursos">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-1">
                         <input
                             type="text"
                             placeholder="🔍 Buscar..."
                             value={searchTerm}
                             onChange={e => setSearchTerm(e.target.value)}
-                            className="w-64 bg-[#1e2329] border border-[#3a3e45] rounded-md px-3 py-1.5 text-sm focus:ring-2 focus:ring-[#0084ff] outline-none"
+                            className="w-32 bg-[#1e2329] border border-[#3a3e45] rounded-md px-3 py-1.5 text-sm focus:ring-2 focus:ring-[#0084ff] outline-none"
                         />
                         <Button variant="primary" onClick={handleAdd}>+ Adicionar</Button>
                     </div>
@@ -172,10 +188,10 @@ export const ResourcesSettings: React.FC<ResourcesSettingsProps> = ({ projectId 
                     <div className="max-h-[600px] overflow-y-auto custom-scrollbar">
                         <table className="w-full text-sm text-left text-[#a0a5b0]">
                             {/* HEADER */}
-                            <thead className="text-xs text-[#e8eaed] uppercase bg-[#242830] sticky top-0 z-30">
+                            <thead className="text-xs text-[#e8eaed] uppercase bg-[#242830] sticky top-0 z-30 shadow-sm">
                                 <tr>
                                     {/* CHECKBOX: Sticky Left */}
-                                    <th className="px-4 py-3 w-[40px] text-center border-b border-[#3a3e45] sticky left-0 z-30 bg-[#242830]">
+                                    <th className="px-4 py-3 w-0 text-center sticky left-0 z-30 bg-[#242830] border-r border-[#3a3e45]">
                                         <input
                                             type="checkbox"
                                             className="rounded border-[#3a3e45] bg-[#1e2329] text-[#0084ff] focus:ring-[#0084ff] focus:ring-offset-0 focus:ring-offset-[#242830]"
@@ -192,7 +208,7 @@ export const ResourcesSettings: React.FC<ResourcesSettingsProps> = ({ projectId 
                                     <ResizableTh
                                         tableId="resources"
                                         colKey="category"
-                                        initialWidth="50%"
+                                        initialWidth="30%"
                                         onSort={() => requestSort('category')}
                                         sortIndicator={getSortIndicator('category')}
                                         colWidths={colWidths}
@@ -205,18 +221,18 @@ export const ResourcesSettings: React.FC<ResourcesSettingsProps> = ({ projectId 
                                     <ResizableTh
                                         tableId="resources"
                                         colKey="name"
-                                        initialWidth="50%"
+                                        initialWidth="70%"
                                         onSort={() => requestSort('name')}
                                         sortIndicator={getSortIndicator('name')}
                                         colWidths={colWidths}
                                         onUpdateWidth={updateColumnWidth}
-                                        className="!border-r-0"
+                                        className=""
                                     >
                                         Nome
                                     </ResizableTh>
 
                                     {/* AÇÕES: Sticky Right + Sem bordas laterais */}
-                                    <th className="px-4 py-3 w-[1%] whitespace-nowrap text-center border-b border-[#3a3e45] sticky right-0 z-30 bg-[#242830]">
+                                    <th className="px-4 py-3 w-0 whitespace-nowrap text-center sticky right-0 z-30 bg-[#242830]">
                                         {selectedIds.size > 0 ? (
                                             <button
                                                 onClick={handleBulkDelete}
@@ -242,10 +258,10 @@ export const ResourcesSettings: React.FC<ResourcesSettingsProps> = ({ projectId 
                                     // Selected: #1a2736 (Azulado escuro opaco)
                                     const stickyBgClass = selectedIds.has(r.id)
                                         ? 'bg-[#1a2736]'
-                                        : 'bg-[#1e2329] group-hover:bg-[#262b33]';
+                                        : 'bg-[#1e2329] group-hover:bg-[#24282f]';
 
                                     return (
-                                        <tr key={r.id} className={`group border-b border-[#3a3e45] hover:bg-[#262b33] transition-colors ${selectedIds.has(r.id) ? 'bg-[#0084ff]/10' : ''}`}>
+                                        <tr key={r.id} className={`group border-b border-[#3a3e45] hover:bg-[#24282f] transition-colors ${selectedIds.has(r.id) ? 'bg-[#0084ff]/10' : ''}`}>
 
                                             {/* CHECKBOX BODY: Sticky Left */}
                                             <td className={`px-4 py-3 text-center sticky left-0 z-20 ${stickyBgClass}`}>
@@ -300,15 +316,38 @@ export const ResourcesSettings: React.FC<ResourcesSettingsProps> = ({ projectId 
                         </div>
                         <form onSubmit={handleSave} className="p-4 space-y-4">
                             <div>
-                                <SearchableDropdown
-                                    label="Categoria"
-                                    options={categories}
-                                    value={currentResource.category || ''}
-                                    onChange={(val) => setCurrentResource({ ...currentResource, category: val })}
-                                    onAddNew={(newVal) => setCurrentResource({ ...currentResource, category: newVal })}
-                                    placeholder="Selecione ou crie uma categoria"
-                                    required
-                                />
+                                <label className="block text-sm font-medium mb-1">Categoria <span className="text-red-500">*</span></label>
+                                <div className="flex gap-2">
+                                    <SearchableDropdown
+                                        options={categories}
+                                        value={currentResource.category || ''}
+                                        onChange={(val) => setCurrentResource({ ...currentResource, category: val })}
+                                        placeholder="Selecione uma categoria..."
+                                        required
+                                        className="flex-1"
+                                    />
+                                    {!isCreatingCategory && <Button variant="secondary" size="sm" onClick={() => setIsCreatingCategory(true)} type="button">+ Novo</Button>}
+                                    {customCategories.includes(currentResource.category || '') && (
+                                        <button type="button" onClick={() => {
+                                            setCustomCategories(prev => prev.filter(c => c !== currentResource.category));
+                                            setCurrentResource({ ...currentResource, category: categories[0] || '' });
+                                        }} className="text-red-400 hover:text-red-500 px-2" title="Excluir categoria">🗑️</button>
+                                    )}
+                                </div>
+                                {isCreatingCategory && (
+                                    <div className="flex gap-2 mt-2">
+                                        <input
+                                            type="text"
+                                            value={newCategory}
+                                            onChange={e => setNewCategory(e.target.value)}
+                                            placeholder="Digite a nova categoria (ex: Equipamentos)"
+                                            className="flex-1 bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 text-sm"
+                                            autoFocus
+                                        />
+                                        <Button variant="primary" size="sm" onClick={handleAddCategory} type="button">Adicionar</Button>
+                                        <Button variant="secondary" size="sm" onClick={() => { setIsCreatingCategory(false); setNewCategory(''); }} type="button">Cancelar</Button>
+                                    </div>
+                                )}
                             </div>
                             <div>
                                 <label className="block text-sm font-medium mb-1">Nome <span className="text-red-500">*</span></label>

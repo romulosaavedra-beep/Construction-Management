@@ -159,7 +159,7 @@ export const SuppliersSettings: React.FC<SuppliersSettingsProps> = ({ projectId 
         <>
             <Card>
                 <CardHeader title="Fornecedores">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-1">
                         <input
                             type="text"
                             placeholder="🔍 Buscar..."
@@ -174,10 +174,10 @@ export const SuppliersSettings: React.FC<SuppliersSettingsProps> = ({ projectId 
                     <div className="max-h-[600px] overflow-y-auto custom-scrollbar">
                         <table className="w-full text-sm text-left text-[#a0a5b0]">
                             {/* HEADER */}
-                            <thead className="text-xs text-[#e8eaed] uppercase bg-[#242830] sticky top-0 z-30">
+                            <thead className="text-xs text-[#e8eaed] uppercase bg-[#242830] sticky top-0 z-30 shadow-sm">
                                 <tr>
                                     {/* CHECKBOX: Sticky Left */}
-                                    <th className="px-4 py-3 w-[40px] text-center border-b border-[#3a3e45] sticky left-0 z-30 bg-[#242830]">
+                                    <th className="px-4 py-3 w-0 text-center sticky left-0 z-30 bg-[#242830] border-r border-[#3a3e45]">
                                         <input
                                             type="checkbox"
                                             className="rounded border-[#3a3e45] bg-[#1e2329] text-[#0084ff] focus:ring-[#0084ff] focus:ring-offset-0 focus:ring-offset-[#242830]"
@@ -191,28 +191,28 @@ export const SuppliersSettings: React.FC<SuppliersSettingsProps> = ({ projectId 
                                     </th>
 
                                     {/* RAZÃO SOCIAL: Prioridade alta */}
-                                    <ResizableTh tableId="forn" colKey="nome" initialWidth="25%" onSort={() => requestSort('nome')} sortIndicator={getSortIndicator('nome')} colWidths={colWidths} onUpdateWidth={updateColumnWidth}>Razão Social</ResizableTh>
+                                    <ResizableTh tableId="forn" colKey="nome" initialWidth="22%" onSort={() => requestSort('nome')} sortIndicator={getSortIndicator('nome')} colWidths={colWidths} onUpdateWidth={updateColumnWidth}>Razão Social</ResizableTh>
 
                                     {/* VENDEDOR */}
-                                    <ResizableTh tableId="forn" colKey="contato" initialWidth="15%" onSort={() => requestSort('contato')} sortIndicator={getSortIndicator('contato')} colWidths={colWidths} onUpdateWidth={updateColumnWidth}>Vendedor</ResizableTh>
+                                    <ResizableTh tableId="forn" colKey="contato" initialWidth="14%" onSort={() => requestSort('contato')} sortIndicator={getSortIndicator('contato')} colWidths={colWidths} onUpdateWidth={updateColumnWidth}>Vendedor</ResizableTh>
 
                                     {/* EMAIL */}
                                     <ResizableTh tableId="forn" colKey="email" initialWidth="20%" onSort={() => requestSort('email')} sortIndicator={getSortIndicator('email')} colWidths={colWidths} onUpdateWidth={updateColumnWidth}>Email</ResizableTh>
 
                                     {/* TELEFONE: Curto */}
-                                    <ResizableTh tableId="forn" colKey="telefone" initialWidth="1%" onSort={() => requestSort('telefone')} sortIndicator={getSortIndicator('telefone')} colWidths={colWidths} onUpdateWidth={updateColumnWidth}>Telefone</ResizableTh>
+                                    <ResizableTh tableId="forn" colKey="telefone" initialWidth="10%" onSort={() => requestSort('telefone')} sortIndicator={getSortIndicator('telefone')} colWidths={colWidths} onUpdateWidth={updateColumnWidth}>Telefone</ResizableTh>
 
                                     {/* CNPJ: Curto */}
-                                    <ResizableTh tableId="forn" colKey="cnpj" initialWidth="1%" onSort={() => requestSort('cnpj')} sortIndicator={getSortIndicator('cnpj')} colWidths={colWidths} onUpdateWidth={updateColumnWidth}>CNPJ/CPF</ResizableTh>
+                                    <ResizableTh tableId="forn" colKey="cnpj" initialWidth="12%" onSort={() => requestSort('cnpj')} sortIndicator={getSortIndicator('cnpj')} colWidths={colWidths} onUpdateWidth={updateColumnWidth}>CNPJ/CPF</ResizableTh>
 
                                     {/* ENDEREÇO: Prioridade média */}
-                                    <ResizableTh tableId="forn" colKey="endereco" initialWidth="20%" onSort={() => requestSort('endereco')} sortIndicator={getSortIndicator('endereco')} colWidths={colWidths} onUpdateWidth={updateColumnWidth}>Endereço</ResizableTh>
+                                    <ResizableTh tableId="forn" colKey="endereco" initialWidth="18%" onSort={() => requestSort('endereco')} sortIndicator={getSortIndicator('endereco')} colWidths={colWidths} onUpdateWidth={updateColumnWidth}>Endereço</ResizableTh>
 
                                     {/* LINK: Curto e sem borda direita */}
-                                    <ResizableTh tableId="forn" colKey="link" initialWidth="1%" onSort={() => requestSort('link')} sortIndicator={getSortIndicator('link')} colWidths={colWidths} onUpdateWidth={updateColumnWidth} className="!border-r-0">Link</ResizableTh>
+                                    <ResizableTh tableId="forn" colKey="link" initialWidth="4%" onSort={() => requestSort('link')} sortIndicator={getSortIndicator('link')} colWidths={colWidths} onUpdateWidth={updateColumnWidth}>Link</ResizableTh>
 
                                     {/* AÇÕES: Sticky Right */}
-                                    <th className="px-4 py-3 w-[1%] whitespace-nowrap text-center border-b border-[#3a3e45] sticky right-0 z-30 bg-[#242830]">
+                                    <th className="px-4 py-3 w-0 whitespace-nowrap text-center sticky right-0 z-30 bg-[#242830]">
                                         {selectedIds.size > 0 ? (
                                             <button
                                                 onClick={handleBulkDelete}

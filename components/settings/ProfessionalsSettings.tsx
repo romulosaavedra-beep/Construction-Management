@@ -9,6 +9,7 @@ import { useColumnWidths } from '../../hooks/useColumnWidths';
 import { useConfirm } from '../../utils/useConfirm';
 import { maskMobilePhone } from '../../utils/formatters';
 import type { Profissional } from '../../types';
+import toast from 'react-hot-toast';
 
 interface ProfessionalsSettingsProps {
     projectId?: string;
@@ -27,29 +28,48 @@ export const ProfessionalsSettings: React.FC<ProfessionalsSettingsProps> = ({ pr
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
     const [isCreatingRole, setIsCreatingRole] = useState(false);
     const [newRole, setNewRole] = useState('');
-    const [customRoles, setCustomRoles] = useState<string[]>([]);
 
-    const [dbRoles, setDbRoles] = useState<string[]>([]);
+    // Roles states
+    const [defaultRoles, setDefaultRoles] = useState<string[]>([]);
+    const [projectRoles, setProjectRoles] = useState<string[]>([]);
 
     useEffect(() => {
         const fetchRoles = async () => {
-            const { data, error } = await supabase
-                .from('job_titles')
-                .select('title')
-                .order('title');
+            try {
+                // Fetch default roles
+                const { data: defaultData } = await supabase
+                    .from('default_job_titles')
+                    .select('title')
+                    .order('title');
 
-            if (data) {
-                setDbRoles(data.map(r => r.title));
+                if (defaultData) {
+                    setDefaultRoles(defaultData.map(r => r.title));
+                }
+
+                // Fetch project specific roles
+                if (projectId) {
+                    const { data: projectData } = await supabase
+                        .from('job_titles')
+                        .select('title')
+                        .eq('project_id', projectId)
+                        .order('title');
+
+                    if (projectData) {
+                        setProjectRoles(projectData.map(r => r.title));
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching roles:', error);
             }
         };
         fetchRoles();
-    }, []);
+    }, [projectId]);
 
-    // Derived state for roles (unique list from professionals + db roles + custom)
+    // Derived state for roles (unique list from professionals + default roles + project roles)
     const roles = useMemo(() => {
         const existingRoles = professionals.map(p => p.cargo);
-        return Array.from(new Set([...dbRoles, ...existingRoles, ...customRoles])).sort();
-    }, [professionals, customRoles, dbRoles]);
+        return Array.from(new Set([...defaultRoles, ...projectRoles, ...existingRoles])).sort();
+    }, [professionals, defaultRoles, projectRoles]);
 
     const filteredAndSortedProfessionals = useMemo(() => {
         let items = [...professionals];
@@ -96,7 +116,7 @@ export const ProfessionalsSettings: React.FC<ProfessionalsSettingsProps> = ({ pr
             return;
         }
         setCurrentProfissional({
-            cargo: roles[0],
+            cargo: roles[0] || '',
             nome: '',
             email: '',
             telefone: '',
@@ -169,19 +189,43 @@ export const ProfessionalsSettings: React.FC<ProfessionalsSettingsProps> = ({ pr
     const isAllSelected = totalCount > 0 && selectedIds.size === totalCount;
     const isIndeterminate = selectedIds.size > 0 && selectedIds.size < totalCount;
 
-    const handleAddRole = () => {
+    const handleAddRole = async () => {
         if (!newRole.trim()) return;
         if (roles.includes(newRole.trim())) {
             alert({ message: 'Este cargo já existe.' });
             return;
         }
-        setCustomRoles(prev => [...prev, newRole.trim()]);
-        setCurrentProfissional({ ...currentProfissional, cargo: newRole.trim() });
-        setNewRole('');
-        setIsCreatingRole(false);
+
+        if (!projectId) {
+            alert({ message: 'Erro: Projeto não identificado.' });
+            return;
+        }
+
+        try {
+            const { error } = await supabase
+                .from('job_titles')
+                .insert([{ project_id: projectId, title: newRole.trim() }]);
+
+            if (error) throw error;
+
+            setProjectRoles(prev => [...prev, newRole.trim()]);
+            setCurrentProfissional({ ...currentProfissional, cargo: newRole.trim() });
+            setNewRole('');
+            setIsCreatingRole(false);
+            toast.success('Cargo adicionado!');
+        } catch (error) {
+            console.error('Error adding role:', error);
+            toast.error('Erro ao adicionar cargo.');
+        }
     };
 
     const handleDeleteRole = async (role: string) => {
+        // Check if it's a default role
+        if (defaultRoles.includes(role)) {
+            alert({ message: 'Não é possível excluir cargos padrão do sistema.' });
+            return;
+        }
+
         const usedByProfessionals = professionals.filter(p => p.cargo === role);
         if (usedByProfessionals.length > 0) {
             alert({ message: `Não é possível excluir o cargo "${role}" pois está sendo usado por ${usedByProfessionals.length} profissional(is).` });
@@ -196,9 +240,23 @@ export const ProfessionalsSettings: React.FC<ProfessionalsSettingsProps> = ({ pr
         });
 
         if (shouldDelete) {
-            setCustomRoles(prev => prev.filter(r => r !== role));
-            if (currentProfissional.cargo === role) {
-                setCurrentProfissional({ ...currentProfissional, cargo: roles[0] });
+            try {
+                const { error } = await supabase
+                    .from('job_titles')
+                    .delete()
+                    .eq('project_id', projectId)
+                    .eq('title', role);
+
+                if (error) throw error;
+
+                setProjectRoles(prev => prev.filter(r => r !== role));
+                if (currentProfissional.cargo === role) {
+                    setCurrentProfissional({ ...currentProfissional, cargo: roles[0] || '' });
+                }
+                toast.success('Cargo removido!');
+            } catch (error) {
+                console.error('Error deleting role:', error);
+                toast.error('Erro ao remover cargo.');
             }
         }
     };
@@ -230,7 +288,7 @@ export const ProfessionalsSettings: React.FC<ProfessionalsSettingsProps> = ({ pr
         <>
             <Card>
                 <CardHeader title="Profissionais">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-1">
                         <input
                             type="text"
                             placeholder="🔍 Buscar..."
@@ -245,10 +303,10 @@ export const ProfessionalsSettings: React.FC<ProfessionalsSettingsProps> = ({ pr
                     <div className="max-h-[600px] overflow-y-auto custom-scrollbar">
                         <table className="w-full text-sm text-left text-[#a0a5b0]">
                             {/* HEADER */}
-                            <thead className="text-xs text-[#e8eaed] uppercase bg-[#242830] sticky top-0 z-30">
+                            <thead className="text-xs text-[#e8eaed] uppercase bg-[#242830] sticky top-0 z-30 shadow-sm">
                                 <tr>
                                     {/* CHECKBOX: Sticky Left */}
-                                    <th className="px-4 py-3 w-[40px] text-center border-b border-[#3a3e45] sticky left-0 z-30 bg-[#242830]">
+                                    <th className="px-4 py-3 w-0 text-center sticky left-0 z-30 bg-[#242830] border-r border-[#3a3e45]">
                                         <input
                                             type="checkbox"
                                             className="rounded border-[#3a3e45] bg-[#1e2329] text-[#0084ff] focus:ring-[#0084ff] focus:ring-offset-0 focus:ring-offset-[#242830]"
@@ -262,22 +320,22 @@ export const ProfessionalsSettings: React.FC<ProfessionalsSettingsProps> = ({ pr
                                     </th>
 
                                     {/* CARGO */}
-                                    <ResizableTh tableId="prof" colKey="cargo" initialWidth="15%" onSort={() => requestSort('cargo')} sortIndicator={getSortIndicator('cargo')} colWidths={colWidths} onUpdateWidth={updateColumnWidth}>Cargo</ResizableTh>
+                                    <ResizableTh tableId="prof" colKey="cargo" initialWidth="12%" onSort={() => requestSort('cargo')} sortIndicator={getSortIndicator('cargo')} colWidths={colWidths} onUpdateWidth={updateColumnWidth}>Cargo</ResizableTh>
 
                                     {/* NOME */}
-                                    <ResizableTh tableId="prof" colKey="nome" initialWidth="20%" onSort={() => requestSort('nome')} sortIndicator={getSortIndicator('nome')} colWidths={colWidths} onUpdateWidth={updateColumnWidth}>Nome</ResizableTh>
+                                    <ResizableTh tableId="prof" colKey="nome" initialWidth="18%" onSort={() => requestSort('nome')} sortIndicator={getSortIndicator('nome')} colWidths={colWidths} onUpdateWidth={updateColumnWidth}>Nome</ResizableTh>
 
                                     {/* EMAIL */}
-                                    <ResizableTh tableId="prof" colKey="email" initialWidth="20%" onSort={() => requestSort('email')} sortIndicator={getSortIndicator('email')} colWidths={colWidths} onUpdateWidth={updateColumnWidth}>Email</ResizableTh>
+                                    <ResizableTh tableId="prof" colKey="email" initialWidth="22%" onSort={() => requestSort('email')} sortIndicator={getSortIndicator('email')} colWidths={colWidths} onUpdateWidth={updateColumnWidth}>Email</ResizableTh>
 
                                     {/* TELEFONE: Curto */}
-                                    <ResizableTh tableId="prof" colKey="telefone" initialWidth="1%" onSort={() => requestSort('telefone')} sortIndicator={getSortIndicator('telefone')} colWidths={colWidths} onUpdateWidth={updateColumnWidth}>Telefone</ResizableTh>
+                                    <ResizableTh tableId="prof" colKey="telefone" initialWidth="10%" onSort={() => requestSort('telefone')} sortIndicator={getSortIndicator('telefone')} colWidths={colWidths} onUpdateWidth={updateColumnWidth}>Telefone</ResizableTh>
 
                                     {/* ATIVIDADES: Ocupa o resto do espaço */}
-                                    <ResizableTh tableId="prof" colKey="atividades" initialWidth="40%" onSort={() => requestSort('atividades')} sortIndicator={getSortIndicator('atividades')} colWidths={colWidths} onUpdateWidth={updateColumnWidth} className="!border-r-0">Atividades</ResizableTh>
+                                    <ResizableTh tableId="prof" colKey="atividades" initialWidth="38%" onSort={() => requestSort('atividades')} sortIndicator={getSortIndicator('atividades')} colWidths={colWidths} onUpdateWidth={updateColumnWidth}>Atividades</ResizableTh>
 
                                     {/* AÇÕES: Sticky Right */}
-                                    <th className="px-4 py-3 w-[1%] whitespace-nowrap text-center border-b border-[#3a3e45] sticky right-0 z-30 bg-[#242830]">
+                                    <th className="px-4 py-3 w-0 whitespace-nowrap text-center sticky right-0 z-30 bg-[#242830]">
                                         {selectedIds.size > 0 ? (
                                             <button
                                                 onClick={handleBulkDelete}
@@ -365,7 +423,7 @@ export const ProfessionalsSettings: React.FC<ProfessionalsSettingsProps> = ({ pr
                                         className="flex-1"
                                     />
                                     {!isCreatingRole && <Button variant="secondary" size="sm" onClick={() => setIsCreatingRole(true)} type="button">+ Novo</Button>}
-                                    {customRoles.includes(currentProfissional.cargo || '') && (
+                                    {projectRoles.includes(currentProfissional.cargo || '') && (
                                         <button type="button" onClick={() => handleDeleteRole(currentProfissional.cargo!)} className="text-red-400 hover:text-red-500 px-2" title="Excluir cargo">🗑️</button>
                                     )}
                                 </div>

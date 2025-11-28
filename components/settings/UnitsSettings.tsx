@@ -145,13 +145,13 @@ export const UnitsSettings: React.FC<UnitsSettingsProps> = ({ projectId }) => {
         <>
             <Card>
                 <CardHeader title="Unidades de Medida">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-1">
                         <input
                             type="text"
                             placeholder="🔍 Buscar..."
                             value={searchTerm}
                             onChange={e => setSearchTerm(e.target.value)}
-                            className="w-64 bg-[#1e2329] border border-[#3a3e45] rounded-md px-3 py-1.5 text-sm focus:ring-2 focus:ring-[#0084ff] outline-none"
+                            className="w-32 bg-[#1e2329] border border-[#3a3e45] rounded-md px-3 py-1.5 text-sm focus:ring-2 focus:ring-[#0084ff] outline-none"
                         />
                         <Button variant="primary" onClick={handleAdd}>+ Adicionar</Button>
                     </div>
@@ -160,10 +160,10 @@ export const UnitsSettings: React.FC<UnitsSettingsProps> = ({ projectId }) => {
                     <div className="max-h-[600px] overflow-y-auto custom-scrollbar">
                         <table className="w-full text-sm text-left text-[#a0a5b0]">
                             {/* HEADER */}
-                            <thead className="text-xs text-[#e8eaed] uppercase bg-[#242830] sticky top-0 z-30">
+                            <thead className="text-xs text-[#e8eaed] uppercase bg-[#242830] sticky top-0 z-30 shadow-sm">
                                 <tr>
                                     {/* CHECKBOX: Sticky Left */}
-                                    <th className="px-4 py-3 w-[40px] text-center border-b border-[#3a3e45] sticky left-0 z-30 bg-[#242830]">
+                                    <th className="px-4 py-3 w-0 text-center sticky left-0 z-30 bg-[#242830] border-r border-[#3a3e45]">
                                         <input
                                             type="checkbox"
                                             className="rounded border-[#3a3e45] bg-[#1e2329] text-[#0084ff] focus:ring-[#0084ff] focus:ring-offset-0 focus:ring-offset-[#242830]"
@@ -176,11 +176,11 @@ export const UnitsSettings: React.FC<UnitsSettingsProps> = ({ projectId }) => {
                                         />
                                     </th>
 
-                                    {/* CATEGORIA: 50% */}
+                                    {/* CATEGORIA: 30% */}
                                     <ResizableTh
                                         tableId="units"
                                         colKey="category"
-                                        initialWidth="50%"
+                                        initialWidth="30%"
                                         onSort={() => requestSort('category')}
                                         sortIndicator={getSortIndicator('category')}
                                         colWidths={colWidths}
@@ -189,11 +189,11 @@ export const UnitsSettings: React.FC<UnitsSettingsProps> = ({ projectId }) => {
                                         Categoria
                                     </ResizableTh>
 
-                                    {/* NOME: 50% */}
+                                    {/* NOME: 60% */}
                                     <ResizableTh
                                         tableId="units"
                                         colKey="name"
-                                        initialWidth="50%"
+                                        initialWidth="60%"
                                         onSort={() => requestSort('name')}
                                         sortIndicator={getSortIndicator('name')}
                                         colWidths={colWidths}
@@ -202,22 +202,22 @@ export const UnitsSettings: React.FC<UnitsSettingsProps> = ({ projectId }) => {
                                         Nome
                                     </ResizableTh>
 
-                                    {/* SÍMBOLO: 1% + Sem borda direita (!border-r-0) */}
+                                    {/* SÍMBOLO: 10% + Sem borda direita (!border-r-0) */}
                                     <ResizableTh
                                         tableId="units"
                                         colKey="symbol"
-                                        initialWidth="1%"
+                                        initialWidth="10%"
                                         onSort={() => requestSort('symbol')}
                                         sortIndicator={getSortIndicator('symbol')}
                                         colWidths={colWidths}
                                         onUpdateWidth={updateColumnWidth}
-                                        className="!border-r-0"
+                                        className=""
                                     >
                                         Abv.
                                     </ResizableTh>
 
                                     {/* AÇÕES: Sticky Right + Sem borda esquerda */}
-                                    <th className="px-4 py-3 w-[1%] whitespace-nowrap text-center border-b border-[#3a3e45] sticky right-0 z-30 bg-[#242830]">
+                                    <th className="px-4 py-3 w-0 whitespace-nowrap text-center sticky right-0 z-30 bg-[#242830]">
                                         {selectedIds.size > 0 ? (
                                             <button
                                                 onClick={handleBulkDelete}
@@ -240,10 +240,10 @@ export const UnitsSettings: React.FC<UnitsSettingsProps> = ({ projectId }) => {
                                     // Lógica de Cores Opacas para Colunas Fixas
                                     const stickyBgClass = selectedIds.has(u.id)
                                         ? 'bg-[#1a2736]'
-                                        : 'bg-[#1e2329] group-hover:bg-[#262b33]';
+                                        : 'bg-[#1e2329] group-hover:bg-[#24282f]';
 
                                     return (
-                                        <tr key={u.id} className={`group border-b border-[#3a3e45] hover:bg-[#262b33] transition-colors ${selectedIds.has(u.id) ? 'bg-[#0084ff]/10' : ''}`}>
+                                        <tr key={u.id} className={`group border-b border-[#3a3e45] hover:bg-[#24282f] transition-colors ${selectedIds.has(u.id) ? 'bg-[#0084ff]/10' : ''}`}>
 
                                             {/* CHECKBOX BODY: Sticky Left */}
                                             <td className={`px-4 py-3 text-center sticky left-0 z-20 ${stickyBgClass}`}>

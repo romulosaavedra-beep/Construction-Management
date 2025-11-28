@@ -22,6 +22,10 @@ export interface GeneralSettingsData {
     impostos: number;
     custosIndiretos: number;
     bdi: number;
+    work_schedule?: string;
+    half_day_saturday?: boolean;
+    half_day_sunday?: boolean;
+    custom_holidays?: any[];
 }
 
 export const useSettings = (projectId?: string) => {
@@ -43,7 +47,11 @@ export const useSettings = (projectId?: string) => {
         custosIndiretos: 0,
         bdi: 0,
         scheduleType: 'mon_fri',
-        workOnHolidays: false
+        workOnHolidays: false,
+        work_schedule: 'mon-fri',
+        half_day_saturday: false,
+        half_day_sunday: false,
+        custom_holidays: []
     });
 
     const fetchSettings = useCallback(async () => {
@@ -94,7 +102,11 @@ export const useSettings = (projectId?: string) => {
                     custosIndiretos: data.settings?.custosIndiretos || 0,
                     bdi: data.settings?.bdi || 0,
                     scheduleType: data.settings?.scheduleType || 'mon_fri',
-                    workOnHolidays: data.settings?.workOnHolidays || false
+                    workOnHolidays: data.settings?.workOnHolidays || false,
+                    work_schedule: data.work_schedule || 'mon-fri',
+                    half_day_saturday: data.half_day_saturday || false,
+                    half_day_sunday: data.half_day_sunday || false,
+                    custom_holidays: data.custom_holidays || []
                 });
             } else {
                 // Reset to defaults if no project found
@@ -115,7 +127,11 @@ export const useSettings = (projectId?: string) => {
                     custosIndiretos: 0,
                     bdi: 0,
                     scheduleType: 'mon_fri',
-                    workOnHolidays: false
+                    workOnHolidays: false,
+                    work_schedule: 'mon-fri',
+                    half_day_saturday: false,
+                    half_day_sunday: false,
+                    custom_holidays: []
                 });
             }
         } catch (error) {
@@ -149,7 +165,13 @@ export const useSettings = (projectId?: string) => {
                     bdi: newSettings.bdi,
                     scheduleType: newSettings.scheduleType,
                     workOnHolidays: newSettings.workOnHolidays
-                }
+                },
+                work_schedule: newSettings.work_schedule,
+                half_day_saturday: newSettings.half_day_saturday,
+                half_day_sunday: newSettings.half_day_sunday,
+                custom_holidays: newSettings.custom_holidays,
+                state: newSettings.estado,
+                city: newSettings.cidade
             };
 
             if (newSettings.id) {

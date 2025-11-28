@@ -13,14 +13,24 @@ import {
 } from '../../services/AddressService';
 import { maskCNPJCPF } from '../../utils/formatters';
 import type { GeneralSettingsData } from '../../hooks/useSettings';
+import { useConfirm } from '../../utils/useConfirm';
+import toast from 'react-hot-toast';
 
 interface GeneralSettingsProps {
     settings: GeneralSettingsData;
     onUpdate: (settings: GeneralSettingsData) => void;
-    onSave: () => Promise<void>;
+    onSave: (updatedSettings: GeneralSettingsData) => Promise<void>;
 }
 
 export const GeneralSettings: React.FC<GeneralSettingsProps> = ({ settings, onUpdate, onSave }) => {
+    // Edit Mode States
+    const [isEditing, setIsEditing] = useState(false);
+    const [originalSettings, setOriginalSettings] = useState<GeneralSettingsData | null>(null);
+    const [localSettings, setLocalSettings] = useState<GeneralSettingsData>(settings);
+    const [history, setHistory] = useState<GeneralSettingsData[]>([]);
+    const [historyIndex, setHistoryIndex] = useState(-1);
+
+    // Address states
     const [isLoadingCEP, setIsLoadingCEP] = useState(false);
     const [cepError, setCepError] = useState('');
     const [availableCities, setAvailableCities] = useState<string[]>([]);
@@ -30,35 +40,108 @@ export const GeneralSettings: React.FC<GeneralSettingsProps> = ({ settings, onUp
     const [isLoadingStreets, setIsLoadingStreets] = useState(false);
     const [streetCandidates, setStreetCandidates] = useState<ViaCEPResponse[]>([]);
 
-    // UX State
-    const [isDirty, setIsDirty] = useState(false);
-    const [isSaving, setIsSaving] = useState(false);
-    const [initialSettings, setInitialSettings] = useState<GeneralSettingsData>(settings);
+    const { confirm, dialogState, handleConfirm, handleCancel } = useConfirm();
 
-    // Update initial settings when settings prop changes (e.g. loaded from DB or project switch)
+    // Sync local settings with props when not editing
     useEffect(() => {
-        if (settings.id !== initialSettings.id || !initialSettings.id) {
-            setInitialSettings(settings);
-            setIsDirty(false);
+        if (!isEditing) {
+            setLocalSettings(settings);
         }
-    }, [settings, initialSettings.id]);
+    }, [settings, isEditing]);
 
-    const handleUpdateWrapper = (newSettings: GeneralSettingsData) => {
-        onUpdate(newSettings);
-        const isChanged = JSON.stringify(newSettings) !== JSON.stringify(initialSettings);
-        setIsDirty(isChanged);
-    };
+    const updateSettings = useCallback((updater: React.SetStateAction<GeneralSettingsData>) => {
+        setLocalSettings(currentData => {
+            const newData = typeof updater === 'function' ? updater(currentData) : updater;
+            const newDataCopy = JSON.parse(JSON.stringify(newData));
+            const newHistory = history.slice(0, historyIndex + 1);
+            newHistory.push(newDataCopy);
+            setHistory(newHistory);
+            setHistoryIndex(newHistory.length - 1);
+            return newData;
+        });
+    }, [history, historyIndex]);
 
-    const handleChange = (field: keyof GeneralSettingsData, value: any) => {
-        handleUpdateWrapper({ ...settings, [field]: value });
+    const handleEdit = () => {
+        const deepCopy = JSON.parse(JSON.stringify(localSettings));
+        setOriginalSettings(deepCopy);
+        setHistory([deepCopy]);
+        setHistoryIndex(0);
+        setIsEditing(true);
     };
 
     const handleSave = async () => {
-        setIsSaving(true);
-        await onSave();
-        setIsSaving(false);
-        setInitialSettings(settings);
-        setIsDirty(false);
+        try {
+            await onSave(localSettings);
+            setIsEditing(false);
+            setOriginalSettings(null);
+            setHistory([]);
+            setHistoryIndex(-1);
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const handleExit = async () => {
+        const confirmExit = await confirm({
+            title: 'Confirmar Saída',
+            message: 'Tem certeza que deseja sair sem salvar? Todas as alterações serão perdidas.',
+            confirmText: 'Sair sem Salvar',
+            cancelText: 'Cancelar'
+        });
+
+        if (!confirmExit) return;
+
+        if (originalSettings) {
+            setLocalSettings(originalSettings);
+            onUpdate(originalSettings);
+        }
+        setIsEditing(false);
+        setOriginalSettings(null);
+        setHistory([]);
+        setHistoryIndex(-1);
+    };
+
+    const handleUndo = useCallback(() => {
+        if (historyIndex > 0) {
+            const newIndex = historyIndex - 1;
+            setHistoryIndex(newIndex);
+            setLocalSettings(history[newIndex]);
+        }
+    }, [history, historyIndex]);
+
+    const handleRedo = useCallback(() => {
+        if (historyIndex < history.length - 1) {
+            const newIndex = historyIndex + 1;
+            setHistoryIndex(newIndex);
+            setLocalSettings(history[newIndex]);
+        }
+    }, [history, historyIndex]);
+
+    const canUndo = historyIndex > 0;
+    const canRedo = historyIndex < history.length - 1;
+
+    // Keyboard shortcuts
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (!isEditing) return;
+            const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+            const isUndo = (isMac ? e.metaKey : e.ctrlKey) && e.key === 'z';
+            const isRedo = (isMac ? e.metaKey : e.ctrlKey) && e.key === 'y';
+
+            if (isUndo) {
+                e.preventDefault();
+                handleUndo();
+            } else if (isRedo) {
+                e.preventDefault();
+                handleRedo();
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [isEditing, handleUndo, handleRedo]);
+
+    const handleChange = (field: keyof GeneralSettingsData, value: any) => {
+        updateSettings({ ...localSettings, [field]: value });
     };
 
     const loadCitiesForUF = async (uf: string) => {
@@ -77,8 +160,8 @@ export const GeneralSettings: React.FC<GeneralSettingsProps> = ({ settings, onUp
         setCepError('');
 
         if (!newCep) {
-            handleUpdateWrapper({
-                ...settings,
+            updateSettings({
+                ...localSettings,
                 cep: '',
                 estado: '',
                 cidade: '',
@@ -97,8 +180,8 @@ export const GeneralSettings: React.FC<GeneralSettingsProps> = ({ settings, onUp
             try {
                 const data = await fetchAddressByCEP(newCep);
                 if (data) {
-                    handleUpdateWrapper({
-                        ...settings,
+                    updateSettings({
+                        ...localSettings,
                         cep: newCep,
                         estado: data.uf,
                         cidade: data.localidade,
@@ -113,13 +196,13 @@ export const GeneralSettings: React.FC<GeneralSettingsProps> = ({ settings, onUp
     };
 
     const handleUFChange = async (uf: string) => {
-        handleUpdateWrapper({ ...settings, estado: uf, cidade: '', bairro: '', logradouro: '', cep: '', numero: '' });
+        updateSettings({ ...localSettings, estado: uf, cidade: '', bairro: '', logradouro: '', cep: '', numero: '' });
         setAvailableCities([]); setStreetCandidates([]);
         if (uf) await loadCitiesForUF(uf);
     };
 
     const handleCityChange = (cidade: string) => {
-        handleUpdateWrapper({ ...settings, cidade: cidade, bairro: '', logradouro: '', cep: '', numero: '' });
+        updateSettings({ ...localSettings, cidade: cidade, bairro: '', logradouro: '', cep: '', numero: '' });
         setStreetCandidates([]);
     };
 
@@ -135,15 +218,15 @@ export const GeneralSettings: React.FC<GeneralSettingsProps> = ({ settings, onUp
 
     const handleLogradouroChange = (val: string) => {
         handleChange('logradouro', val);
-        if (settings.estado && settings.cidade && val.length >= 3) {
-            debouncedStreetSearch(settings.estado, settings.cidade, val);
+        if (localSettings.estado && localSettings.cidade && val.length >= 3) {
+            debouncedStreetSearch(localSettings.estado, localSettings.cidade, val);
         } else { setShowStreetSuggestions(false); }
     };
 
     const handleSelectStreetSuggestion = (item: ViaCEPResponse) => {
         const candidates = streetSuggestions.filter(s => s.logradouro === item.logradouro && s.bairro === item.bairro);
         setStreetCandidates(candidates);
-        handleUpdateWrapper({ ...settings, logradouro: item.logradouro, bairro: item.bairro, cep: '', complemento: '' });
+        updateSettings({ ...localSettings, logradouro: item.logradouro, bairro: item.bairro, cep: '', complemento: '' });
         setShowStreetSuggestions(false);
     };
 
@@ -182,22 +265,24 @@ export const GeneralSettings: React.FC<GeneralSettingsProps> = ({ settings, onUp
 
     // Load cities on mount if UF is present
     useEffect(() => {
-        if (settings.estado && availableCities.length === 0) {
-            loadCitiesForUF(settings.estado);
+        if (localSettings.estado && availableCities.length === 0) {
+            loadCitiesForUF(localSettings.estado);
         }
-    }, [settings.estado]);
+    }, [localSettings.estado]);
 
     return (
         <div>
-            <div className="flex justify-end mb-4">
-                <Button
-                    variant="primary"
-                    onClick={handleSave}
-                    disabled={!isDirty || isSaving}
-                    className={`transition-all duration-300 ${isDirty ? 'opacity-100' : 'opacity-50 cursor-not-allowed'}`}
-                >
-                    {isSaving ? 'Salvando...' : isDirty ? '💾 Salvar Configurações Gerais' : 'Salvo'}
-                </Button>
+            <div className="flex justify-end gap-1 mb-4">
+                {isEditing ? (
+                    <>
+                        <Button variant="primary" onClick={handleSave}>💾 Salvar</Button>
+                        <Button variant="secondary" onClick={handleExit}>Sair sem Salvar</Button>
+                        <Button size="sm" variant="secondary" onClick={handleUndo} disabled={!canUndo} title="Desfazer (Ctrl+Z)">↩️</Button>
+                        <Button size="sm" variant="secondary" onClick={handleRedo} disabled={!canRedo} title="Refazer (Ctrl+Y)">↪️</Button>
+                    </>
+                ) : (
+                    <Button onClick={handleEdit}>✏️ Editar</Button>
+                )}
             </div>
             <Card>
                 <CardHeader title="🏗️ Informações da Obra" />
@@ -205,25 +290,25 @@ export const GeneralSettings: React.FC<GeneralSettingsProps> = ({ settings, onUp
                     <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
                         <div className="md:col-span-2">
                             <label className="block text-sm font-medium mb-1">Nome da Obra</label>
-                            <input type="text" value={settings.nomeObra} onChange={e => handleChange('nomeObra', e.target.value)} className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none text-sm" placeholder="Ex: Edifício Residencial Jardim Botânico" />
+                            <input type="text" value={localSettings.nomeObra} onChange={e => handleChange('nomeObra', e.target.value)} disabled={!isEditing} className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none text-sm disabled:opacity-60 disabled:cursor-not-allowed" placeholder="Ex: Edifício Residencial Jardim Botânico" />
                         </div>
                         <div className="md:col-span-2">
                             <label className="block text-sm font-medium mb-1">Empresa Executora</label>
-                            <input type="text" value={settings.empresa} onChange={e => handleChange('empresa', e.target.value)} className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none text-sm" placeholder="Ex: Construtora Silva & Cia" />
+                            <input type="text" value={localSettings.empresa} onChange={e => handleChange('empresa', e.target.value)} disabled={!isEditing} className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none text-sm disabled:opacity-60 disabled:cursor-not-allowed" placeholder="Ex: Construtora Silva & Cia" />
                         </div>
                         <div className="md:col-span-2">
                             <label className="block text-sm font-medium mb-1">CNPJ/CPF da Empresa</label>
-                            <input type="text" value={settings.empresaCNPJ} onChange={e => handleChange('empresaCNPJ', maskCNPJCPF(e.target.value))} className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none text-sm" placeholder="12.345.678/0001-99" maxLength={18} />
+                            <input type="text" value={localSettings.empresaCNPJ} onChange={e => handleChange('empresaCNPJ', maskCNPJCPF(e.target.value))} disabled={!isEditing} className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none text-sm disabled:opacity-60 disabled:cursor-not-allowed" placeholder="12.345.678/0001-99" maxLength={18} />
                         </div>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                         <div className="md:col-span-2">
                             <label className="block text-sm font-medium mb-1">Cliente</label>
-                            <input type="text" value={settings.cliente} onChange={e => handleChange('cliente', e.target.value)} className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none text-sm" placeholder="Ex: Maria Oliveira Investimentos" />
+                            <input type="text" value={localSettings.cliente} onChange={e => handleChange('cliente', e.target.value)} disabled={!isEditing} className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none text-sm disabled:opacity-60 disabled:cursor-not-allowed" placeholder="Ex: Maria Oliveira Investimentos" />
                         </div>
                         <div className="md:col-span-2">
                             <label className="block text-sm font-medium mb-1">CNPJ/CPF do Cliente</label>
-                            <input type="text" value={settings.clienteCNPJ} onChange={e => handleChange('clienteCNPJ', maskCNPJCPF(e.target.value))} className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none text-sm" placeholder="123.456.789-01" maxLength={18} />
+                            <input type="text" value={localSettings.clienteCNPJ} onChange={e => handleChange('clienteCNPJ', maskCNPJCPF(e.target.value))} disabled={!isEditing} className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none text-sm disabled:opacity-60 disabled:cursor-not-allowed" placeholder="123.456.789-01" maxLength={18} />
                         </div>
                     </div>
                     <hr className="border-[#3a3e45]" />
@@ -233,28 +318,28 @@ export const GeneralSettings: React.FC<GeneralSettingsProps> = ({ settings, onUp
                             <div className="md:col-span-2">
                                 <label className="block text-sm font-medium mb-1">CEP</label>
                                 <div className="relative">
-                                    <input type="text" value={settings.cep} onChange={handleCEPChange} placeholder="00000-000" maxLength={9} className={`w-full bg-[#1e2329] border ${cepError ? 'border-red-500' : 'border-[#3a3e45]'} rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none text-sm`} />
+                                    <input type="text" value={localSettings.cep} onChange={handleCEPChange} disabled={!isEditing} placeholder="00000-000" maxLength={9} className={`w-full bg-[#1e2329] border ${cepError ? 'border-red-500' : 'border-[#3a3e45]'} rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none text-sm disabled:opacity-60 disabled:cursor-not-allowed`} />
                                     {isLoadingCEP && <div className="absolute right-3 top-2.5 text-xs text-[#0084ff]">...</div>}
                                 </div>
                                 {cepError && <p className="text-xs text-red-500 mt-1">{cepError}</p>}
                             </div>
                             <div className="md:col-span-2">
-                                <SearchableDropdown label="UF" options={BRAZILIAN_STATES} value={settings.estado} onChange={handleUFChange} placeholder="UF" required />
+                                <SearchableDropdown label="UF" options={BRAZILIAN_STATES} value={localSettings.estado} onChange={handleUFChange} placeholder="UF" required disabled={!isEditing} />
                             </div>
                             <div className="md:col-span-4">
-                                <SearchableDropdown label="Cidade" options={availableCities} value={settings.cidade} onChange={handleCityChange} placeholder={isLoadingCities ? "Carregando..." : "Selecione a cidade"} disabled={!settings.estado || isLoadingCities} required />
+                                <SearchableDropdown label="Cidade" options={availableCities} value={localSettings.cidade} onChange={handleCityChange} placeholder={isLoadingCities ? "Carregando..." : "Selecione a cidade"} disabled={!isEditing || !localSettings.estado || isLoadingCities} required />
                             </div>
                             <div className="md:col-span-4">
                                 <label className="block text-sm font-medium mb-1">Bairro</label>
-                                <input type="text" value={settings.bairro} readOnly disabled className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 outline-none text-sm opacity-60 cursor-not-allowed" placeholder="Automático..." />
+                                <input type="text" value={localSettings.bairro} readOnly disabled className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 outline-none text-sm opacity-60 cursor-not-allowed" placeholder="Automático..." />
                             </div>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
                             <div className="md:col-span-6 relative">
                                 <label className="block text-sm font-medium mb-1">Logradouro <span className="text-red-500">*</span></label>
-                                <input type="text" value={settings.logradouro} onChange={e => handleLogradouroChange(e.target.value)} disabled={!settings.cidade} placeholder={!settings.cidade ? "Selecione a cidade primeiro" : "Digite o nome da rua..."} className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none text-sm" autoComplete="off" />
+                                <input type="text" value={localSettings.logradouro} onChange={e => handleLogradouroChange(e.target.value)} disabled={!isEditing || !localSettings.cidade} placeholder={!localSettings.cidade ? "Selecione a cidade primeiro" : "Digite o nome da rua..."} className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none text-sm disabled:opacity-60 disabled:cursor-not-allowed" autoComplete="off" />
                                 {isLoadingStreets && <div className="absolute right-3 top-9 text-xs text-[#a0a5b0]">Buscando...</div>}
-                                {showStreetSuggestions && (
+                                {showStreetSuggestions && isEditing && (
                                     <div className="absolute z-50 w-full bg-[#242830] border border-[#3a3e45] rounded-md mt-1 shadow-xl max-h-60 overflow-y-auto">
                                         {getUniqueSuggestions().map((item: any, idx) => (
                                             <div key={idx} onClick={() => handleSelectStreetSuggestion(item)} className="p-3 hover:bg-[#3a3e45] cursor-pointer border-b border-[#3a3e45] last:border-0">
@@ -267,30 +352,12 @@ export const GeneralSettings: React.FC<GeneralSettingsProps> = ({ settings, onUp
                             </div>
                             <div className="md:col-span-2">
                                 <label className="block text-sm font-medium mb-1">Número</label>
-                                <input type="text" value={settings.numero} onChange={e => handleNumberChange(e.target.value)} className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none text-sm" placeholder="Ex: 1234" />
+                                <input type="text" value={localSettings.numero} onChange={e => handleNumberChange(e.target.value)} disabled={!isEditing} className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none text-sm disabled:opacity-60 disabled:cursor-not-allowed" placeholder="Ex: 1234" />
                             </div>
                             <div className="md:col-span-4">
                                 <label className="block text-sm font-medium mb-1">Complemento</label>
-                                <input type="text" value={settings.complemento} onChange={e => handleChange('complemento', e.target.value)} className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none text-sm" placeholder="Ex: Bloco A, Sala 301" />
+                                <input type="text" value={localSettings.complemento} onChange={e => handleChange('complemento', e.target.value)} disabled={!isEditing} className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none text-sm disabled:opacity-60 disabled:cursor-not-allowed" placeholder="Ex: Bloco A, Sala 301" />
                             </div>
-                        </div>
-                    </div>
-                </div>
-            </Card>
-            <Card>
-                <CardHeader title="📅 Calendário" />
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label className="block text-sm font-medium mb-1">Jornada</label>
-                        <select value={settings.scheduleType} onChange={e => handleChange('scheduleType', e.target.value)} className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 text-sm">
-                            <option value="mon_fri">Segunda a Sexta</option>
-                            <option value="mon_sat_half">Segunda a Sábado (Meio)</option>
-                        </select>
-                    </div>
-                    <div className="flex flex-col gap-3 pt-6">
-                        <div className="flex items-center gap-3">
-                            <input type="checkbox" checked={settings.workOnHolidays} onChange={e => handleChange('workOnHolidays', e.target.checked)} className="w-5 h-5 bg-[#1e2329] border border-[#3a3e45] rounded" />
-                            <label className="text-sm">Trabalhar em Feriados</label>
                         </div>
                     </div>
                 </div>
@@ -300,18 +367,32 @@ export const GeneralSettings: React.FC<GeneralSettingsProps> = ({ settings, onUp
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                         <label className="block text-sm font-medium mb-1">% Impostos</label>
-                        <input type="number" value={settings.impostos} onChange={e => handleChange('impostos', parseFloat(e.target.value))} className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none" placeholder="Ex: 8.5" />
+                        <input type="number" value={localSettings.impostos} onChange={e => handleChange('impostos', parseFloat(e.target.value))} disabled={!isEditing} className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none disabled:opacity-60 disabled:cursor-not-allowed" placeholder="Ex: 8.5" />
                     </div>
                     <div>
                         <label className="block text-sm font-medium mb-1">% Custos Indiretos</label>
-                        <input type="number" value={settings.custosIndiretos} onChange={e => handleChange('custosIndiretos', parseFloat(e.target.value))} className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none" placeholder="Ex: 5.0" />
+                        <input type="number" value={localSettings.custosIndiretos} onChange={e => handleChange('custosIndiretos', parseFloat(e.target.value))} disabled={!isEditing} className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none disabled:opacity-60 disabled:cursor-not-allowed" placeholder="Ex: 5.0" />
                     </div>
                     <div>
                         <label className="block text-sm font-medium mb-1">% BDI</label>
-                        <input type="number" value={settings.bdi} onChange={e => handleChange('bdi', parseFloat(e.target.value))} className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none" placeholder="Ex: 25.0" />
+                        <input type="number" value={localSettings.bdi} onChange={e => handleChange('bdi', parseFloat(e.target.value))} disabled={!isEditing} className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none disabled:opacity-60 disabled:cursor-not-allowed" placeholder="Ex: 25.0" />
                     </div>
                 </div>
             </Card>
+
+            {/* Confirm Dialog */}
+            {dialogState.isOpen && (
+                <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[2100] p-4">
+                    <div className="bg-[#242830] rounded-lg shadow-2xl w-full max-w-md border border-[#3a3e45] p-6">
+                        <h3 className="text-lg font-semibold text-white mb-2">{dialogState.title}</h3>
+                        <p className="text-[#a0a5b0] mb-6">{dialogState.message}</p>
+                        <div className="flex justify-end gap-3">
+                            <Button variant="secondary" onClick={handleCancel}>{dialogState.cancelText || 'Cancelar'}</Button>
+                            <Button variant="danger" onClick={handleConfirm}>{dialogState.confirmText || 'Confirmar'}</Button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

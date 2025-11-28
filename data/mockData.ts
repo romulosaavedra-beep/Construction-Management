@@ -101,10 +101,10 @@ export const comprasData: Compra[] = [
 ];
 
 export const fornecedoresData: Fornecedor[] = [
-    { nome: 'Lafarge', vendedor: 'Roberto Silva', cnpj: '12.345.678/0001-00', telefone: '(11) 99999-1111', email: 'vendas@lafarge.com', cidade: 'São Paulo', estado: 'SP' },
-    { nome: 'Votorantim', vendedor: 'Marcela Costa', cnpj: '98.765.432/0001-00', telefone: '(11) 88888-2222', email: 'vendas@votorantim.com', cidade: 'São Paulo', estado: 'SP' },
-    { nome: 'Brasital', vendedor: 'Fernando Oliveira', cnpj: '44.555.666/0001-00', telefone: '(11) 66666-4444', email: 'vendas@brasital.com', cidade: 'São Paulo', estado: 'SP' },
-    { nome: 'Concremat', vendedor: 'Ana Paula', cnpj: '77.888.999/0001-00', telefone: '(11) 55555-5555', email: 'vendas@concremat.com', cidade: 'São Paulo', estado: 'SP' }
+    { id: 1, nome: 'Lafarge', vendedor: 'Roberto Silva', cnpj: '12.345.678/0001-00', telefone: '(11) 99999-1111', email: 'vendas@lafarge.com', cidade: 'São Paulo', estado: 'SP' },
+    { id: 2, nome: 'Votorantim', vendedor: 'Marcela Costa', cnpj: '98.765.432/0001-00', telefone: '(11) 88888-2222', email: 'vendas@votorantim.com', cidade: 'São Paulo', estado: 'SP' },
+    { id: 3, nome: 'Brasital', vendedor: 'Fernando Oliveira', cnpj: '44.555.666/0001-00', telefone: '(11) 66666-4444', email: 'vendas@brasital.com', cidade: 'São Paulo', estado: 'SP' },
+    { id: 4, nome: 'Concremat', vendedor: 'Ana Paula', cnpj: '77.888.999/0001-00', telefone: '(11) 55555-5555', email: 'vendas@concremat.com', cidade: 'São Paulo', estado: 'SP' }
 ];
 
 export const clima15DiasData = [

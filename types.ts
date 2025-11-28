@@ -168,6 +168,9 @@ export interface Compra {
   unidade: string;
   data_necessaria: string;
   etapa: string;
+  status: string;
+  fornecedor: string;
+  cotacoes: Cotacao[];
   justificativa?: string;
 }
 
@@ -175,6 +178,7 @@ export interface Fornecedor {
   id: string | number;
   nome: string;
   contato?: string;
+  vendedor?: string;
   email?: string;
   telefone?: string;
   cnpj?: string;

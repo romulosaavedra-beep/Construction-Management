@@ -5,13 +5,14 @@ import { ProfessionalsSettings } from '../components/settings/ProfessionalsSetti
 import { SuppliersSettings } from '../components/settings/SuppliersSettings';
 import { UnitsSettings } from '../components/settings/UnitsSettings';
 import { ResourcesSettings } from '../components/settings/ResourcesSettings';
+import { CalendarSettings } from '../components/settings/CalendarSettings';
 import { useSettings } from '../hooks/useSettings';
 import { useProjects } from '../hooks/useProjects';
 import { Button } from '../components/Button';
 import { useConfirm } from '../utils/useConfirm';
-import toast from 'react-hot-toast';
+import type { GeneralSettingsData } from '../hooks/useSettings';
 
-type SettingsTab = 'geral' | 'profissionais' | 'fornecedores' | 'unidades_recursos';
+type SettingsTab = 'geral' | 'calendar' | 'profissionais' | 'fornecedores' | 'unidades_recursos';
 
 const Settings: React.FC = () => {
     const [activeTab, setActiveTab] = useState<SettingsTab>('geral');
@@ -71,6 +72,7 @@ const Settings: React.FC = () => {
 
     const tabs: { id: SettingsTab; label: string }[] = [
         { id: 'geral', label: 'Geral' },
+        { id: 'calendar', label: 'Calendário' },
         { id: 'profissionais', label: 'Profissionais' },
         { id: 'fornecedores', label: 'Fornecedores' },
         { id: 'unidades_recursos', label: 'Unidades e Recursos' }
@@ -87,7 +89,21 @@ const Settings: React.FC = () => {
                     <GeneralSettings
                         settings={settings}
                         onUpdate={setSettings}
-                        onSave={() => saveSettings(settings)}
+                        onSave={async (updatedSettings: GeneralSettingsData) => {
+                            setSettings(updatedSettings);
+                            await saveSettings(updatedSettings);
+                        }}
+                    />
+                );
+            case 'calendar':
+                return (
+                    <CalendarSettings
+                        settings={settings}
+                        onUpdate={setSettings}
+                        onSave={async (updatedSettings: GeneralSettingsData) => {
+                            setSettings(updatedSettings);
+                            await saveSettings(updatedSettings);
+                        }}
                     />
                 );
             case 'profissionais':
@@ -115,12 +131,12 @@ const Settings: React.FC = () => {
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                 <PageHeader title="⚙️ CONFIGURAÇÕES" subtitle="Gerenciar dados mestres da obra" />
 
-                <div className="flex items-center gap-2 bg-[#242830] p-2 rounded-lg border border-[#3a3e45]">
+                <div className="flex items-center gap-1 bg-[#242830] p-2 rounded-lg border border-[#3a3e45]">
                     <span className="text-sm text-[#a0a5b0] whitespace-nowrap">Projeto:</span>
                     <select
                         value={selectedProjectId || ''}
                         onChange={(e) => setSelectedProjectId(e.target.value)}
-                        className="bg-[#1e2329] text-white text-sm border border-[#3a3e45] rounded px-2 py-1 outline-none focus:border-[#0084ff] min-w-[150px]"
+                        className="bg-[#1e2329] text-white text-sm border border-[#3a3e45] rounded px-2 py-1 outline-none focus:border-[#0084ff] min-w-[300px]"
                     >
                         {projects.map(p => (
                             <option key={p.id} value={p.id}>{p.name}</option>
