@@ -1,7 +1,18 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { supabase } from '../../services/supabase';
 import { Card, CardHeader } from '../Card';
-import { Button } from '../Button';
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog"
 import { DataTable } from '../Table/DataTable';
 import { SearchableDropdown } from '../SearchableDropdown';
 import { useProfessionals } from '../../hooks/useProfessionals';
@@ -224,7 +235,7 @@ export const ProfessionalsSettings: React.FC<ProfessionalsSettingsProps> = ({ pr
                         }}
                         onChange={row.getToggleSelectedHandler()}
                     />
-               ) : null
+                ) : null
             ),
             size: 40,
             enableResizing: false,
@@ -281,8 +292,12 @@ export const ProfessionalsSettings: React.FC<ProfessionalsSettingsProps> = ({ pr
             },
             cell: ({ row }: any) => (
                 <div className="flex justify-center gap-2">
-                    <button onClick={() => handleEdit(row.original)} className="text-[#a0a5b0] hover:text-white p-1" title="Editar">✏️</button>
-                    <button onClick={() => handleDelete(row.original.id)} className="text-red-400 hover:text-red-500 p-1" title="Excluir">🗑️</button>
+                    <Button variant="ghost" size="icon" onClick={() => handleEdit(row.original)} className="h-8 w-8 text-[#a0a5b0] hover:text-white" title="Editar">
+                        ✏️
+                    </Button>
+                    <Button variant="ghost" size="icon" onClick={() => handleDelete(row.original.id)} className="h-8 w-8 text-red-400 hover:text-red-500 hover:bg-red-900/20" title="Excluir">
+                        🗑️
+                    </Button>
                 </div>
             ),
             size: 0,
@@ -301,112 +316,117 @@ export const ProfessionalsSettings: React.FC<ProfessionalsSettingsProps> = ({ pr
             />
 
             {/* Modal */}
-            {isModalOpen && (
-                <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[1000] p-4">
-                    <div className="bg-[#242830] rounded-lg shadow-2xl w-full max-w-lg border border-[#3a3e45]">
-                        <div className="flex justify-between items-center p-4 border-b border-[#3a3e45]">
-                            <h3 className="text-lg font-semibold text-white">{currentProfissional.id ? 'Editar Profissional' : 'Novo Profissional'}</h3>
-                            <button onClick={() => setIsModalOpen(false)} className="text-[#a0a5b0] hover:text-white">✕</button>
-                        </div>
-                        <form onSubmit={handleSave} className="p-4 space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Cargo <span className="text-red-500">*</span></label>
-                                <div className="flex gap-2">
-                                    <SearchableDropdown
-                                        options={roles}
-                                        value={currentProfissional.cargo || ''}
-                                        onChange={(val) => setCurrentProfissional({ ...currentProfissional, cargo: val })}
-                                        placeholder="Selecione um cargo..."
-                                        required
-                                        className="flex-1"
-                                    />
-                                    {!isCreatingRole && <Button variant="secondary" size="sm" onClick={() => setIsCreatingRole(true)} type="button">+ Novo</Button>}
-                                    {projectRoles.includes(currentProfissional.cargo || '') && (
-                                        <button type="button" onClick={() => handleDeleteRole(currentProfissional.cargo!)} className="text-red-400 hover:text-red-500 px-2" title="Excluir cargo">🗑️</button>
-                                    )}
-                                </div>
-                                {isCreatingRole && (
-                                    <div className="flex gap-2 mt-2">
-                                        <input
-                                            type="text"
-                                            value={newRole}
-                                            onChange={e => setNewRole(e.target.value)}
-                                            placeholder="Digite o novo cargo"
-                                            className="flex-1 bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 text-sm"
-                                            autoFocus
-                                        />
-                                        <Button variant="primary" size="sm" onClick={handleAddRole} type="button">Adicionar</Button>
-                                        <Button variant="secondary" size="sm" onClick={() => { setIsCreatingRole(false); setNewRole(''); }} type="button">Cancelar</Button>
-                                    </div>
+            <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+                <DialogContent className="sm:max-w-[550px] bg-[#242830] border-[#3a3e45] text-[#e8eaed]">
+                    <DialogHeader>
+                        <DialogTitle className="text-white">{currentProfissional.id ? 'Editar Profissional' : 'Novo Profissional'}</DialogTitle>
+                        <DialogDescription className="text-[#a0a5b0]">
+                            Preencha os dados do profissional abaixo.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <form onSubmit={handleSave} className="space-y-4 py-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="cargo" className="text-sm font-medium">Cargo <span className="text-red-500">*</span></Label>
+                            <div className="flex gap-2">
+                                <SearchableDropdown
+                                    options={roles}
+                                    value={currentProfissional.cargo || ''}
+                                    onChange={(val) => setCurrentProfissional({ ...currentProfissional, cargo: val })}
+                                    placeholder="Selecione um cargo..."
+                                    required
+                                    className="flex-1"
+                                />
+                                {!isCreatingRole && <Button variant="secondary" size="sm" onClick={() => setIsCreatingRole(true)} type="button">+ Novo</Button>}
+                                {projectRoles.includes(currentProfissional.cargo || '') && (
+                                    <Button variant="ghost" size="icon" type="button" onClick={() => handleDeleteRole(currentProfissional.cargo!)} className="h-9 w-9 text-red-400 hover:text-red-500 hover:bg-red-900/20" title="Excluir cargo">
+                                        🗑️
+                                    </Button>
                                 )}
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Nome <span className="text-red-500">*</span></label>
-                                <input
-                                    type="text"
-                                    value={currentProfissional.nome || ''}
-                                    onChange={e => setCurrentProfissional({ ...currentProfissional, nome: e.target.value })}
-                                    className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 text-sm"
-                                    placeholder="Ex: João Silva"
-                                    required
+                            {isCreatingRole && (
+                                <div className="flex gap-2 mt-2">
+                                    <Input
+                                        value={newRole}
+                                        onChange={e => setNewRole(e.target.value)}
+                                        placeholder="Digite o novo cargo"
+                                        className="flex-1 bg-[#1e2329] border-[#3a3e45] text-white focus-visible:ring-[#0084ff]"
+                                        autoFocus
+                                    />
+                                    <Button variant="default" size="sm" onClick={handleAddRole} type="button" className="bg-[#0084ff] hover:bg-[#0073e6]">Adicionar</Button>
+                                    <Button variant="secondary" size="sm" onClick={() => { setIsCreatingRole(false); setNewRole(''); }} type="button">Cancelar</Button>
+                                </div>
+                            )}
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="nome" className="text-sm font-medium">Nome <span className="text-red-500">*</span></Label>
+                            <Input
+                                id="nome"
+                                value={currentProfissional.nome || ''}
+                                onChange={e => setCurrentProfissional({ ...currentProfissional, nome: e.target.value })}
+                                className="bg-[#1e2329] border-[#3a3e45] text-white focus-visible:ring-[#0084ff]"
+                                placeholder="Ex: João Silva"
+                                required
+                            />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="email" className="text-sm font-medium">Email</Label>
+                                <Input
+                                    id="email"
+                                    type="email"
+                                    value={currentProfissional.email || ''}
+                                    onChange={e => setCurrentProfissional({ ...currentProfissional, email: e.target.value })}
+                                    className="bg-[#1e2329] border-[#3a3e45] text-white focus-visible:ring-[#0084ff]"
+                                    placeholder="joao@exemplo.com"
                                 />
                             </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">Email</label>
-                                    <input
-                                        type="email"
-                                        value={currentProfissional.email || ''}
-                                        onChange={e => setCurrentProfissional({ ...currentProfissional, email: e.target.value })}
-                                        className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 text-sm"
-                                        placeholder="joao@exemplo.com"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">Telefone</label>
-                                    <input
-                                        type="text"
-                                        value={currentProfissional.telefone || ''}
-                                        onChange={e => setCurrentProfissional({ ...currentProfissional, telefone: maskMobilePhone(e.target.value) })}
-                                        className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 text-sm"
-                                        placeholder="(11) 99999-9999"
-                                    />
-                                    {phoneError && <p className="text-xs text-red-500 mt-1">{phoneError}</p>}
-                                </div>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Atividades <span className="text-red-500">*</span></label>
-                                <textarea
-                                    value={currentProfissional.atividades || ''}
-                                    onChange={e => setCurrentProfissional({ ...currentProfissional, atividades: e.target.value })}
-                                    className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 text-sm"
-                                    rows={4}
-                                    placeholder="Ex: Coordenação de equipes, elaboração de projetos estruturais, fiscalização de obras"
-                                    required
+                            <div className="space-y-2">
+                                <Label htmlFor="telefone" className="text-sm font-medium">Telefone</Label>
+                                <Input
+                                    id="telefone"
+                                    value={currentProfissional.telefone || ''}
+                                    onChange={e => setCurrentProfissional({ ...currentProfissional, telefone: maskMobilePhone(e.target.value) })}
+                                    className="bg-[#1e2329] border-[#3a3e45] text-white focus-visible:ring-[#0084ff]"
+                                    placeholder="(11) 99999-9999"
                                 />
+                                {phoneError && <p className="text-xs text-red-500">{phoneError}</p>}
                             </div>
-                            <div className="flex justify-end gap-3 pt-2">
-                                <Button variant="secondary" onClick={() => setIsModalOpen(false)} type="button">Cancelar</Button>
-                                <Button variant="primary" type="submit">Salvar</Button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="atividades" className="text-sm font-medium">Atividades <span className="text-red-500">*</span></Label>
+                            <Textarea
+                                id="atividades"
+                                value={currentProfissional.atividades || ''}
+                                onChange={e => setCurrentProfissional({ ...currentProfissional, atividades: e.target.value })}
+                                className="bg-[#1e2329] border-[#3a3e45] text-white focus-visible:ring-[#0084ff]"
+                                rows={4}
+                                placeholder="Ex: Coordenação de equipes, elaboração de projetos estruturais, fiscalização de obras"
+                                required
+                            />
+                        </div>
+                        <DialogFooter>
+                            <Button variant="secondary" onClick={() => setIsModalOpen(false)} type="button">Cancelar</Button>
+                            <Button type="submit" className="bg-[#0084ff] hover:bg-[#0073e6] text-white">Salvar</Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
 
             {/* Confirm Dialog */}
-            {dialogState.isOpen && (
-                <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[1100] p-4">
-                    <div className="bg-[#242830] rounded-lg shadow-2xl w-full max-w-md border border-[#3a3e45] p-6">
-                        <h3 className="text-lg font-semibold text-white mb-2">{dialogState.title}</h3>
-                        <p className="text-[#a0a5b0] mb-6">{dialogState.message}</p>
-                        <div className="flex justify-end gap-3">
-                            <Button variant="secondary" onClick={handleCancel}>{dialogState.cancelText || 'Cancelar'}</Button>
-                            <Button variant="danger" onClick={handleConfirm}>{dialogState.confirmText || 'Confirmar'}</Button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <Dialog open={dialogState.isOpen} onOpenChange={(open) => !open && handleCancel()}>
+                <DialogContent className="sm:max-w-[425px] bg-[#242830] border-[#3a3e45] text-[#e8eaed]">
+                    <DialogHeader>
+                        <DialogTitle className="text-white">{dialogState.title}</DialogTitle>
+                        <DialogDescription className="text-[#a0a5b0]">
+                            {dialogState.message}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <Button variant="secondary" onClick={handleCancel}>{dialogState.cancelText || 'Cancelar'}</Button>
+                        <Button variant="destructive" onClick={handleConfirm}>{dialogState.confirmText || 'Confirmar'}</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </>
     );
 };

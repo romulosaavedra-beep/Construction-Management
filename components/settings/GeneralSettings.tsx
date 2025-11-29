@@ -1,6 +1,8 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { Card, CardHeader } from '../Card';
-import { Button } from '../Button';
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { SearchableDropdown } from '../SearchableDropdown';
 import {
     fetchAddressByCEP,
@@ -275,7 +277,7 @@ export const GeneralSettings: React.FC<GeneralSettingsProps> = ({ settings, onUp
             <div className="flex justify-end gap-1 mb-4">
                 {isEditing ? (
                     <>
-                        <Button variant="primary" onClick={handleSave}>💾 Salvar</Button>
+                        <Button variant="default" onClick={handleSave} className="bg-[#0084ff] hover:bg-[#0073e6] text-white">💾 Salvar</Button>
                         <Button variant="secondary" onClick={handleExit}>Sair sem Salvar</Button>
                         <Button size="sm" variant="secondary" onClick={handleUndo} disabled={!canUndo} title="Desfazer (Ctrl+Z)">↩️</Button>
                         <Button size="sm" variant="secondary" onClick={handleRedo} disabled={!canRedo} title="Refazer (Ctrl+Y)">↪️</Button>
@@ -388,7 +390,7 @@ export const GeneralSettings: React.FC<GeneralSettingsProps> = ({ settings, onUp
                         <p className="text-[#a0a5b0] mb-6">{dialogState.message}</p>
                         <div className="flex justify-end gap-3">
                             <Button variant="secondary" onClick={handleCancel}>{dialogState.cancelText || 'Cancelar'}</Button>
-                            <Button variant="danger" onClick={handleConfirm}>{dialogState.confirmText || 'Confirmar'}</Button>
+                            <Button variant="destructive" onClick={handleConfirm}>{dialogState.confirmText || 'Confirmar'}</Button>
                         </div>
                     </div>
                 </div>

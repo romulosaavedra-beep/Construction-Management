@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { GeneralSettingsData } from '../../hooks/useSettings';
-import { Button } from '../Button';
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { useCalendar } from '../../hooks/useCalendar';
 import { CustomHoliday, WorkSchedule } from '../../types/calendar';
 import { useConfirm } from '../../utils/useConfirm';
@@ -206,7 +208,7 @@ export const CalendarSettings: React.FC<CalendarSettingsProps> = ({ settings, on
             <div className="flex justify-end gap-1 mb-4">
                 {isEditing ? (
                     <>
-                        <Button variant="primary" onClick={handleSave}>💾 Salvar</Button>
+                        <Button variant="default" onClick={handleSave} className="bg-[#0084ff] hover:bg-[#0073e6] text-white">💾 Salvar</Button>
                         <Button variant="secondary" onClick={handleExit}>Sair sem Salvar</Button>
                         <Button size="sm" variant="secondary" onClick={handleUndo} disabled={historyIndex <= 0}>↩️</Button>
                         <Button size="sm" variant="secondary" onClick={handleRedo} disabled={historyIndex >= history.length - 1}>↪️</Button>
@@ -395,7 +397,7 @@ export const CalendarSettings: React.FC<CalendarSettingsProps> = ({ settings, on
                         <p className="text-[#a0a5b0] mb-6">{dialogState.message}</p>
                         <div className="flex justify-end gap-3">
                             <Button variant="secondary" onClick={handleCancel}>{dialogState.cancelText || 'Cancelar'}</Button>
-                            <Button variant="danger" onClick={handleConfirm}>{dialogState.confirmText || 'Confirmar'}</Button>
+                            <Button variant="destructive" onClick={handleConfirm}>{dialogState.confirmText || 'Confirmar'}</Button>
                         </div>
                     </div>
                 </div>

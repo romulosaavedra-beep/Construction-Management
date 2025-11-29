@@ -4,7 +4,17 @@ import { useUnits } from '../../hooks/useUnits';
 import { useConfirm } from '../../utils/useConfirm';
 import type { UnitItem } from '../../types';
 import { DataTable } from '../Table/DataTable';
-import { Button } from '../Button';
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog"
 
 interface UnitsSettingsProps {
     projectId?: string;
@@ -126,8 +136,12 @@ export const UnitsSettings: React.FC<UnitsSettingsProps> = ({ projectId }) => {
             cell: ({ row }: any) => (
                 row.original.project_id ? (
                     <div className="flex justify-center gap-2">
-                        <button onClick={() => handleEdit(row.original)} className="text-[#a0a5b0] hover:text-white p-1" title="Editar">✏️</button>
-                        <button onClick={() => handleDelete([row.original.id])} className="text-red-400 hover:text-red-500 p-1" title="Excluir">🗑️</button>
+                        <Button variant="ghost" size="icon" onClick={() => handleEdit(row.original)} className="h-8 w-8 text-[#a0a5b0] hover:text-white" title="Editar">
+                            ✏️
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={() => handleDelete([row.original.id])} className="h-8 w-8 text-red-400 hover:text-red-500 hover:bg-red-900/20" title="Excluir">
+                            🗑️
+                        </Button>
                     </div>
                 ) : (
                     <span className="text-[#4a4e55] text-xs italic">Padrão</span>
@@ -148,58 +162,60 @@ export const UnitsSettings: React.FC<UnitsSettingsProps> = ({ projectId }) => {
             />
 
             {/* Modal */}
-            {isModalOpen && (
-                <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[1000] p-4">
-                    <div className="bg-[#242830] rounded-lg shadow-2xl w-full max-w-md border border-[#3a3e45]">
-                        <div className="flex justify-between items-center p-4 border-b border-[#3a3e45]">
-                            <h3 className="text-lg font-semibold text-white">{currentUnit.id ? 'Editar Unidade' : 'Nova Unidade'}</h3>
-                            <button onClick={() => setIsModalOpen(false)} className="text-[#a0a5b0] hover:text-white">✕</button>
+            <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+                <DialogContent className="sm:max-w-[425px] bg-[#242830] border-[#3a3e45] text-[#e8eaed]">
+                    <DialogHeader>
+                        <DialogTitle className="text-white">{currentUnit.id ? 'Editar Unidade' : 'Nova Unidade'}</DialogTitle>
+                        <DialogDescription className="text-[#a0a5b0]">
+                            Preencha os dados da unidade de medida abaixo.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <form onSubmit={handleSave} className="space-y-4 py-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="name" className="text-sm font-medium">Nome <span className="text-red-500">*</span></Label>
+                            <Input
+                                id="name"
+                                value={currentUnit.name || ''}
+                                onChange={e => setCurrentUnit({ ...currentUnit, name: e.target.value })}
+                                className="bg-[#1e2329] border-[#3a3e45] text-white focus-visible:ring-[#0084ff]"
+                                required
+                                placeholder="Ex: Metro Quadrado"
+                            />
                         </div>
-                        <form onSubmit={handleSave} className="p-4 space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Nome <span className="text-red-500">*</span></label>
-                                <input
-                                    type="text"
-                                    value={currentUnit.name || ''}
-                                    onChange={e => setCurrentUnit({ ...currentUnit, name: e.target.value })}
-                                    className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 text-sm"
-                                    required
-                                    placeholder="Ex: Metro Quadrado"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Símbolo <span className="text-red-500">*</span></label>
-                                <input
-                                    type="text"
-                                    value={currentUnit.symbol || ''}
-                                    onChange={e => setCurrentUnit({ ...currentUnit, symbol: e.target.value })}
-                                    className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 text-sm"
-                                    required
-                                    placeholder="Ex: m²"
-                                />
-                            </div>
-                            <div className="flex justify-end gap-3 pt-2">
-                                <Button variant="secondary" onClick={() => setIsModalOpen(false)} type="button">Cancelar</Button>
-                                <Button variant="primary" type="submit">Salvar</Button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
+                        <div className="space-y-2">
+                            <Label htmlFor="symbol" className="text-sm font-medium">Símbolo <span className="text-red-500">*</span></Label>
+                            <Input
+                                id="symbol"
+                                value={currentUnit.symbol || ''}
+                                onChange={e => setCurrentUnit({ ...currentUnit, symbol: e.target.value })}
+                                className="bg-[#1e2329] border-[#3a3e45] text-white focus-visible:ring-[#0084ff]"
+                                required
+                                placeholder="Ex: m²"
+                            />
+                        </div>
+                        <DialogFooter>
+                            <Button variant="secondary" onClick={() => setIsModalOpen(false)} type="button">Cancelar</Button>
+                            <Button type="submit" className="bg-[#0084ff] hover:bg-[#0073e6] text-white">Salvar</Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
 
             {/* Confirm Dialog */}
-            {dialogState.isOpen && (
-                <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[1100] p-4">
-                    <div className="bg-[#242830] rounded-lg shadow-2xl w-full max-w-md border border-[#3a3e45] p-6">
-                        <h3 className="text-lg font-semibold text-white mb-2">{dialogState.title}</h3>
-                        <p className="text-[#a0a5b0] mb-6">{dialogState.message}</p>
-                        <div className="flex justify-end gap-3">
-                            <Button variant="secondary" onClick={handleCancel}>{dialogState.cancelText || 'Cancelar'}</Button>
-                            <Button variant="danger" onClick={handleConfirm}>{dialogState.confirmText || 'Confirmar'}</Button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <Dialog open={dialogState.isOpen} onOpenChange={(open) => !open && handleCancel()}>
+                <DialogContent className="sm:max-w-[425px] bg-[#242830] border-[#3a3e45] text-[#e8eaed]">
+                    <DialogHeader>
+                        <DialogTitle className="text-white">{dialogState.title}</DialogTitle>
+                        <DialogDescription className="text-[#a0a5b0]">
+                            {dialogState.message}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <Button variant="secondary" onClick={handleCancel}>{dialogState.cancelText || 'Cancelar'}</Button>
+                        <Button variant="destructive" onClick={handleConfirm}>{dialogState.confirmText || 'Confirmar'}</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </>
     );
 };

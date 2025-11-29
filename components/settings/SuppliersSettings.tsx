@@ -5,7 +5,17 @@ import { useConfirm } from '../../utils/useConfirm';
 import { maskMobilePhone, maskCNPJCPF } from '../../utils/formatters';
 import type { Fornecedor } from '../../types';
 import { DataTable } from '../Table/DataTable';
-import { Button } from '../Button';
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog"
 
 interface SuppliersSettingsProps {
     projectId?: string;
@@ -155,8 +165,12 @@ export const SuppliersSettings: React.FC<SuppliersSettingsProps> = ({ projectId 
             enableResizing: false,
             cell: ({ row }: any) => (
                 <div className="flex justify-center gap-2">
-                    <button onClick={() => handleEdit(row.original)} className="text-[#a0a5b0] hover:text-white p-1" title="Editar">✏️</button>
-                    <button onClick={() => handleDelete([row.original.id])} className="text-red-400 hover:text-red-500 p-1" title="Excluir">🗑️</button>
+                    <Button variant="ghost" size="icon" onClick={() => handleEdit(row.original)} className="h-8 w-8 text-[#a0a5b0] hover:text-white" title="Editar">
+                        ✏️
+                    </Button>
+                    <Button variant="ghost" size="icon" onClick={() => handleDelete([row.original.id])} className="h-8 w-8 text-red-400 hover:text-red-500 hover:bg-red-900/20" title="Excluir">
+                        🗑️
+                    </Button>
                 </div>
             )
         }
@@ -174,118 +188,122 @@ export const SuppliersSettings: React.FC<SuppliersSettingsProps> = ({ projectId 
             />
 
             {/* Modal */}
-            {isModalOpen && (
-                <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[1000] p-4">
-                    <div className="bg-[#242830] rounded-lg shadow-2xl w-full max-w-lg border border-[#3a3e45]">
-                        <div className="flex justify-between items-center p-4 border-b border-[#3a3e45]">
-                            <h3 className="text-lg font-semibold text-white">{currentSupplier.id ? 'Editar Fornecedor' : 'Novo Fornecedor'}</h3>
-                            <button onClick={() => setIsModalOpen(false)} className="text-[#a0a5b0] hover:text-white">✕</button>
+            <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+                <DialogContent className="sm:max-w-[500px] bg-[#242830] border-[#3a3e45] text-[#e8eaed]">
+                    <DialogHeader>
+                        <DialogTitle className="text-white">{currentSupplier.id ? 'Editar Fornecedor' : 'Novo Fornecedor'}</DialogTitle>
+                        <DialogDescription className="text-[#a0a5b0]">
+                            Preencha os dados do fornecedor abaixo.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <form onSubmit={handleSave} className="space-y-4 py-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="nome" className="text-sm font-medium">Razão Social <span className="text-red-500">*</span></Label>
+                            <Input
+                                id="nome"
+                                value={currentSupplier.nome || ''}
+                                onChange={e => setCurrentSupplier({ ...currentSupplier, nome: e.target.value })}
+                                className="bg-[#1e2329] border-[#3a3e45] text-white focus-visible:ring-[#0084ff]"
+                                placeholder="Ex: Construtora ABC Ltda"
+                                required
+                            />
                         </div>
-                        <form onSubmit={handleSave} className="p-4 space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Razão Social <span className="text-red-500">*</span></label>
-                                <input
-                                    type="text"
-                                    value={currentSupplier.nome || ''}
-                                    onChange={e => setCurrentSupplier({ ...currentSupplier, nome: e.target.value })}
-                                    className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 text-sm"
-                                    placeholder="Ex: Construtora ABC Ltda"
-                                    required
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="contato" className="text-sm font-medium">Nome do Vendedor</Label>
+                                <Input
+                                    id="contato"
+                                    value={currentSupplier.contato || ''}
+                                    onChange={e => setCurrentSupplier({ ...currentSupplier, contato: e.target.value })}
+                                    className="bg-[#1e2329] border-[#3a3e45] text-white focus-visible:ring-[#0084ff]"
+                                    placeholder="Ex: Carlos Souza"
                                 />
                             </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">Nome do Vendedor</label>
-                                    <input
-                                        type="text"
-                                        value={currentSupplier.contato || ''}
-                                        onChange={e => setCurrentSupplier({ ...currentSupplier, contato: e.target.value })}
-                                        className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 text-sm"
-                                        placeholder="Ex: Carlos Souza"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">CNPJ/CPF</label>
-                                    <input
-                                        type="text"
-                                        value={currentSupplier.cnpj || ''}
-                                        onChange={e => setCurrentSupplier({ ...currentSupplier, cnpj: maskCNPJCPF(e.target.value) })}
-                                        className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 text-sm"
-                                        maxLength={18}
-                                        placeholder="12.345.678/0001-99"
-                                    />
-                                </div>
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">Email</label>
-                                    <input
-                                        type="email"
-                                        value={currentSupplier.email || ''}
-                                        onChange={e => setCurrentSupplier({ ...currentSupplier, email: e.target.value })}
-                                        className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 text-sm"
-                                        placeholder="vendas@fornecedor.com.br"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">Telefone</label>
-                                    <input
-                                        type="text"
-                                        value={currentSupplier.telefone || ''}
-                                        onChange={e => {
-                                            const masked = maskMobilePhone(e.target.value);
-                                            setCurrentSupplier({ ...currentSupplier, telefone: masked });
-                                            setPhoneError("");
-                                        }}
-                                        className={`w-full bg-[#1e2329] border ${phoneError ? 'border-red-500' : 'border-[#3a3e45]'} rounded-md p-2 text-sm`}
-                                        maxLength={15}
-                                        placeholder="(11) 98765-4321"
-                                    />
-                                    {phoneError && <p className="text-xs text-red-500 mt-1">{phoneError}</p>}
-                                </div>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Endereço Completo</label>
-                                <input
-                                    type="text"
-                                    value={currentSupplier.endereco || ''}
-                                    onChange={e => setCurrentSupplier({ ...currentSupplier, endereco: e.target.value })}
-                                    className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 text-sm"
-                                    placeholder="Rua das Flores, 123, Centro - São Paulo - SP"
+                            <div className="space-y-2">
+                                <Label htmlFor="cnpj" className="text-sm font-medium">CNPJ/CPF</Label>
+                                <Input
+                                    id="cnpj"
+                                    value={currentSupplier.cnpj || ''}
+                                    onChange={e => setCurrentSupplier({ ...currentSupplier, cnpj: maskCNPJCPF(e.target.value) })}
+                                    className="bg-[#1e2329] border-[#3a3e45] text-white focus-visible:ring-[#0084ff]"
+                                    maxLength={18}
+                                    placeholder="12.345.678/0001-99"
                                 />
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Link (Site/Catálogo)</label>
-                                <input
-                                    type="url"
-                                    value={currentSupplier.link || ''}
-                                    onChange={e => setCurrentSupplier({ ...currentSupplier, link: e.target.value })}
-                                    className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 text-sm"
-                                    placeholder="https://www.fornecedor.com.br"
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="email" className="text-sm font-medium">Email</Label>
+                                <Input
+                                    id="email"
+                                    type="email"
+                                    value={currentSupplier.email || ''}
+                                    onChange={e => setCurrentSupplier({ ...currentSupplier, email: e.target.value })}
+                                    className="bg-[#1e2329] border-[#3a3e45] text-white focus-visible:ring-[#0084ff]"
+                                    placeholder="vendas@fornecedor.com.br"
                                 />
                             </div>
-                            <div className="flex justify-end gap-3 pt-2">
-                                <Button variant="secondary" onClick={() => setIsModalOpen(false)} type="button">Cancelar</Button>
-                                <Button variant="primary" type="submit">Salvar</Button>
+                            <div className="space-y-2">
+                                <Label htmlFor="telefone" className="text-sm font-medium">Telefone</Label>
+                                <Input
+                                    id="telefone"
+                                    value={currentSupplier.telefone || ''}
+                                    onChange={e => {
+                                        const masked = maskMobilePhone(e.target.value);
+                                        setCurrentSupplier({ ...currentSupplier, telefone: masked });
+                                        setPhoneError("");
+                                    }}
+                                    className={`bg-[#1e2329] border ${phoneError ? 'border-red-500' : 'border-[#3a3e45]'} text-white focus-visible:ring-[#0084ff]`}
+                                    maxLength={15}
+                                    placeholder="(11) 98765-4321"
+                                />
+                                {phoneError && <p className="text-xs text-red-500">{phoneError}</p>}
                             </div>
-                        </form>
-                    </div>
-                </div>
-            )}
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="endereco" className="text-sm font-medium">Endereço Completo</Label>
+                            <Input
+                                id="endereco"
+                                value={currentSupplier.endereco || ''}
+                                onChange={e => setCurrentSupplier({ ...currentSupplier, endereco: e.target.value })}
+                                className="bg-[#1e2329] border-[#3a3e45] text-white focus-visible:ring-[#0084ff]"
+                                placeholder="Rua das Flores, 123, Centro - São Paulo - SP"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="link" className="text-sm font-medium">Link (Site/Catálogo)</Label>
+                            <Input
+                                id="link"
+                                type="url"
+                                value={currentSupplier.link || ''}
+                                onChange={e => setCurrentSupplier({ ...currentSupplier, link: e.target.value })}
+                                className="bg-[#1e2329] border-[#3a3e45] text-white focus-visible:ring-[#0084ff]"
+                                placeholder="https://www.fornecedor.com.br"
+                            />
+                        </div>
+                        <DialogFooter>
+                            <Button variant="secondary" onClick={() => setIsModalOpen(false)} type="button">Cancelar</Button>
+                            <Button type="submit" className="bg-[#0084ff] hover:bg-[#0073e6] text-white">Salvar</Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
 
             {/* Confirm Dialog */}
-            {dialogState.isOpen && (
-                <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[1100] p-4">
-                    <div className="bg-[#242830] rounded-lg shadow-2xl w-full max-w-md border border-[#3a3e45] p-6">
-                        <h3 className="text-lg font-semibold text-white mb-2">{dialogState.title}</h3>
-                        <p className="text-[#a0a5b0] mb-6">{dialogState.message}</p>
-                        <div className="flex justify-end gap-3">
-                            <Button variant="secondary" onClick={handleCancel}>{dialogState.cancelText || 'Cancelar'}</Button>
-                            <Button variant="danger" onClick={handleConfirm}>{dialogState.confirmText || 'Confirmar'}</Button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <Dialog open={dialogState.isOpen} onOpenChange={(open) => !open && handleCancel()}>
+                <DialogContent className="sm:max-w-[425px] bg-[#242830] border-[#3a3e45] text-[#e8eaed]">
+                    <DialogHeader>
+                        <DialogTitle className="text-white">{dialogState.title}</DialogTitle>
+                        <DialogDescription className="text-[#a0a5b0]">
+                            {dialogState.message}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <Button variant="secondary" onClick={handleCancel}>{dialogState.cancelText || 'Cancelar'}</Button>
+                        <Button variant="destructive" onClick={handleConfirm}>{dialogState.confirmText || 'Confirmar'}</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </>
     );
 };
