@@ -1,12 +1,11 @@
 import React, { useState, useMemo } from 'react';
-import { Card, CardHeader } from '../Card';
-import { Button } from '../Button';
-import { ResizableTh } from '../Table/ResizableTh';
+import { createColumnHelper } from '@tanstack/react-table';
 import { useSuppliers } from '../../hooks/useSuppliers';
-import { useColumnWidths } from '../../hooks/useColumnWidths';
 import { useConfirm } from '../../utils/useConfirm';
 import { maskMobilePhone, maskCNPJCPF } from '../../utils/formatters';
 import type { Fornecedor } from '../../types';
+import { DataTable } from '../Table/DataTable';
+import { Button } from '../Button';
 
 interface SuppliersSettingsProps {
     projectId?: string;
@@ -14,54 +13,11 @@ interface SuppliersSettingsProps {
 
 export const SuppliersSettings: React.FC<SuppliersSettingsProps> = ({ projectId }) => {
     const { suppliers, loading, addSupplier, updateSupplier, deleteSupplier, deleteSuppliers } = useSuppliers(projectId);
-    const { colWidths, updateColumnWidth } = useColumnWidths('vobi-settings-sort-forn');
     const { confirm, dialogState, handleConfirm, handleCancel } = useConfirm();
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentSupplier, setCurrentSupplier] = useState<Partial<Fornecedor>>({});
     const [phoneError, setPhoneError] = useState("");
-    const [sortConfig, setSortConfig] = useState<{ key: keyof Fornecedor; direction: 'asc' | 'desc' } | null>(null);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-
-    const filteredAndSortedSuppliers = useMemo(() => {
-        let items = [...suppliers];
-
-        if (searchTerm.trim()) {
-            const search = searchTerm.toLowerCase();
-            items = items.filter(s =>
-                s.nome.toLowerCase().includes(search) ||
-                (s.contato && s.contato.toLowerCase().includes(search)) ||
-                (s.email && s.email.toLowerCase().includes(search)) ||
-                (s.telefone && s.telefone.includes(search)) ||
-                (s.cnpj && s.cnpj.includes(search)) ||
-                (s.endereco && s.endereco.toLowerCase().includes(search)) ||
-                (s.link && s.link.toLowerCase().includes(search))
-            );
-        }
-
-        if (sortConfig) {
-            items.sort((a, b) => {
-                const aVal = String(a[sortConfig.key] || '').toLowerCase();
-                const bVal = String(b[sortConfig.key] || '').toLowerCase();
-                if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
-                if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
-                return 0;
-            });
-        }
-        return items;
-    }, [suppliers, sortConfig, searchTerm]);
-
-    const requestSort = (key: keyof Fornecedor) => {
-        let direction: 'asc' | 'desc' = 'asc';
-        if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') direction = 'desc';
-        setSortConfig({ key, direction });
-    };
-
-    const getSortIndicator = (key: string) => {
-        if (!sortConfig || sortConfig.key !== key) return <span className="text-[#4a4e55] ml-1 text-[10px]">▼</span>;
-        return <span className="text-[#0084ff] ml-1 text-[10px]">{sortConfig.direction === 'asc' ? '▲' : '▼'}</span>;
-    };
 
     const handleAdd = () => {
         if (!projectId) {
@@ -79,62 +35,31 @@ export const SuppliersSettings: React.FC<SuppliersSettingsProps> = ({ projectId 
         setIsModalOpen(true);
     };
 
-    const handleDelete = async (id: string | number) => {
-        const shouldDelete = await confirm({
-            title: 'Remover Fornecedor',
-            message: 'Tem certeza que deseja remover este fornecedor?',
-            confirmText: 'Remover',
-            cancelText: 'Cancelar'
-        });
+    const handleDelete = async (ids: string[]) => {
+        if (ids.length === 1) {
+            const shouldDelete = await confirm({
+                title: 'Remover Fornecedor',
+                message: 'Tem certeza que deseja remover este fornecedor?',
+                confirmText: 'Remover',
+                cancelText: 'Cancelar'
+            });
 
-        if (shouldDelete) {
-            await deleteSupplier(id);
-            const idStr = String(id);
-            if (selectedIds.has(idStr)) {
-                const newSelected = new Set(selectedIds);
-                newSelected.delete(idStr);
-                setSelectedIds(newSelected);
+            if (shouldDelete) {
+                await deleteSupplier(ids[0]);
+            }
+        } else {
+            const shouldDelete = await confirm({
+                title: 'Excluir Fornecedores',
+                message: `Tem certeza que deseja excluir ${ids.length} fornecedores selecionados?`,
+                confirmText: 'Excluir',
+                cancelText: 'Cancelar'
+            });
+
+            if (shouldDelete) {
+                await deleteSuppliers(ids);
             }
         }
     };
-
-    const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.checked) {
-            const allIds = filteredAndSortedSuppliers.map(s => String(s.id));
-            setSelectedIds(new Set(allIds));
-        } else {
-            setSelectedIds(new Set());
-        }
-    };
-
-    const handleSelectRow = (id: string | number) => {
-        const idStr = String(id);
-        const newSelected = new Set(selectedIds);
-        if (newSelected.has(idStr)) {
-            newSelected.delete(idStr);
-        } else {
-            newSelected.add(idStr);
-        }
-        setSelectedIds(newSelected);
-    };
-
-    const handleBulkDelete = async () => {
-        const shouldDelete = await confirm({
-            title: 'Excluir Fornecedores',
-            message: `Tem certeza que deseja excluir ${selectedIds.size} fornecedores selecionados?`,
-            confirmText: 'Excluir',
-            cancelText: 'Cancelar'
-        });
-
-        if (shouldDelete) {
-            await deleteSuppliers(Array.from(selectedIds));
-            setSelectedIds(new Set());
-        }
-    };
-
-    const totalCount = filteredAndSortedSuppliers.length;
-    const isAllSelected = totalCount > 0 && selectedIds.size === totalCount;
-    const isIndeterminate = selectedIds.size > 0 && selectedIds.size < totalCount;
 
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -155,133 +80,98 @@ export const SuppliersSettings: React.FC<SuppliersSettingsProps> = ({ projectId 
         setIsModalOpen(false);
     };
 
+    const columnHelper = createColumnHelper<Fornecedor>();
+
+    const columns = useMemo(() => [
+        {
+            id: 'select',
+            header: ({ table }: any) => (
+                <input
+                    type="checkbox"
+                    className="rounded border-[#3a3e45] bg-[#1e2329] text-[#0084ff] focus:ring-[#0084ff] focus:ring-offset-0 focus:ring-offset-[#242830]"
+                    checked={table.getIsAllPageRowsSelected()}
+                    ref={input => {
+                        if (input) input.indeterminate = table.getIsSomePageRowsSelected();
+                    }}
+                    onChange={table.getToggleAllPageRowsSelectedHandler()}
+                />
+            ),
+            cell: ({ row }: any) => (
+                <input
+                    type="checkbox"
+                    className="rounded border-[#3a3e45] bg-[#1e2329] text-[#0084ff] focus:ring-[#0084ff] focus:ring-offset-0 focus:ring-offset-[#242830]"
+                    checked={row.getIsSelected()}
+                    disabled={!row.getCanSelect()}
+                    ref={input => {
+                        if (input) input.indeterminate = row.getIsSomeSelected();
+                    }}
+                    onChange={row.getToggleSelectedHandler()}
+                />
+            ),
+            size: 40,
+            enableResizing: false,
+        },
+        columnHelper.accessor('nome', {
+            header: 'Razão Social',
+            size: 250,
+            cell: info => <span className="font-medium text-white">{info.getValue()}</span>
+        }),
+        columnHelper.accessor('contato', {
+            header: 'Vendedor',
+            size: 150,
+            cell: info => info.getValue() || '-'
+        }),
+        columnHelper.accessor('email', {
+            header: 'Email',
+            size: 200,
+            cell: info => info.getValue() || '-'
+        }),
+        columnHelper.accessor('telefone', {
+            header: 'Telefone',
+            size: 120,
+            cell: info => <span className="font-mono text-xs">{info.getValue() || '-'}</span>
+        }),
+        columnHelper.accessor('cnpj', {
+            header: 'CNPJ/CPF',
+            size: 140,
+            cell: info => <span className="font-mono text-xs">{info.getValue() || '-'}</span>
+        }),
+        columnHelper.accessor('endereco', {
+            header: 'Endereço',
+            size: 200,
+            meta: { isFluid: true },
+            cell: info => <span title={info.getValue()}>{info.getValue() || '-'}</span>
+        }),
+        columnHelper.accessor('link', {
+            header: 'Link',
+            size: 60,
+            enableResizing: false,
+            cell: info => info.getValue() ? <a href={info.getValue()} target="_blank" rel="noopener noreferrer" className="text-[#0084ff] hover:underline text-xs">Link</a> : '-'
+        }),
+        {
+            id: 'actions',
+            header: 'Ações',
+            size: 80,
+            enableResizing: false,
+            cell: ({ row }: any) => (
+                <div className="flex justify-center gap-2">
+                    <button onClick={() => handleEdit(row.original)} className="text-[#a0a5b0] hover:text-white p-1" title="Editar">✏️</button>
+                    <button onClick={() => handleDelete([row.original.id])} className="text-red-400 hover:text-red-500 p-1" title="Excluir">🗑️</button>
+                </div>
+            )
+        }
+    ], [deleteSupplier, deleteSuppliers, confirm]);
+
     return (
         <>
-            <Card>
-                <CardHeader title="Fornecedores">
-                    <div className="flex items-center gap-1">
-                        <input
-                            type="text"
-                            placeholder="🔍 Buscar..."
-                            value={searchTerm}
-                            onChange={e => setSearchTerm(e.target.value)}
-                            className="w-64 bg-[#1e2329] border border-[#3a3e45] rounded-md px-3 py-1.5 text-sm focus:ring-2 focus:ring-[#0084ff] outline-none"
-                        />
-                        <Button variant="primary" onClick={handleAdd}>+ Adicionar</Button>
-                    </div>
-                </CardHeader>
-                <div className="overflow-x-auto">
-                    <div className="max-h-[600px] overflow-y-auto custom-scrollbar">
-                        <table className="w-full text-sm text-left text-[#a0a5b0]">
-                            {/* HEADER */}
-                            <thead className="text-xs text-[#e8eaed] uppercase bg-[#242830] sticky top-0 z-30 shadow-sm">
-                                <tr>
-                                    {/* CHECKBOX: Sticky Left */}
-                                    <th className="px-4 py-3 w-0 text-center sticky left-0 z-30 bg-[#242830] border-r border-[#3a3e45]">
-                                        <input
-                                            type="checkbox"
-                                            className="rounded border-[#3a3e45] bg-[#1e2329] text-[#0084ff] focus:ring-[#0084ff] focus:ring-offset-0 focus:ring-offset-[#242830]"
-                                            checked={isAllSelected}
-                                            ref={input => {
-                                                if (input) input.indeterminate = isIndeterminate;
-                                            }}
-                                            onChange={handleSelectAll}
-                                            disabled={totalCount === 0}
-                                        />
-                                    </th>
-
-                                    {/* RAZÃO SOCIAL: Prioridade alta */}
-                                    <ResizableTh tableId="forn" colKey="nome" initialWidth="22%" onSort={() => requestSort('nome')} sortIndicator={getSortIndicator('nome')} colWidths={colWidths} onUpdateWidth={updateColumnWidth}>Razão Social</ResizableTh>
-
-                                    {/* VENDEDOR */}
-                                    <ResizableTh tableId="forn" colKey="contato" initialWidth="14%" onSort={() => requestSort('contato')} sortIndicator={getSortIndicator('contato')} colWidths={colWidths} onUpdateWidth={updateColumnWidth}>Vendedor</ResizableTh>
-
-                                    {/* EMAIL */}
-                                    <ResizableTh tableId="forn" colKey="email" initialWidth="20%" onSort={() => requestSort('email')} sortIndicator={getSortIndicator('email')} colWidths={colWidths} onUpdateWidth={updateColumnWidth}>Email</ResizableTh>
-
-                                    {/* TELEFONE: Curto */}
-                                    <ResizableTh tableId="forn" colKey="telefone" initialWidth="10%" onSort={() => requestSort('telefone')} sortIndicator={getSortIndicator('telefone')} colWidths={colWidths} onUpdateWidth={updateColumnWidth}>Telefone</ResizableTh>
-
-                                    {/* CNPJ: Curto */}
-                                    <ResizableTh tableId="forn" colKey="cnpj" initialWidth="12%" onSort={() => requestSort('cnpj')} sortIndicator={getSortIndicator('cnpj')} colWidths={colWidths} onUpdateWidth={updateColumnWidth}>CNPJ/CPF</ResizableTh>
-
-                                    {/* ENDEREÇO: Prioridade média */}
-                                    <ResizableTh tableId="forn" colKey="endereco" initialWidth="18%" onSort={() => requestSort('endereco')} sortIndicator={getSortIndicator('endereco')} colWidths={colWidths} onUpdateWidth={updateColumnWidth}>Endereço</ResizableTh>
-
-                                    {/* LINK: Curto e sem borda direita */}
-                                    <ResizableTh tableId="forn" colKey="link" initialWidth="4%" onSort={() => requestSort('link')} sortIndicator={getSortIndicator('link')} colWidths={colWidths} onUpdateWidth={updateColumnWidth}>Link</ResizableTh>
-
-                                    {/* AÇÕES: Sticky Right */}
-                                    <th className="px-4 py-3 w-0 whitespace-nowrap text-center sticky right-0 z-30 bg-[#242830]">
-                                        {selectedIds.size > 0 ? (
-                                            <button
-                                                onClick={handleBulkDelete}
-                                                className="text-red-400 hover:text-red-300 text-xs font-bold uppercase"
-                                            >
-                                                Apagar ({selectedIds.size})
-                                            </button>
-                                        ) : (
-                                            "Ações"
-                                        )}
-                                    </th>
-                                </tr>
-                            </thead>
-
-                            {/* BODY */}
-                            <tbody>
-                                {loading ? (
-                                    <tr><td colSpan={9} className="text-center py-6">Carregando...</td></tr>
-                                ) : filteredAndSortedSuppliers.map(s => {
-                                    // Lógica de Cores Opacas para Colunas Fixas
-                                    const stickyBgClass = selectedIds.has(String(s.id))
-                                        ? 'bg-[#1a2736]' // Cor de fundo quando selecionado (ajustado ao modelo)
-                                        : 'bg-[#1e2329] group-hover:bg-[#24282f]'; // Cor normal / hover
-
-                                    return (
-                                        <tr key={s.id} className={`group border-b border-[#3a3e45] hover:bg-[#24282f] transition-colors ${selectedIds.has(String(s.id)) ? 'bg-[#0084ff]/10' : ''}`}>
-
-                                            {/* CHECKBOX BODY: Sticky Left */}
-                                            <td className={`px-4 py-3 text-center sticky left-0 z-20 ${stickyBgClass}`}>
-                                                <input
-                                                    type="checkbox"
-                                                    className="rounded border-[#3a3e45] bg-[#1e2329] text-[#0084ff] focus:ring-[#0084ff] focus:ring-offset-0 focus:ring-offset-[#242830]"
-                                                    checked={selectedIds.has(String(s.id))}
-                                                    onChange={() => handleSelectRow(s.id)}
-                                                />
-                                            </td>
-
-                                            {/* Colunas Fluidas (max-w-[1px]) */}
-                                            <td className="px-4 py-3 whitespace-nowrap overflow-hidden text-ellipsis max-w-[1px]">{s.nome}</td>
-                                            <td className="px-4 py-3 whitespace-nowrap overflow-hidden text-ellipsis max-w-[1px]">{s.contato || '-'}</td>
-                                            <td className="px-4 py-3 whitespace-nowrap overflow-hidden text-ellipsis max-w-[1px]">{s.email || '-'}</td>
-
-                                            {/* Colunas Curtas (w-[1%]) */}
-                                            <td className="px-4 py-3 font-mono text-xs whitespace-nowrap w-[1%]">{s.telefone || '-'}</td>
-                                            <td className="px-4 py-3 font-mono text-xs whitespace-nowrap w-[1%]">{s.cnpj || '-'}</td>
-
-                                            {/* Coluna Fluida */}
-                                            <td className="px-4 py-3 whitespace-nowrap overflow-hidden text-ellipsis max-w-[1px]">{s.endereco || '-'}</td>
-
-                                            {/* Coluna Curta */}
-                                            <td className="px-4 py-3 text-center w-[1%]">{s.link ? <a href={s.link} target="_blank" rel="noopener noreferrer" className="text-[#0084ff] hover:underline text-xs">Link</a> : '-'}</td>
-
-                                            {/* AÇÕES BODY: Sticky Right */}
-                                            <td className={`px-4 py-3 text-center whitespace-nowrap w-[1%] sticky right-0 z-20 ${stickyBgClass}`}>
-                                                <div className="flex justify-center gap-2">
-                                                    <button onClick={() => handleEdit(s)} className="text-[#a0a5b0] hover:text-white p-1" title="Editar">✏️</button>
-                                                    <button onClick={() => handleDelete(s.id)} className="text-red-400 hover:text-red-500 p-1" title="Excluir">🗑️</button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
-                    </div>
-                    {!loading && suppliers.length === 0 && <div className="text-center py-6 text-[#a0a5b0]">Nenhum fornecedor cadastrado.</div>}
-                    {!loading && suppliers.length > 0 && filteredAndSortedSuppliers.length === 0 && <div className="text-center py-6 text-[#a0a5b0]">Nenhum resultado encontrado para "{searchTerm}".</div>}
-                </div>
-            </Card>
+            <DataTable
+                title="Fornecedores"
+                columns={columns}
+                data={suppliers}
+                onAdd={handleAdd}
+                onDelete={handleDelete}
+                isLoading={loading}
+            />
 
             {/* Modal */}
             {isModalOpen && (

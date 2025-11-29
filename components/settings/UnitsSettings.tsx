@@ -1,11 +1,10 @@
 import React, { useState, useMemo } from 'react';
-import { Card, CardHeader } from '../Card';
-import { Button } from '../Button';
-import { ResizableTh } from '../Table/ResizableTh';
+import { createColumnHelper } from '@tanstack/react-table';
 import { useUnits } from '../../hooks/useUnits';
-import { useColumnWidths } from '../../hooks/useColumnWidths';
 import { useConfirm } from '../../utils/useConfirm';
 import type { UnitItem } from '../../types';
+import { DataTable } from '../Table/DataTable';
+import { Button } from '../Button';
 
 interface UnitsSettingsProps {
     projectId?: string;
@@ -13,51 +12,10 @@ interface UnitsSettingsProps {
 
 export const UnitsSettings: React.FC<UnitsSettingsProps> = ({ projectId }) => {
     const { units, loading, addUnit, updateUnit, deleteUnit, deleteUnits } = useUnits(projectId);
-    const { colWidths, updateColumnWidth } = useColumnWidths('vobi-settings-sort-units');
     const { confirm, dialogState, handleConfirm, handleCancel } = useConfirm();
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentUnit, setCurrentUnit] = useState<Partial<UnitItem>>({});
-    const [sortConfig, setSortConfig] = useState<{ key: keyof UnitItem; direction: 'asc' | 'desc' } | null>(null);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-
-    const filteredAndSortedUnits = useMemo(() => {
-        let items = [...units];
-
-        // Apply search filter
-        if (searchTerm.trim()) {
-            const search = searchTerm.toLowerCase();
-            items = items.filter(u =>
-                u.name.toLowerCase().includes(search) ||
-                u.symbol.toLowerCase().includes(search) ||
-                u.category.toLowerCase().includes(search)
-            );
-        }
-
-        // Apply sorting
-        if (sortConfig) {
-            items.sort((a, b) => {
-                const aVal = String(a[sortConfig.key] || '').toLowerCase();
-                const bVal = String(b[sortConfig.key] || '').toLowerCase();
-                if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
-                if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
-                return 0;
-            });
-        }
-        return items;
-    }, [units, sortConfig, searchTerm]);
-
-    const requestSort = (key: keyof UnitItem) => {
-        let direction: 'asc' | 'desc' = 'asc';
-        if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') direction = 'desc';
-        setSortConfig({ key, direction });
-    };
-
-    const getSortIndicator = (key: string) => {
-        if (!sortConfig || sortConfig.key !== key) return <span className="text-[#4a4e55] ml-1 text-[10px]">▼</span>;
-        return <span className="text-[#0084ff] ml-1 text-[10px]">{sortConfig.direction === 'asc' ? '▲' : '▼'}</span>;
-    };
 
     const handleAdd = () => {
         if (!projectId) {
@@ -73,60 +31,31 @@ export const UnitsSettings: React.FC<UnitsSettingsProps> = ({ projectId }) => {
         setIsModalOpen(true);
     };
 
-    const handleDelete = async (id: string) => {
-        const shouldDelete = await confirm({
-            title: 'Remover Unidade',
-            message: 'Tem certeza que deseja remover esta unidade?',
-            confirmText: 'Remover',
-            cancelText: 'Cancelar'
-        });
+    const handleDelete = async (ids: string[]) => {
+        if (ids.length === 1) {
+            const shouldDelete = await confirm({
+                title: 'Remover Unidade',
+                message: 'Tem certeza que deseja remover esta unidade?',
+                confirmText: 'Remover',
+                cancelText: 'Cancelar'
+            });
 
-        if (shouldDelete) {
-            await deleteUnit(id);
-            if (selectedIds.has(id)) {
-                const newSelected = new Set(selectedIds);
-                newSelected.delete(id);
-                setSelectedIds(newSelected);
+            if (shouldDelete) {
+                await deleteUnit(ids[0]);
+            }
+        } else {
+            const shouldDelete = await confirm({
+                title: 'Excluir Unidades',
+                message: `Tem certeza que deseja excluir ${ids.length} unidades selecionadas?`,
+                confirmText: 'Excluir',
+                cancelText: 'Cancelar'
+            });
+
+            if (shouldDelete) {
+                await deleteUnits(ids);
             }
         }
     };
-
-    const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.checked) {
-            const userUnits = filteredAndSortedUnits.filter(u => u.project_id).map(u => u.id);
-            setSelectedIds(new Set(userUnits));
-        } else {
-            setSelectedIds(new Set());
-        }
-    };
-
-    const handleSelectRow = (id: string) => {
-        const newSelected = new Set(selectedIds);
-        if (newSelected.has(id)) {
-            newSelected.delete(id);
-        } else {
-            newSelected.add(id);
-        }
-        setSelectedIds(newSelected);
-    };
-
-    const handleBulkDelete = async () => {
-        const shouldDelete = await confirm({
-            title: 'Excluir Unidades',
-            message: `Tem certeza que deseja excluir ${selectedIds.size} unidades selecionadas?`,
-            confirmText: 'Excluir',
-            cancelText: 'Cancelar'
-        });
-
-        if (shouldDelete) {
-            await deleteUnits(Array.from(selectedIds));
-            setSelectedIds(new Set());
-        }
-    };
-
-    const userUnitsCount = filteredAndSortedUnits.filter(u => u.project_id).length;
-    const isAllSelected = userUnitsCount > 0 && selectedIds.size === userUnitsCount;
-    const isIndeterminate = selectedIds.size > 0 && selectedIds.size < userUnitsCount;
 
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -141,155 +70,82 @@ export const UnitsSettings: React.FC<UnitsSettingsProps> = ({ projectId }) => {
         setIsModalOpen(false);
     };
 
+    const columnHelper = createColumnHelper<UnitItem>();
+
+    const columns = useMemo(() => [
+        {
+            id: 'select',
+            header: ({ table }: any) => (
+                <input
+                    type="checkbox"
+                    className="rounded border-[#3a3e45] bg-[#1e2329] text-[#0084ff] focus:ring-[#0084ff] focus:ring-offset-0 focus:ring-offset-[#242830]"
+                    checked={table.getIsAllPageRowsSelected()}
+                    ref={input => {
+                        if (input) input.indeterminate = table.getIsSomePageRowsSelected();
+                    }}
+                    onChange={table.getToggleAllPageRowsSelectedHandler()}
+                />
+            ),
+            cell: ({ row }: any) => (
+                row.original.project_id ? (
+                    <input
+                        type="checkbox"
+                        className="rounded border-[#3a3e45] bg-[#1e2329] text-[#0084ff] focus:ring-[#0084ff] focus:ring-offset-0 focus:ring-offset-[#242830]"
+                        checked={row.getIsSelected()}
+                        disabled={!row.getCanSelect()}
+                        ref={input => {
+                            if (input) input.indeterminate = row.getIsSomeSelected();
+                        }}
+                        onChange={row.getToggleSelectedHandler()}
+                    />
+                ) : null
+            ),
+            size: 40,
+            enableResizing: false,
+        },
+        columnHelper.accessor('category', {
+            header: 'Categoria',
+            size: 200,
+        }),
+        columnHelper.accessor('name', {
+            header: 'Nome',
+            size: 300,
+            meta: { isFluid: true },
+            cell: info => <span className="font-medium text-white">{info.getValue()}</span>
+        }),
+        columnHelper.accessor('symbol', {
+            header: 'Abv.',
+            size: 100,
+            cell: info => <span className="font-mono text-xs">{info.getValue()}</span>
+        }),
+        {
+            id: 'actions',
+            header: 'Ações',
+            size: 80,
+            enableResizing: false,
+            cell: ({ row }: any) => (
+                row.original.project_id ? (
+                    <div className="flex justify-center gap-2">
+                        <button onClick={() => handleEdit(row.original)} className="text-[#a0a5b0] hover:text-white p-1" title="Editar">✏️</button>
+                        <button onClick={() => handleDelete([row.original.id])} className="text-red-400 hover:text-red-500 p-1" title="Excluir">🗑️</button>
+                    </div>
+                ) : (
+                    <span className="text-[#4a4e55] text-xs italic">Padrão</span>
+                )
+            )
+        }
+    ], [deleteUnit, deleteUnits, confirm]);
+
     return (
         <>
-            <Card>
-                <CardHeader title="Unidades de Medida">
-                    <div className="flex items-center gap-1">
-                        <input
-                            type="text"
-                            placeholder="🔍 Buscar..."
-                            value={searchTerm}
-                            onChange={e => setSearchTerm(e.target.value)}
-                            className="w-32 bg-[#1e2329] border border-[#3a3e45] rounded-md px-3 py-1.5 text-sm focus:ring-2 focus:ring-[#0084ff] outline-none"
-                        />
-                        <Button variant="primary" onClick={handleAdd}>+ Adicionar</Button>
-                    </div>
-                </CardHeader>
-                <div className="overflow-x-auto">
-                    <div className="max-h-[600px] overflow-y-auto custom-scrollbar">
-                        <table className="w-full text-sm text-left text-[#a0a5b0]">
-                            {/* HEADER */}
-                            <thead className="text-xs text-[#e8eaed] uppercase bg-[#242830] sticky top-0 z-30 shadow-sm">
-                                <tr>
-                                    {/* CHECKBOX: Sticky Left */}
-                                    <th className="px-4 py-3 w-0 text-center sticky left-0 z-30 bg-[#242830] border-r border-[#3a3e45]">
-                                        <input
-                                            type="checkbox"
-                                            className="rounded border-[#3a3e45] bg-[#1e2329] text-[#0084ff] focus:ring-[#0084ff] focus:ring-offset-0 focus:ring-offset-[#242830]"
-                                            checked={isAllSelected}
-                                            ref={input => {
-                                                if (input) input.indeterminate = isIndeterminate;
-                                            }}
-                                            onChange={handleSelectAll}
-                                            disabled={userUnitsCount === 0}
-                                        />
-                                    </th>
-
-                                    {/* CATEGORIA: 30% */}
-                                    <ResizableTh
-                                        tableId="units"
-                                        colKey="category"
-                                        initialWidth="30%"
-                                        onSort={() => requestSort('category')}
-                                        sortIndicator={getSortIndicator('category')}
-                                        colWidths={colWidths}
-                                        onUpdateWidth={updateColumnWidth}
-                                    >
-                                        Categoria
-                                    </ResizableTh>
-
-                                    {/* NOME: 60% */}
-                                    <ResizableTh
-                                        tableId="units"
-                                        colKey="name"
-                                        initialWidth="60%"
-                                        onSort={() => requestSort('name')}
-                                        sortIndicator={getSortIndicator('name')}
-                                        colWidths={colWidths}
-                                        onUpdateWidth={updateColumnWidth}
-                                    >
-                                        Nome
-                                    </ResizableTh>
-
-                                    {/* SÍMBOLO: 10% + Sem borda direita (!border-r-0) */}
-                                    <ResizableTh
-                                        tableId="units"
-                                        colKey="symbol"
-                                        initialWidth="10%"
-                                        onSort={() => requestSort('symbol')}
-                                        sortIndicator={getSortIndicator('symbol')}
-                                        colWidths={colWidths}
-                                        onUpdateWidth={updateColumnWidth}
-                                        className=""
-                                    >
-                                        Abv.
-                                    </ResizableTh>
-
-                                    {/* AÇÕES: Sticky Right + Sem borda esquerda */}
-                                    <th className="px-4 py-3 w-0 whitespace-nowrap text-center sticky right-0 z-30 bg-[#242830]">
-                                        {selectedIds.size > 0 ? (
-                                            <button
-                                                onClick={handleBulkDelete}
-                                                className="text-red-400 hover:text-red-300 text-xs font-bold uppercase"
-                                            >
-                                                Apagar ({selectedIds.size})
-                                            </button>
-                                        ) : (
-                                            "Ações"
-                                        )}
-                                    </th>
-                                </tr>
-                            </thead>
-
-                            {/* BODY */}
-                            <tbody>
-                                {loading ? (
-                                    <tr><td colSpan={5} className="text-center py-6">Carregando...</td></tr>
-                                ) : filteredAndSortedUnits.map(u => {
-                                    // Lógica de Cores Opacas para Colunas Fixas
-                                    const stickyBgClass = selectedIds.has(u.id)
-                                        ? 'bg-[#1a2736]'
-                                        : 'bg-[#1e2329] group-hover:bg-[#24282f]';
-
-                                    return (
-                                        <tr key={u.id} className={`group border-b border-[#3a3e45] hover:bg-[#24282f] transition-colors ${selectedIds.has(u.id) ? 'bg-[#0084ff]/10' : ''}`}>
-
-                                            {/* CHECKBOX BODY: Sticky Left */}
-                                            <td className={`px-4 py-3 text-center sticky left-0 z-20 ${stickyBgClass}`}>
-                                                {u.project_id && (
-                                                    <input
-                                                        type="checkbox"
-                                                        className="rounded border-[#3a3e45] bg-[#1e2329] text-[#0084ff] focus:ring-[#0084ff] focus:ring-offset-0 focus:ring-offset-[#242830]"
-                                                        checked={selectedIds.has(u.id)}
-                                                        onChange={() => handleSelectRow(u.id)}
-                                                    />
-                                                )}
-                                            </td>
-
-                                            <td className="px-4 py-3 whitespace-nowrap overflow-hidden text-ellipsis max-w-[1px]">
-                                                {u.category}
-                                            </td>
-                                            <td className="px-4 py-3 font-medium text-white whitespace-nowrap overflow-hidden text-ellipsis max-w-[1px]">
-                                                {u.name}
-                                            </td>
-
-                                            {/* SÍMBOLO: Sem borda direita visualmente */}
-                                            <td className="px-4 py-3 font-mono text-xs whitespace-nowrap w-[1%]">
-                                                {u.symbol}
-                                            </td>
-
-                                            {/* AÇÕES BODY: Sticky Right */}
-                                            <td className={`px-4 py-3 text-center whitespace-nowrap w-[1%] sticky right-0 z-20 ${stickyBgClass}`}>
-                                                {u.project_id ? (
-                                                    <div className="flex justify-center gap-2">
-                                                        <button onClick={() => handleEdit(u)} className="text-[#a0a5b0] hover:text-white p-1" title="Editar">✏️</button>
-                                                        <button onClick={() => handleDelete(u.id)} className="text-red-400 hover:text-red-500 p-1" title="Excluir">🗑️</button>
-                                                    </div>
-                                                ) : (
-                                                    <span className="text-[#4a4e55] text-xs italic">Padrão</span>
-                                                )}
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
-                    </div>
-                    {!loading && units.length === 0 && <div className="text-center py-6 text-[#a0a5b0]">Nenhuma unidade cadastrada.</div>}
-                    {!loading && units.length > 0 && filteredAndSortedUnits.length === 0 && <div className="text-center py-6 text-[#a0a5b0]">Nenhum resultado encontrado para "{searchTerm}".</div>}
-                </div>
-            </Card>
+            <DataTable
+                title="Unidades de Medida"
+                columns={columns}
+                data={units}
+                onAdd={handleAdd}
+                onDelete={handleDelete}
+                isLoading={loading}
+            />
 
             {/* Modal */}
             {isModalOpen && (

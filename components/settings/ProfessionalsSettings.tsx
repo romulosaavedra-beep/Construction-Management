@@ -2,14 +2,14 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { supabase } from '../../services/supabase';
 import { Card, CardHeader } from '../Card';
 import { Button } from '../Button';
-import { ResizableTh } from '../Table/ResizableTh';
+import { DataTable } from '../Table/DataTable';
 import { SearchableDropdown } from '../SearchableDropdown';
 import { useProfessionals } from '../../hooks/useProfessionals';
-import { useColumnWidths } from '../../hooks/useColumnWidths';
 import { useConfirm } from '../../utils/useConfirm';
 import { maskMobilePhone } from '../../utils/formatters';
 import type { Profissional } from '../../types';
 import toast from 'react-hot-toast';
+import { createColumnHelper } from '@tanstack/react-table';
 
 interface ProfessionalsSettingsProps {
     projectId?: string;
@@ -17,15 +17,11 @@ interface ProfessionalsSettingsProps {
 
 export const ProfessionalsSettings: React.FC<ProfessionalsSettingsProps> = ({ projectId }) => {
     const { professionals, loading, addProfessional, updateProfessional, deleteProfessional, deleteProfessionals } = useProfessionals(projectId);
-    const { colWidths, updateColumnWidth } = useColumnWidths('vobi-settings-col-widths');
     const { confirm, alert, dialogState, handleConfirm, handleCancel } = useConfirm();
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentProfissional, setCurrentProfissional] = useState<Partial<Profissional>>({});
     const [phoneError, setPhoneError] = useState("");
-    const [sortConfig, setSortConfig] = useState<{ key: keyof Profissional; direction: 'asc' | 'desc' } | null>(null);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
     const [isCreatingRole, setIsCreatingRole] = useState(false);
     const [newRole, setNewRole] = useState('');
 
@@ -65,50 +61,11 @@ export const ProfessionalsSettings: React.FC<ProfessionalsSettingsProps> = ({ pr
         fetchRoles();
     }, [projectId]);
 
-    // Derived state for roles (unique list from professionals + default roles + project roles)
+    // Derived state for roles
     const roles = useMemo(() => {
         const existingRoles = professionals.map(p => p.cargo);
         return Array.from(new Set([...defaultRoles, ...projectRoles, ...existingRoles])).sort();
     }, [professionals, defaultRoles, projectRoles]);
-
-    const filteredAndSortedProfessionals = useMemo(() => {
-        let items = [...professionals];
-
-        // Apply search filter
-        if (searchTerm.trim()) {
-            const search = searchTerm.toLowerCase();
-            items = items.filter(p =>
-                p.nome.toLowerCase().includes(search) ||
-                p.cargo.toLowerCase().includes(search) ||
-                (p.email && p.email.toLowerCase().includes(search)) ||
-                (p.telefone && p.telefone.includes(search)) ||
-                (p.atividades && p.atividades.toLowerCase().includes(search))
-            );
-        }
-
-        // Apply sorting
-        if (sortConfig) {
-            items.sort((a, b) => {
-                const aVal = String(a[sortConfig.key] || '').toLowerCase();
-                const bVal = String(b[sortConfig.key] || '').toLowerCase();
-                if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
-                if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
-                return 0;
-            });
-        }
-        return items;
-    }, [professionals, sortConfig, searchTerm]);
-
-    const requestSort = (key: keyof Profissional) => {
-        let direction: 'asc' | 'desc' = 'asc';
-        if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') direction = 'desc';
-        setSortConfig({ key, direction });
-    };
-
-    const getSortIndicator = (key: string) => {
-        if (!sortConfig || sortConfig.key !== key) return <span className="text-[#4a4e55] ml-1 text-[10px]">▼</span>;
-        return <span className="text-[#0084ff] ml-1 text-[10px]">{sortConfig.direction === 'asc' ? '▲' : '▼'}</span>;
-    };
 
     const handleAdd = () => {
         if (!projectId) {
@@ -142,52 +99,8 @@ export const ProfessionalsSettings: React.FC<ProfessionalsSettingsProps> = ({ pr
 
         if (shouldDelete) {
             await deleteProfessional(id);
-            const idStr = String(id);
-            if (selectedIds.has(idStr)) {
-                const newSelected = new Set(selectedIds);
-                newSelected.delete(idStr);
-                setSelectedIds(newSelected);
-            }
         }
     };
-
-    const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.checked) {
-            const allIds = filteredAndSortedProfessionals.map(p => String(p.id));
-            setSelectedIds(new Set(allIds));
-        } else {
-            setSelectedIds(new Set());
-        }
-    };
-
-    const handleSelectRow = (id: string | number) => {
-        const idStr = String(id);
-        const newSelected = new Set(selectedIds);
-        if (newSelected.has(idStr)) {
-            newSelected.delete(idStr);
-        } else {
-            newSelected.add(idStr);
-        }
-        setSelectedIds(newSelected);
-    };
-
-    const handleBulkDelete = async () => {
-        const shouldDelete = await confirm({
-            title: 'Excluir Profissionais',
-            message: `Tem certeza que deseja excluir ${selectedIds.size} profissionais selecionados?`,
-            confirmText: 'Excluir',
-            cancelText: 'Cancelar'
-        });
-
-        if (shouldDelete) {
-            await deleteProfessionals(Array.from(selectedIds));
-            setSelectedIds(new Set());
-        }
-    };
-
-    const totalCount = filteredAndSortedProfessionals.length;
-    const isAllSelected = totalCount > 0 && selectedIds.size === totalCount;
-    const isIndeterminate = selectedIds.size > 0 && selectedIds.size < totalCount;
 
     const handleAddRole = async () => {
         if (!newRole.trim()) return;
@@ -220,7 +133,6 @@ export const ProfessionalsSettings: React.FC<ProfessionalsSettingsProps> = ({ pr
     };
 
     const handleDeleteRole = async (role: string) => {
-        // Check if it's a default role
         if (defaultRoles.includes(role)) {
             alert({ message: 'Não é possível excluir cargos padrão do sistema.' });
             return;
@@ -284,123 +196,109 @@ export const ProfessionalsSettings: React.FC<ProfessionalsSettingsProps> = ({ pr
         setIsModalOpen(false);
     };
 
+    const columnHelper = createColumnHelper<Profissional>();
+
+    const columns = useMemo(() => [
+        {
+            id: 'select',
+            header: ({ table }: any) => (
+                <input
+                    type="checkbox"
+                    className="rounded border-[#3a3e45] bg-[#1e2329] text-[#0084ff] focus:ring-[#0084ff] focus:ring-offset-0 focus:ring-offset-[#242830]"
+                    checked={table.getIsAllRowsSelected()}
+                    ref={input => {
+                        if (input) input.indeterminate = table.getIsSomePageRowsSelected();
+                    }}
+                    onChange={table.getToggleAllRowsSelectedHandler()}
+                />
+            ),
+            cell: ({ row }: any) => (
+                row.original.project_id ? (
+                    <input
+                        type="checkbox"
+                        className="rounded border-[#3a3e45] bg-[#1e2329] text-[#0084ff] focus:ring-[#0084ff] focus:ring-offset-0 focus:ring-offset-[#242830]"
+                        checked={row.getIsSelected()}
+                        disabled={!row.getCanSelect()}
+                        ref={input => {
+                            if (input) input.indeterminate = row.getIsSomeSelected();
+                        }}
+                        onChange={row.getToggleSelectedHandler()}
+                    />
+               ) : null
+            ),
+            size: 40,
+            enableResizing: false,
+        },
+        columnHelper.accessor('cargo', {
+            header: 'Cargo',
+            size: 150,
+        }),
+        columnHelper.accessor('nome', {
+            header: 'Nome',
+            size: 200,
+            cell: info => <span className="font-medium text-white">{info.getValue()}</span>
+        }),
+        columnHelper.accessor('email', {
+            header: 'Email',
+            size: 250,
+            cell: info => info.getValue() || '-'
+        }),
+        columnHelper.accessor('telefone', {
+            header: 'Telefone',
+            size: 120,
+            cell: info => <span className="font-mono text-xs">{info.getValue() || '-'}</span>
+        }),
+        columnHelper.accessor('atividades', {
+            header: 'Atividades',
+            size: 400,
+            meta: { isFluid: true },
+            cell: info => <span title={info.getValue()}>{info.getValue() || '-'}</span>
+        }),
+        {
+            id: 'actions',
+            header: ({ table }: any) => {
+                const selectedCount = table.getSelectedRowModel().rows.length;
+                return selectedCount > 0 ? (
+                    <button
+                        onClick={async () => {
+                            const shouldDelete = await confirm({
+                                title: 'Excluir Profissionais',
+                                message: `Tem certeza que deseja excluir ${selectedCount} profissionais selecionados?`,
+                                confirmText: 'Excluir',
+                                cancelText: 'Cancelar'
+                            });
+                            if (shouldDelete) {
+                                const ids = table.getSelectedRowModel().rows.map((r: any) => String(r.original.id));
+                                await deleteProfessionals(ids);
+                                table.resetRowSelection();
+                            }
+                        }}
+                        className="text-red-400 hover:text-red-300 text-xs font-bold uppercase"
+                    >
+                        Apagar ({selectedCount})
+                    </button>
+                ) : "Ações";
+            },
+            cell: ({ row }: any) => (
+                <div className="flex justify-center gap-2">
+                    <button onClick={() => handleEdit(row.original)} className="text-[#a0a5b0] hover:text-white p-1" title="Editar">✏️</button>
+                    <button onClick={() => handleDelete(row.original.id)} className="text-red-400 hover:text-red-500 p-1" title="Excluir">🗑️</button>
+                </div>
+            ),
+            size: 0,
+            minSize: 0,
+        }
+    ], [deleteProfessionals, confirm]);
+
     return (
         <>
-            <Card>
-                <CardHeader title="Profissionais">
-                    <div className="flex items-center gap-1">
-                        <input
-                            type="text"
-                            placeholder="🔍 Buscar..."
-                            value={searchTerm}
-                            onChange={e => setSearchTerm(e.target.value)}
-                            className="w-64 bg-[#1e2329] border border-[#3a3e45] rounded-md px-3 py-1.5 text-sm focus:ring-2 focus:ring-[#0084ff] outline-none"
-                        />
-                        <Button variant="primary" onClick={handleAdd}>+ Adicionar</Button>
-                    </div>
-                </CardHeader>
-                <div className="overflow-x-auto">
-                    <div className="max-h-[600px] overflow-y-auto custom-scrollbar">
-                        <table className="w-full text-sm text-left text-[#a0a5b0]">
-                            {/* HEADER */}
-                            <thead className="text-xs text-[#e8eaed] uppercase bg-[#242830] sticky top-0 z-30 shadow-sm">
-                                <tr>
-                                    {/* CHECKBOX: Sticky Left */}
-                                    <th className="px-4 py-3 w-0 text-center sticky left-0 z-30 bg-[#242830] border-r border-[#3a3e45]">
-                                        <input
-                                            type="checkbox"
-                                            className="rounded border-[#3a3e45] bg-[#1e2329] text-[#0084ff] focus:ring-[#0084ff] focus:ring-offset-0 focus:ring-offset-[#242830]"
-                                            checked={isAllSelected}
-                                            ref={input => {
-                                                if (input) input.indeterminate = isIndeterminate;
-                                            }}
-                                            onChange={handleSelectAll}
-                                            disabled={totalCount === 0}
-                                        />
-                                    </th>
-
-                                    {/* CARGO */}
-                                    <ResizableTh tableId="prof" colKey="cargo" initialWidth="12%" onSort={() => requestSort('cargo')} sortIndicator={getSortIndicator('cargo')} colWidths={colWidths} onUpdateWidth={updateColumnWidth}>Cargo</ResizableTh>
-
-                                    {/* NOME */}
-                                    <ResizableTh tableId="prof" colKey="nome" initialWidth="18%" onSort={() => requestSort('nome')} sortIndicator={getSortIndicator('nome')} colWidths={colWidths} onUpdateWidth={updateColumnWidth}>Nome</ResizableTh>
-
-                                    {/* EMAIL */}
-                                    <ResizableTh tableId="prof" colKey="email" initialWidth="22%" onSort={() => requestSort('email')} sortIndicator={getSortIndicator('email')} colWidths={colWidths} onUpdateWidth={updateColumnWidth}>Email</ResizableTh>
-
-                                    {/* TELEFONE: Curto */}
-                                    <ResizableTh tableId="prof" colKey="telefone" initialWidth="10%" onSort={() => requestSort('telefone')} sortIndicator={getSortIndicator('telefone')} colWidths={colWidths} onUpdateWidth={updateColumnWidth}>Telefone</ResizableTh>
-
-                                    {/* ATIVIDADES: Ocupa o resto do espaço */}
-                                    <ResizableTh tableId="prof" colKey="atividades" initialWidth="38%" onSort={() => requestSort('atividades')} sortIndicator={getSortIndicator('atividades')} colWidths={colWidths} onUpdateWidth={updateColumnWidth}>Atividades</ResizableTh>
-
-                                    {/* AÇÕES: Sticky Right */}
-                                    <th className="px-4 py-3 w-0 whitespace-nowrap text-center sticky right-0 z-30 bg-[#242830]">
-                                        {selectedIds.size > 0 ? (
-                                            <button
-                                                onClick={handleBulkDelete}
-                                                className="text-red-400 hover:text-red-300 text-xs font-bold uppercase"
-                                            >
-                                                Apagar ({selectedIds.size})
-                                            </button>
-                                        ) : (
-                                            "Ações"
-                                        )}
-                                    </th>
-                                </tr>
-                            </thead>
-
-                            {/* BODY */}
-                            <tbody>
-                                {loading ? (
-                                    <tr><td colSpan={7} className="text-center py-6">Carregando...</td></tr>
-                                ) : filteredAndSortedProfessionals.map(p => {
-                                    // Lógica de Cores Opacas para Colunas Fixas
-                                    const stickyBgClass = selectedIds.has(String(p.id))
-                                        ? 'bg-[#1a2736]' // Cor de fundo quando selecionado
-                                        : 'bg-[#1e2329] group-hover:bg-[#24282f]'; // Cor normal / hover
-
-                                    return (
-                                        <tr key={p.id} className={`group border-b border-[#3a3e45] hover:bg-[#24282f] transition-colors ${selectedIds.has(String(p.id)) ? 'bg-[#0084ff]/10' : ''}`}>
-
-                                            {/* CHECKBOX BODY: Sticky Left */}
-                                            <td className={`px-4 py-3 text-center sticky left-0 z-20 ${stickyBgClass}`}>
-                                                <input
-                                                    type="checkbox"
-                                                    className="rounded border-[#3a3e45] bg-[#1e2329] text-[#0084ff] focus:ring-[#0084ff] focus:ring-offset-0 focus:ring-offset-[#242830]"
-                                                    checked={selectedIds.has(String(p.id))}
-                                                    onChange={() => handleSelectRow(p.id)}
-                                                />
-                                            </td>
-
-                                            {/* Colunas Fluidas (max-w-[1px]) */}
-                                            <td className="px-4 py-3 whitespace-nowrap overflow-hidden text-ellipsis max-w-[1px]">{p.cargo}</td>
-                                            <td className="px-4 py-3 font-medium text-white whitespace-nowrap overflow-hidden text-ellipsis max-w-[1px]">{p.nome}</td>
-                                            <td className="px-4 py-3 whitespace-nowrap overflow-hidden text-ellipsis max-w-[1px]">{p.email || '-'}</td>
-
-                                            {/* Coluna Curta (w-[1%]) */}
-                                            <td className="px-4 py-3 font-mono text-xs whitespace-nowrap w-[1%]">{p.telefone || '-'}</td>
-
-                                            {/* Atividades: Fluida e Truncada (mudança de break-words para ellipsis para manter padrão) */}
-                                            <td className="px-4 py-3 whitespace-nowrap overflow-hidden text-ellipsis max-w-[1px]" title={p.atividades}>{p.atividades || '-'}</td>
-
-                                            {/* AÇÕES BODY: Sticky Right */}
-                                            <td className={`px-4 py-3 text-center whitespace-nowrap w-[1%] sticky right-0 z-20 ${stickyBgClass}`}>
-                                                <div className="flex justify-center gap-2">
-                                                    <button onClick={() => handleEdit(p)} className="text-[#a0a5b0] hover:text-white p-1" title="Editar">✏️</button>
-                                                    <button onClick={() => handleDelete(p.id)} className="text-red-400 hover:text-red-500 p-1" title="Excluir">🗑️</button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
-                    </div>
-                    {!loading && professionals.length === 0 && <div className="text-center py-6 text-[#a0a5b0]">Nenhum profissional cadastrado.</div>}
-                    {!loading && professionals.length > 0 && filteredAndSortedProfessionals.length === 0 && <div className="text-center py-6 text-[#a0a5b0]">Nenhum resultado encontrado para "{searchTerm}".</div>}
-                </div>
-            </Card>
+            <DataTable
+                title="Profissionais"
+                columns={columns}
+                data={professionals}
+                onAdd={handleAdd}
+                isLoading={loading}
+            />
 
             {/* Modal */}
             {isModalOpen && (
