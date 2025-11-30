@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { ChevronDown, Search } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface SearchableDropdownProps {
     options: string[];
@@ -7,9 +9,8 @@ interface SearchableDropdownProps {
     placeholder?: string;
     disabled?: boolean;
     required?: boolean;
-    label?: string;
     className?: string;
-    onAddNew?: (newValue: string) => void;
+    // Label removido daqui para ser controlado externamente pelo componente pai
 }
 
 export const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
@@ -19,9 +20,7 @@ export const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
     placeholder = 'Selecione...',
     disabled = false,
     required = false,
-    label,
-    className = '',
-    onAddNew
+    className = ''
 }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
@@ -49,76 +48,63 @@ export const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
         setSearchTerm('');
     };
 
-    const handleAddNew = () => {
-        if (onAddNew && searchTerm.trim()) {
-            onAddNew(searchTerm.trim());
-            onChange(searchTerm.trim());
-            setIsOpen(false);
-            setSearchTerm('');
-        }
-    };
-
     return (
-        <div className={`relative ${className}`} ref={dropdownRef}>
-            {label && (
-                <label className="block text-sm font-medium mb-1">
-                    {label} {required && <span className="text-red-500">*</span>}
-                </label>
-            )}
+        <div className={cn("relative w-full", className)} ref={dropdownRef}>
             <div className="relative">
                 <button
                     type="button"
                     onClick={() => !disabled && setIsOpen(!isOpen)}
                     disabled={disabled}
-                    className={`w-full bg-[#1e2329] border ${required && !value ? 'border-red-500' : 'border-[#3a3e45]'
-                        } rounded-md p-2 text-left focus:ring-2 focus:ring-[#0084ff] outline-none text-sm ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
-                        }`}
+                    className={cn(
+                        // ESTILO IDÊNTICO AO INPUT DO SHADCN (h-10, cores, bordas)
+                        "flex h-10 w-full items-center justify-between rounded-md border bg-[#1e2329] px-3 py-2 text-sm ring-offset-background",
+                        "border-[#3a3e45]", 
+                        "placeholder:text-[#5f656f]",
+                        "focus:outline-none focus:border-[#71767f]", // Foco cinza claro
+                        "disabled:cursor-not-allowed disabled:opacity-50",
+                        required && !value ? "border-red-500" : "",
+                        value ? "text-white" : "text-[#5f656f]"
+                    )}
                 >
-                    <span className={value ? 'text-white' : 'text-[#a0a5b0]'}>
+                    <span className="truncate">
                         {value || placeholder}
                     </span>
-                    <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-[#a0a5b0]">
-                        {isOpen ? '▲' : '▼'}
-                    </span>
+                    <ChevronDown className="h-4 w-4 opacity-50 text-white" />
                 </button>
 
                 {isOpen && !disabled && (
-                    <div className="absolute z-50 w-full mt-1 bg-[#242830] border border-[#3a3e45] rounded-md shadow-lg max-h-60 overflow-hidden">
-                        <div className="p-2 border-b border-[#3a3e45]">
-                            <input
-                                type="text"
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                placeholder="Buscar..."
-                                className="w-full bg-[#1e2329] border border-[#3a3e45] rounded p-2 text-sm focus:ring-2 focus:ring-[#0084ff] outline-none"
-                                autoFocus
-                            />
+                    <div className="absolute z-50 w-full mt-1 bg-[#1e2329] border border-[#3a3e45] rounded-md shadow-xl max-h-60 overflow-hidden">
+                        <div className="p-2 border-b border-[#3a3e45] sticky top-0 bg-[#1e2329] z-10">
+                            <div className="relative">
+                                <Search className="absolute left-2 top-2.5 h-3.5 w-3.5 text-[#a0a5b0]" />
+                                <input
+                                    type="text"
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    placeholder="Buscar..."
+                                    className="w-full bg-[#0f1419] border border-[#3a3e45] rounded-sm py-1.5 pl-8 pr-2 text-xs text-white focus:outline-none focus:border-[#71767f] placeholder:text-[#5f656f]"
+                                    autoFocus
+                                />
+                            </div>
                         </div>
-                        <div className="overflow-y-auto max-h-48 custom-scrollbar">
+                        <div className="overflow-y-auto max-h-48 custom-scrollbar p-1">
                             {filteredOptions.length > 0 ? (
                                 filteredOptions.map((option, index) => (
                                     <div
                                         key={index}
                                         onClick={() => handleSelect(option)}
-                                        className={`p-2 cursor-pointer text-sm hover:bg-[#3a3e45] ${option === value ? 'bg-[#0084ff]/20 text-[#0084ff]' : 'text-white'
-                                            }`}
+                                        className={cn(
+                                            "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors",
+                                            "hover:bg-[#242830] hover:text-white",
+                                            option === value ? "text-[#0084ff] font-medium bg-[#0084ff]/10" : "text-[#e8eaed]"
+                                        )}
                                     >
                                         {option}
                                     </div>
                                 ))
                             ) : (
                                 <div className="p-2 text-sm text-[#a0a5b0] text-center">
-                                    {onAddNew && searchTerm.trim() ? (
-                                        <button
-                                            type="button"
-                                            onClick={handleAddNew}
-                                            className="text-[#0084ff] hover:underline w-full text-left"
-                                        >
-                                            + Criar "{searchTerm}"
-                                        </button>
-                                    ) : (
-                                        'Nenhum resultado encontrado'
-                                    )}
+                                    Nenhum resultado.
                                 </div>
                             )}
                         </div>

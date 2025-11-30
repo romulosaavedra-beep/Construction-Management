@@ -1,8 +1,13 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { Card, CardHeader } from '../Card';
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import {
+    Card,
+    CardContent,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { SearchableDropdown } from '../SearchableDropdown';
 import {
     fetchAddressByCEP,
@@ -16,7 +21,31 @@ import {
 import { maskCNPJCPF } from '../../utils/formatters';
 import type { GeneralSettingsData } from '../../hooks/useSettings';
 import { useConfirm } from '../../utils/useConfirm';
-import toast from 'react-hot-toast';
+import { 
+    Save, 
+    Pencil, 
+    Undo2, 
+    Redo2, 
+    X, 
+    Building2, 
+    MapPin, 
+    DollarSign,
+    AlertTriangle
+} from "lucide-react";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
 
 interface GeneralSettingsProps {
     settings: GeneralSettingsData;
@@ -85,10 +114,10 @@ export const GeneralSettings: React.FC<GeneralSettingsProps> = ({ settings, onUp
 
     const handleExit = async () => {
         const confirmExit = await confirm({
-            title: 'Confirmar Saída',
+            title: 'Descartar Alterações',
             message: 'Tem certeza que deseja sair sem salvar? Todas as alterações serão perdidas.',
             confirmText: 'Sair sem Salvar',
-            cancelText: 'Cancelar'
+            cancelText: 'Continuar Editando'
         });
 
         if (!confirmExit) return;
@@ -233,26 +262,34 @@ export const GeneralSettings: React.FC<GeneralSettingsProps> = ({ settings, onUp
     };
 
     const handleNumberChange = (val: string) => {
-        handleChange('numero', val);
-        if (streetCandidates.length === 0) return;
-        let selectedCep = '';
-        if (val.trim() === '') {
-            const evenCandidate = streetCandidates.find(c => c.complemento.includes('par') && !c.complemento.includes('ímpar'));
-            selectedCep = evenCandidate ? evenCandidate.cep : streetCandidates[0].cep;
-        } else {
-            const num = parseInt(val.replace(/\D/g, ''));
-            if (!isNaN(num)) {
-                const isEven = num % 2 === 0;
-                const match = streetCandidates.find(c => {
-                    const comp = c.complemento.toLowerCase();
-                    if (isEven && comp.includes('lado par')) return true;
-                    if (!isEven && comp.includes('lado ímpar')) return true;
-                    return false;
-                });
-                selectedCep = match ? match.cep : streetCandidates[0].cep;
-            } else { selectedCep = streetCandidates[0].cep; }
+        let updates: Partial<GeneralSettingsData> = { numero: val };
+
+        if (streetCandidates.length > 0) {
+            let selectedCep = '';
+            if (val.trim() === '') {
+                const evenCandidate = streetCandidates.find(c => c.complemento.includes('par') && !c.complemento.includes('ímpar'));
+                selectedCep = evenCandidate ? evenCandidate.cep : streetCandidates[0].cep;
+            } else {
+                const num = parseInt(val.replace(/\D/g, ''));
+                if (!isNaN(num)) {
+                    const isEven = num % 2 === 0;
+                    const match = streetCandidates.find(c => {
+                        const comp = c.complemento.toLowerCase();
+                        if (isEven && comp.includes('lado par')) return true;
+                        if (!isEven && comp.includes('lado ímpar')) return true;
+                        return false;
+                    });
+                    selectedCep = match ? match.cep : streetCandidates[0].cep;
+                } else { 
+                    selectedCep = streetCandidates[0].cep; 
+                }
+            }
+            
+            if (selectedCep) {
+                updates.cep = selectedCep;
+            }
         }
-        if (selectedCep) handleChange('cep', selectedCep);
+        updateSettings(prev => ({ ...prev, ...updates }));
     };
 
     const getUniqueSuggestions = () => {
@@ -265,136 +302,326 @@ export const GeneralSettings: React.FC<GeneralSettingsProps> = ({ settings, onUp
         });
     };
 
-    // Load cities on mount if UF is present
     useEffect(() => {
         if (localSettings.estado && availableCities.length === 0) {
             loadCitiesForUF(localSettings.estado);
         }
     }, [localSettings.estado]);
 
+    const inputClass = "h-10 bg-[#1e2329] border-[#3a3e45] text-white focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-[#71767f] placeholder:text-[#5f656f] disabled:opacity-50 disabled:cursor-not-allowed";
+
     return (
-        <div>
-            <div className="flex justify-end gap-1 mb-4">
-                {isEditing ? (
-                    <>
-                        <Button variant="default" onClick={handleSave} className="bg-[#0084ff] hover:bg-[#0073e6] text-white">💾 Salvar</Button>
-                        <Button variant="secondary" onClick={handleExit}>Sair sem Salvar</Button>
-                        <Button size="sm" variant="secondary" onClick={handleUndo} disabled={!canUndo} title="Desfazer (Ctrl+Z)">↩️</Button>
-                        <Button size="sm" variant="secondary" onClick={handleRedo} disabled={!canRedo} title="Refazer (Ctrl+Y)">↪️</Button>
-                    </>
-                ) : (
-                    <Button onClick={handleEdit}>✏️ Editar</Button>
-                )}
-            </div>
-            <Card>
-                <CardHeader title="🏗️ Informações da Obra" />
-                <div className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
-                        <div className="md:col-span-2">
-                            <label className="block text-sm font-medium mb-1">Nome da Obra</label>
-                            <input type="text" value={localSettings.nomeObra} onChange={e => handleChange('nomeObra', e.target.value)} disabled={!isEditing} className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none text-sm disabled:opacity-60 disabled:cursor-not-allowed" placeholder="Ex: Edifício Residencial Jardim Botânico" />
-                        </div>
-                        <div className="md:col-span-2">
-                            <label className="block text-sm font-medium mb-1">Empresa Executora</label>
-                            <input type="text" value={localSettings.empresa} onChange={e => handleChange('empresa', e.target.value)} disabled={!isEditing} className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none text-sm disabled:opacity-60 disabled:cursor-not-allowed" placeholder="Ex: Construtora Silva & Cia" />
-                        </div>
-                        <div className="md:col-span-2">
-                            <label className="block text-sm font-medium mb-1">CNPJ/CPF da Empresa</label>
-                            <input type="text" value={localSettings.empresaCNPJ} onChange={e => handleChange('empresaCNPJ', maskCNPJCPF(e.target.value))} disabled={!isEditing} className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none text-sm disabled:opacity-60 disabled:cursor-not-allowed" placeholder="12.345.678/0001-99" maxLength={18} />
-                        </div>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <div className="md:col-span-2">
-                            <label className="block text-sm font-medium mb-1">Cliente</label>
-                            <input type="text" value={localSettings.cliente} onChange={e => handleChange('cliente', e.target.value)} disabled={!isEditing} className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none text-sm disabled:opacity-60 disabled:cursor-not-allowed" placeholder="Ex: Maria Oliveira Investimentos" />
-                        </div>
-                        <div className="md:col-span-2">
-                            <label className="block text-sm font-medium mb-1">CNPJ/CPF do Cliente</label>
-                            <input type="text" value={localSettings.clienteCNPJ} onChange={e => handleChange('clienteCNPJ', maskCNPJCPF(e.target.value))} disabled={!isEditing} className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none text-sm disabled:opacity-60 disabled:cursor-not-allowed" placeholder="123.456.789-01" maxLength={18} />
-                        </div>
-                    </div>
-                    <hr className="border-[#3a3e45]" />
-                    <div className="space-y-4">
-                        <h4 className="text-sm font-semibold text-[#e8eaed] mb-2">Localização da Obra</h4>
-                        <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-                            <div className="md:col-span-2">
-                                <label className="block text-sm font-medium mb-1">CEP</label>
-                                <div className="relative">
-                                    <input type="text" value={localSettings.cep} onChange={handleCEPChange} disabled={!isEditing} placeholder="00000-000" maxLength={9} className={`w-full bg-[#1e2329] border ${cepError ? 'border-red-500' : 'border-[#3a3e45]'} rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none text-sm disabled:opacity-60 disabled:cursor-not-allowed`} />
-                                    {isLoadingCEP && <div className="absolute right-3 top-2.5 text-xs text-[#0084ff]">...</div>}
-                                </div>
-                                {cepError && <p className="text-xs text-red-500 mt-1">{cepError}</p>}
-                            </div>
-                            <div className="md:col-span-2">
-                                <SearchableDropdown label="UF" options={BRAZILIAN_STATES} value={localSettings.estado} onChange={handleUFChange} placeholder="UF" required disabled={!isEditing} />
-                            </div>
-                            <div className="md:col-span-4">
-                                <SearchableDropdown label="Cidade" options={availableCities} value={localSettings.cidade} onChange={handleCityChange} placeholder={isLoadingCities ? "Carregando..." : "Selecione a cidade"} disabled={!isEditing || !localSettings.estado || isLoadingCities} required />
-                            </div>
-                            <div className="md:col-span-4">
-                                <label className="block text-sm font-medium mb-1">Bairro</label>
-                                <input type="text" value={localSettings.bairro} readOnly disabled className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 outline-none text-sm opacity-60 cursor-not-allowed" placeholder="Automático..." />
-                            </div>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-                            <div className="md:col-span-6 relative">
-                                <label className="block text-sm font-medium mb-1">Logradouro <span className="text-red-500">*</span></label>
-                                <input type="text" value={localSettings.logradouro} onChange={e => handleLogradouroChange(e.target.value)} disabled={!isEditing || !localSettings.cidade} placeholder={!localSettings.cidade ? "Selecione a cidade primeiro" : "Digite o nome da rua..."} className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none text-sm disabled:opacity-60 disabled:cursor-not-allowed" autoComplete="off" />
-                                {isLoadingStreets && <div className="absolute right-3 top-9 text-xs text-[#a0a5b0]">Buscando...</div>}
-                                {showStreetSuggestions && isEditing && (
-                                    <div className="absolute z-50 w-full bg-[#242830] border border-[#3a3e45] rounded-md mt-1 shadow-xl max-h-60 overflow-y-auto">
-                                        {getUniqueSuggestions().map((item: any, idx) => (
-                                            <div key={idx} onClick={() => handleSelectStreetSuggestion(item)} className="p-3 hover:bg-[#3a3e45] cursor-pointer border-b border-[#3a3e45] last:border-0">
-                                                <p className="text-sm text-white font-medium">{item.logradouro}</p>
-                                                <p className="text-xs text-[#a0a5b0]">{item.bairro}</p>
-                                            </div>
-                                        ))}
+        <TooltipProvider>
+            <div className="space-y-6">
+                {/* CARD ÚNICO UNIFICADO */}
+                <Card className="bg-[#1e2329] border-[#3a3e45] shadow-sm">
+                    {/* HEADER COM BOTÕES DE AÇÃO */}
+                    <CardHeader className="border-b border-[#3a3e45] pb-4 flex flex-row items-center justify-between space-y-0">
+                        <CardTitle className="text-lg font-semibold text-white flex items-center gap-2">
+                            <Building2 className="w-5 h-5 text-[#0084ff]" />
+                            Informações da Obra
+                        </CardTitle>
+
+                        {/* BOTÕES MOVIDOS PARA DENTRO DO HEADER */}
+                        <div className="flex items-center gap-2">
+                            {isEditing ? (
+                                <>
+                                    <div className="flex items-center gap-1 mr-2 bg-[#0f1419] p-1 rounded-lg border border-[#3a3e45]">
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                {/* CORREÇÃO AQUI: hover:bg-[#3a3e45] para não ficar branco */}
+                                                <Button 
+                                                    size="icon" 
+                                                    variant="ghost" 
+                                                    onClick={handleUndo} 
+                                                    disabled={!canUndo} 
+                                                    className="h-7 w-7 text-[#a0a5b0] hover:text-white hover:bg-[#3a3e45]"
+                                                >
+                                                    <Undo2 className="h-4 w-4" />
+                                                </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent side="bottom">Desfazer (Ctrl+Z)</TooltipContent>
+                                        </Tooltip>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                {/* CORREÇÃO AQUI: hover:bg-[#3a3e45] para não ficar branco */}
+                                                <Button 
+                                                    size="icon" 
+                                                    variant="ghost" 
+                                                    onClick={handleRedo} 
+                                                    disabled={!canRedo} 
+                                                    className="h-7 w-7 text-[#a0a5b0] hover:text-white hover:bg-[#3a3e45]"
+                                                >
+                                                    <Redo2 className="h-4 w-4" />
+                                                </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent side="bottom">Refazer (Ctrl+Y)</TooltipContent>
+                                        </Tooltip>
                                     </div>
-                                )}
+                                    <Button variant="ghost" onClick={handleExit} className="text-[#a0a5b0] hover:text-white hover:bg-[#3a3e45] h-9">
+                                        <X className="w-4 h-4 mr-2" /> Cancelar
+                                    </Button>
+                                    <Button onClick={handleSave} className="bg-[#0084ff] hover:bg-[#0073e6] text-white shadow-lg shadow-blue-900/20 h-9">
+                                        <Save className="w-4 h-4 mr-2" /> Salvar
+                                    </Button>
+                                </>
+                            ) : (
+                                <Button onClick={handleEdit} className="bg-[#242830] border border-[#3a3e45] hover:bg-[#2f343d] text-white h-9">
+                                    <Pencil className="w-4 h-4 mr-2" /> Editar Informações
+                                </Button>
+                            )}
+                        </div>
+                    </CardHeader>
+
+                    <CardContent className="pt-6 space-y-6">
+                        {/* BLOCO 1: DADOS BÁSICOS */}
+                        <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
+                            <div className="md:col-span-2 space-y-2">
+                                <Label className="text-[#e8eaed]">Nome da Obra</Label>
+                                <Input 
+                                    value={localSettings.nomeObra} 
+                                    onChange={e => handleChange('nomeObra', e.target.value)} 
+                                    disabled={!isEditing} 
+                                    className={inputClass}
+                                    placeholder="Ex: Edifício Residencial Jardim Botânico" 
+                                />
                             </div>
-                            <div className="md:col-span-2">
-                                <label className="block text-sm font-medium mb-1">Número</label>
-                                <input type="text" value={localSettings.numero} onChange={e => handleNumberChange(e.target.value)} disabled={!isEditing} className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none text-sm disabled:opacity-60 disabled:cursor-not-allowed" placeholder="Ex: 1234" />
+                            <div className="md:col-span-2 space-y-2">
+                                <Label className="text-[#e8eaed]">Empresa Executora</Label>
+                                <Input 
+                                    value={localSettings.empresa} 
+                                    onChange={e => handleChange('empresa', e.target.value)} 
+                                    disabled={!isEditing} 
+                                    className={inputClass}
+                                    placeholder="Ex: Construtora Silva & Cia" 
+                                />
                             </div>
-                            <div className="md:col-span-4">
-                                <label className="block text-sm font-medium mb-1">Complemento</label>
-                                <input type="text" value={localSettings.complemento} onChange={e => handleChange('complemento', e.target.value)} disabled={!isEditing} className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none text-sm disabled:opacity-60 disabled:cursor-not-allowed" placeholder="Ex: Bloco A, Sala 301" />
+                            <div className="md:col-span-2 space-y-2">
+                                <Label className="text-[#e8eaed]">CNPJ/CPF da Empresa</Label>
+                                <Input 
+                                    value={localSettings.empresaCNPJ} 
+                                    onChange={e => handleChange('empresaCNPJ', maskCNPJCPF(e.target.value))} 
+                                    disabled={!isEditing} 
+                                    className={inputClass}
+                                    placeholder="12.345.678/0001-99" 
+                                    maxLength={18} 
+                                />
                             </div>
                         </div>
-                    </div>
-                </div>
-            </Card>
-            <Card>
-                <CardHeader title="Configurações Financeiras" />
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                        <label className="block text-sm font-medium mb-1">% Impostos</label>
-                        <input type="number" value={localSettings.impostos} onChange={e => handleChange('impostos', parseFloat(e.target.value))} disabled={!isEditing} className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none disabled:opacity-60 disabled:cursor-not-allowed" placeholder="Ex: 8.5" />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium mb-1">% Custos Indiretos</label>
-                        <input type="number" value={localSettings.custosIndiretos} onChange={e => handleChange('custosIndiretos', parseFloat(e.target.value))} disabled={!isEditing} className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none disabled:opacity-60 disabled:cursor-not-allowed" placeholder="Ex: 5.0" />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium mb-1">% BDI</label>
-                        <input type="number" value={localSettings.bdi} onChange={e => handleChange('bdi', parseFloat(e.target.value))} disabled={!isEditing} className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none disabled:opacity-60 disabled:cursor-not-allowed" placeholder="Ex: 25.0" />
-                    </div>
-                </div>
-            </Card>
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                            <div className="md:col-span-2 space-y-2">
+                                <Label className="text-[#e8eaed]">Cliente</Label>
+                                <Input 
+                                    value={localSettings.cliente} 
+                                    onChange={e => handleChange('cliente', e.target.value)} 
+                                    disabled={!isEditing} 
+                                    className={inputClass}
+                                    placeholder="Ex: Maria Oliveira Investimentos" 
+                                />
+                            </div>
+                            <div className="md:col-span-2 space-y-2">
+                                <Label className="text-[#e8eaed]">CNPJ/CPF do Cliente</Label>
+                                <Input 
+                                    value={localSettings.clienteCNPJ} 
+                                    onChange={e => handleChange('clienteCNPJ', maskCNPJCPF(e.target.value))} 
+                                    disabled={!isEditing} 
+                                    className={inputClass}
+                                    placeholder="123.456.789-01" 
+                                    maxLength={18} 
+                                />
+                            </div>
+                        </div>
+
+                        {/* DIVISOR: LOCALIZAÇÃO */}
+                        <div className="relative py-2">
+                            <div className="absolute inset-0 flex items-center">
+                                <span className="w-full border-t border-[#3a3e45]" />
+                            </div>
+                            <div className="relative flex justify-center text-xs uppercase">
+                                <span className="bg-[#1e2329] px-2 text-[#a0a5b0] font-medium flex items-center gap-1">
+                                    <MapPin className="w-3 h-3" /> Localização
+                                </span>
+                            </div>
+                        </div>
+
+                        {/* BLOCO 2: ENDEREÇO */}
+                        <div className="space-y-4">
+                            <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+                                <div className="md:col-span-2 space-y-2">
+                                    <Label className="text-[#e8eaed]">CEP</Label>
+                                    <div className="relative">
+                                        <Input 
+                                            value={localSettings.cep} 
+                                            onChange={handleCEPChange} 
+                                            disabled={!isEditing} 
+                                            placeholder="00000-000" 
+                                            maxLength={9} 
+                                            className={`${inputClass} ${cepError ? 'border-red-500 focus-visible:border-red-500' : ''}`} 
+                                        />
+                                        {isLoadingCEP && <div className="absolute right-3 top-2.5 text-xs text-[#0084ff] animate-pulse">...</div>}
+                                    </div>
+                                    {cepError && <p className="text-xs text-red-500">{cepError}</p>}
+                                </div>
+                                <div className="md:col-span-2 space-y-2">
+                                    <Label className="text-[#e8eaed]">UF <span className="text-red-500">*</span></Label>
+                                    <SearchableDropdown 
+                                        options={BRAZILIAN_STATES} 
+                                        value={localSettings.estado} 
+                                        onChange={handleUFChange} 
+                                        placeholder="UF" 
+                                        required 
+                                        disabled={!isEditing}
+                                        className="w-full" 
+                                    />
+                                </div>
+                                <div className="md:col-span-4 space-y-2">
+                                    <Label className="text-[#e8eaed]">Cidade <span className="text-red-500">*</span></Label>
+                                    <SearchableDropdown 
+                                        options={availableCities} 
+                                        value={localSettings.cidade} 
+                                        onChange={handleCityChange} 
+                                        placeholder={isLoadingCities ? "Carregando..." : "Selecione a cidade"} 
+                                        disabled={!isEditing || !localSettings.estado || isLoadingCities} 
+                                        required 
+                                        className="w-full"
+                                    />
+                                </div>
+                                <div className="md:col-span-4 space-y-2">
+                                    <Label className="text-[#e8eaed]">Bairro</Label>
+                                    <Input 
+                                        value={localSettings.bairro} 
+                                        readOnly 
+                                        disabled 
+                                        className={`${inputClass} opacity-60 cursor-not-allowed`} 
+                                        placeholder="Automático..." 
+                                    />
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+                                <div className="md:col-span-6 space-y-2 relative">
+                                    <Label className="text-[#e8eaed]">Logradouro <span className="text-red-500">*</span></Label>
+                                    <Input 
+                                        value={localSettings.logradouro} 
+                                        onChange={e => handleLogradouroChange(e.target.value)} 
+                                        disabled={!isEditing || !localSettings.cidade} 
+                                        placeholder={!localSettings.cidade ? "Selecione a cidade primeiro" : "Digite o nome da rua..."} 
+                                        className={inputClass} 
+                                        autoComplete="off" 
+                                    />
+                                    {isLoadingStreets && <div className="absolute right-3 top-9 text-xs text-[#a0a5b0]">Buscando...</div>}
+                                    {showStreetSuggestions && isEditing && (
+                                        <div className="absolute z-50 w-full bg-[#242830] border border-[#3a3e45] rounded-md mt-1 shadow-xl max-h-60 overflow-y-auto">
+                                            {getUniqueSuggestions().map((item: any, idx) => (
+                                                <div key={idx} onClick={() => handleSelectStreetSuggestion(item)} className="p-3 hover:bg-[#3a3e45] cursor-pointer border-b border-[#3a3e45] last:border-0">
+                                                    <p className="text-sm text-white font-medium">{item.logradouro}</p>
+                                                    <p className="text-xs text-[#a0a5b0]">{item.bairro}</p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="md:col-span-2 space-y-2">
+                                    <Label className="text-[#e8eaed]">Número</Label>
+                                    <Input 
+                                        value={localSettings.numero} 
+                                        onChange={e => handleNumberChange(e.target.value)} 
+                                        disabled={!isEditing} 
+                                        className={inputClass} 
+                                        placeholder="Ex: 1234" 
+                                    />
+                                </div>
+                                <div className="md:col-span-4 space-y-2">
+                                    <Label className="text-[#e8eaed]">Complemento</Label>
+                                    <Input 
+                                        value={localSettings.complemento} 
+                                        onChange={e => handleChange('complemento', e.target.value)} 
+                                        disabled={!isEditing} 
+                                        className={inputClass} 
+                                        placeholder="Ex: Bloco A, Sala 301" 
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* DIVISOR: FINANCEIRO */}
+                        <div className="relative py-4 mt-4">
+                            <div className="absolute inset-0 flex items-center">
+                                <span className="w-full border-t border-[#3a3e45]" />
+                            </div>
+                            <div className="relative flex justify-center text-xs uppercase">
+                                <span className="bg-[#1e2329] px-2 text-[#a0a5b0] font-medium flex items-center gap-1">
+                                    <DollarSign className="w-3 h-3" /> Configurações Financeiras
+                                </span>
+                            </div>
+                        </div>
+
+                        {/* BLOCO 3: FINANCEIRO */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div className="space-y-2">
+                                <Label className="text-[#e8eaed]">% Impostos</Label>
+                                <div className="relative">
+                                    <Input 
+                                        type="number" 
+                                        value={localSettings.impostos} 
+                                        onChange={e => handleChange('impostos', parseFloat(e.target.value))} 
+                                        disabled={!isEditing} 
+                                        className={`${inputClass} pr-8`} 
+                                        placeholder="Ex: 8.5" 
+                                    />
+                                    <span className="absolute right-3 top-2.5 text-xs text-[#a0a5b0]">%</span>
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="text-[#e8eaed]">% Custos Indiretos</Label>
+                                <div className="relative">
+                                    <Input 
+                                        type="number" 
+                                        value={localSettings.custosIndiretos} 
+                                        onChange={e => handleChange('custosIndiretos', parseFloat(e.target.value))} 
+                                        disabled={!isEditing} 
+                                        className={`${inputClass} pr-8`} 
+                                        placeholder="Ex: 5.0" 
+                                    />
+                                    <span className="absolute right-3 top-2.5 text-xs text-[#a0a5b0]">%</span>
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="text-[#e8eaed]">% BDI</Label>
+                                <div className="relative">
+                                    <Input 
+                                        type="number" 
+                                        value={localSettings.bdi} 
+                                        onChange={e => handleChange('bdi', parseFloat(e.target.value))} 
+                                        disabled={!isEditing} 
+                                        className={`${inputClass} pr-8`} 
+                                        placeholder="Ex: 25.0" 
+                                    />
+                                    <span className="absolute right-3 top-2.5 text-xs text-[#a0a5b0]">%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
 
             {/* Confirm Dialog */}
-            {dialogState.isOpen && (
-                <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[2100] p-4">
-                    <div className="bg-[#242830] rounded-lg shadow-2xl w-full max-w-md border border-[#3a3e45] p-6">
-                        <h3 className="text-lg font-semibold text-white mb-2">{dialogState.title}</h3>
-                        <p className="text-[#a0a5b0] mb-6">{dialogState.message}</p>
-                        <div className="flex justify-end gap-3">
-                            <Button variant="secondary" onClick={handleCancel}>{dialogState.cancelText || 'Cancelar'}</Button>
-                            <Button variant="destructive" onClick={handleConfirm}>{dialogState.confirmText || 'Confirmar'}</Button>
-                        </div>
-                    </div>
-                </div>
-            )}
-        </div>
+            <Dialog open={dialogState.isOpen} onOpenChange={(open) => !open && handleCancel()}>
+                <DialogContent className="sm:max-w-[400px] bg-[#242830] border-[#3a3e45] text-[#e8eaed] shadow-2xl">
+                    <DialogHeader>
+                        <DialogTitle className="text-white flex items-center gap-2">
+                            <AlertTriangle className="w-5 h-5 text-yellow-500" />
+                            {dialogState.title}
+                        </DialogTitle>
+                        <DialogDescription className="text-[#a0a5b0] pt-2">
+                            {dialogState.message}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter className="gap-2 sm:gap-0 mt-4">
+                        <Button variant="ghost" onClick={handleCancel} className="text-[#a0a5b0] hover:text-white hover:bg-[#3a3e45]">{dialogState.cancelText || 'Cancelar'}</Button>
+                        <Button variant="destructive" onClick={handleConfirm} className="bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-900/20">{dialogState.confirmText || 'Confirmar'}</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+        </TooltipProvider>
     );
 };

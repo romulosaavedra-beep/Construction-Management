@@ -5,9 +5,21 @@ import { useConfirm } from '../../utils/useConfirm';
 import { maskMobilePhone, maskCNPJCPF } from '../../utils/formatters';
 import type { Fornecedor } from '../../types';
 import { DataTable } from '../Table/DataTable';
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+    Pencil,
+    Trash2,
+    Plus,
+    CirclePlus,
+    ExternalLink,
+    Building2,
+    User,
+    Mail,
+    Phone,
+    MapPin
+} from "lucide-react";
 import {
     Dialog,
     DialogContent,
@@ -15,7 +27,15 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+    TooltipProvider
+} from "@/components/ui/tooltip";
+import toast from 'react-hot-toast';
+import { Truck } from "lucide-react";
 
 interface SuppliersSettingsProps {
     projectId?: string;
@@ -31,7 +51,7 @@ export const SuppliersSettings: React.FC<SuppliersSettingsProps> = ({ projectId 
 
     const handleAdd = () => {
         if (!projectId) {
-            alert({ message: 'Por favor, salve as Configurações Gerais primeiro para criar o projeto.' });
+            toast.error('Selecione um projeto primeiro.');
             return;
         }
         setCurrentSupplier({});
@@ -56,17 +76,19 @@ export const SuppliersSettings: React.FC<SuppliersSettingsProps> = ({ projectId 
 
             if (shouldDelete) {
                 await deleteSupplier(ids[0]);
+                toast.success('Fornecedor removido.');
             }
         } else {
             const shouldDelete = await confirm({
                 title: 'Excluir Fornecedores',
                 message: `Tem certeza que deseja excluir ${ids.length} fornecedores selecionados?`,
-                confirmText: 'Excluir',
+                confirmText: 'Excluir Seleção',
                 cancelText: 'Cancelar'
             });
 
             if (shouldDelete) {
                 await deleteSuppliers(ids);
+                toast.success(`${ids.length} fornecedores removidos.`);
             }
         }
     };
@@ -75,157 +97,267 @@ export const SuppliersSettings: React.FC<SuppliersSettingsProps> = ({ projectId 
         e.preventDefault();
         setPhoneError("");
 
-        if (!currentSupplier.nome) return;
+        if (!currentSupplier.nome) {
+            toast.error('Razão Social é obrigatória.');
+            return;
+        }
 
         const rawPhone = (currentSupplier.telefone || '').replace(/\D/g, '');
         if (rawPhone.length > 0) {
-            if (rawPhone.length !== 11 && rawPhone.length !== 10) return setPhoneError("Telefone inválido.");
+            if (rawPhone.length !== 11 && rawPhone.length !== 10) {
+                setPhoneError("Telefone inválido.");
+                return;
+            }
         }
 
-        if (currentSupplier.id) {
-            await updateSupplier(currentSupplier as Fornecedor);
-        } else {
-            await addSupplier(currentSupplier as Omit<Fornecedor, 'id'>);
+        try {
+            if (currentSupplier.id) {
+                await updateSupplier(currentSupplier as Fornecedor);
+                toast.success('Fornecedor atualizado!');
+            } else {
+                await addSupplier(currentSupplier as Omit<Fornecedor, 'id'>);
+                toast.success('Fornecedor criado!');
+            }
+            setIsModalOpen(false);
+        } catch (error) {
+            console.error(error);
+            toast.error('Erro ao salvar fornecedor.');
         }
-        setIsModalOpen(false);
     };
 
     const columnHelper = createColumnHelper<Fornecedor>();
 
     const columns = useMemo(() => [
+        // 1. Checkbox Column (Fixed 48px)
         {
             id: 'select',
             header: ({ table }: any) => (
-                <input
-                    type="checkbox"
-                    className="rounded border-[#3a3e45] bg-[#1e2329] text-[#0084ff] focus:ring-[#0084ff] focus:ring-offset-0 focus:ring-offset-[#242830]"
-                    checked={table.getIsAllPageRowsSelected()}
-                    ref={input => {
-                        if (input) input.indeterminate = table.getIsSomePageRowsSelected();
-                    }}
-                    onChange={table.getToggleAllPageRowsSelectedHandler()}
-                />
+                <div className="flex justify-center">
+                    <input
+                        type="checkbox"
+                        className="rounded border-[#3a3e45] bg-[#0f1419] text-[#0084ff] focus:ring-[#0084ff] focus:ring-offset-0 focus:ring-offset-[#242830] w-3.5 h-3.5 cursor-pointer"
+                        checked={table.getIsAllPageRowsSelected()}
+                        ref={input => {
+                            if (input) input.indeterminate = table.getIsSomePageRowsSelected();
+                        }}
+                        onChange={table.getToggleAllPageRowsSelectedHandler()}
+                    />
+                </div>
             ),
             cell: ({ row }: any) => (
-                <input
-                    type="checkbox"
-                    className="rounded border-[#3a3e45] bg-[#1e2329] text-[#0084ff] focus:ring-[#0084ff] focus:ring-offset-0 focus:ring-offset-[#242830]"
-                    checked={row.getIsSelected()}
-                    disabled={!row.getCanSelect()}
-                    ref={input => {
-                        if (input) input.indeterminate = row.getIsSomeSelected();
-                    }}
-                    onChange={row.getToggleSelectedHandler()}
-                />
+                <div className="flex justify-center">
+                    <input
+                        type="checkbox"
+                        className="rounded border-[#3a3e45] bg-[#0f1419] text-[#0084ff] focus:ring-[#0084ff] focus:ring-offset-0 focus:ring-offset-[#242830] w-3.5 h-3.5 cursor-pointer"
+                        checked={row.getIsSelected()}
+                        disabled={!row.getCanSelect()}
+                        onChange={row.getToggleSelectedHandler()}
+                    />
+                </div>
             ),
-            size: 40,
+            size: 48,
+            minSize: 48,
             enableResizing: false,
         },
+        // 2. Razão Social (Fluid)
         columnHelper.accessor('nome', {
             header: 'Razão Social',
-            size: 250,
-            cell: info => <span className="font-medium text-white">{info.getValue()}</span>
+            size: 350,
+            minSize: 200,
+            cell: info => (
+                <div className="flex items-center gap-2">
+                    <Building2 className="w-3.5 h-3.5 text-[#a0a5b0]" />
+                    <span className="font-medium text-white">{info.getValue()}</span>
+                </div>
+            )
         }),
+        // 3. Vendedor
         columnHelper.accessor('contato', {
             header: 'Vendedor',
-            size: 150,
-            cell: info => info.getValue() || '-'
+            size: 250,
+            minSize: 150,
+            cell: info => info.getValue() ? (
+                <div className="flex items-center gap-2 text-[#a0a5b0]">
+                    <User className="w-3.5 h-3.5" />
+                    <span>{info.getValue()}</span>
+                </div>
+            ) : '-'
         }),
+        // 4. Email
         columnHelper.accessor('email', {
             header: 'Email',
-            size: 200,
-            cell: info => info.getValue() || '-'
+            size: 250,
+            minSize: 150,
+            cell: info => info.getValue() ? (
+                <div className="flex items-center gap-2 text-[#a0a5b0]">
+                    <Mail className="w-3.5 h-3.5" />
+                    <span className="truncate">{info.getValue()}</span>
+                </div>
+            ) : '-'
         }),
+        // 5. Telefone
         columnHelper.accessor('telefone', {
             header: 'Telefone',
-            size: 120,
-            cell: info => <span className="font-mono text-xs">{info.getValue() || '-'}</span>
+            size: 160,
+            minSize: 120,
+            cell: info => info.getValue() ? (
+                <div className="flex items-center gap-2 text-[#a0a5b0]">
+                    <Phone className="w-3.5 h-3.5" />
+                    <span className="font-mono text-xs">{info.getValue()}</span>
+                </div>
+            ) : '-'
         }),
+        // 6. CNPJ
         columnHelper.accessor('cnpj', {
             header: 'CNPJ/CPF',
-            size: 140,
-            cell: info => <span className="font-mono text-xs">{info.getValue() || '-'}</span>
+            size: 160,
+            minSize: 140,
+            cell: info => <span className="font-mono text-xs text-[#a0a5b0] bg-[#242830] px-2 py-1 rounded border border-[#3a3e45]">{info.getValue() || '-'}</span>
         }),
+        // 7. Endereço (Fluid)
         columnHelper.accessor('endereco', {
             header: 'Endereço',
-            size: 200,
+            size: 250,
+            minSize: 200,
             meta: { isFluid: true },
-            cell: info => <span title={info.getValue()}>{info.getValue() || '-'}</span>
+            cell: info => info.getValue() ? (
+                <div className="flex items-center gap-2 text-[#a0a5b0]" title={info.getValue()}>
+                    <MapPin className="w-3.5 h-3.5 shrink-0" />
+                    <span className="truncate">{info.getValue()}</span>
+                </div>
+            ) : '-'
         }),
+        // 8. Link (Fixed)
         columnHelper.accessor('link', {
             header: 'Link',
             size: 60,
+            minSize: 60,
             enableResizing: false,
-            cell: info => info.getValue() ? <a href={info.getValue()} target="_blank" rel="noopener noreferrer" className="text-[#0084ff] hover:underline text-xs">Link</a> : '-'
+            cell: info => info.getValue() ? (
+                <div className="flex justify-center">
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <a
+                                href={info.getValue()}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-[#0084ff] hover:text-[#339dff] p-1 rounded hover:bg-[#0084ff]/10 transition-colors"
+                            >
+                                <ExternalLink className="w-3.5 h-3.5" />
+                            </a>
+                        </TooltipTrigger>
+                        <TooltipContent side="left">Abrir Link</TooltipContent>
+                    </Tooltip>
+                </div>
+            ) : <div className="text-center">-</div>
         }),
+        // 9. Actions (Fixed Right)
         {
             id: 'actions',
             header: 'Ações',
-            size: 80,
+            size: 100,
+            minSize: 100,
             enableResizing: false,
             cell: ({ row }: any) => (
-                <div className="flex justify-center gap-2">
-                    <Button variant="ghost" size="icon" onClick={() => handleEdit(row.original)} className="h-8 w-8 text-[#a0a5b0] hover:text-white" title="Editar">
-                        ✏️
-                    </Button>
-                    <Button variant="ghost" size="icon" onClick={() => handleDelete([row.original.id])} className="h-8 w-8 text-red-400 hover:text-red-500 hover:bg-red-900/20" title="Excluir">
-                        🗑️
-                    </Button>
+                <div className="flex justify-center gap-1">
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleEdit(row.original)}
+                                className="h-8 w-8 text-[#a0a5b0] hover:text-white hover:bg-[#3a3e45]"
+                            >
+                                <Pencil className="h-3.5 w-3.5" />
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom" align="end">
+                            <p>Editar</p>
+                        </TooltipContent>
+                    </Tooltip>
+
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleDelete([row.original.id])}
+                                className="h-8 w-8 text-red-400 hover:text-red-300 hover:bg-red-400/10"
+                            >
+                                <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom" align="end">
+                            <p>Excluir</p>
+                        </TooltipContent>
+                    </Tooltip>
                 </div>
             )
         }
     ], [deleteSupplier, deleteSuppliers, confirm]);
 
     return (
-        <>
+        <TooltipProvider>
             <DataTable
-                title="Fornecedores"
+                title={
+                    <div className="flex items-center gap-2">
+                        <Truck className="w-5 h-5 text-[#0084ff]" />
+                        Fornecedores
+                    </div>
+                }
                 columns={columns}
                 data={suppliers}
                 onAdd={handleAdd}
                 onDelete={handleDelete}
                 isLoading={loading}
+                searchPlaceholder="Buscar fornecedores..."
+                initialSorting={[{ id: 'nome', desc: false }]}
             />
+
 
             {/* Modal */}
             <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-                <DialogContent className="sm:max-w-[500px] bg-[#242830] border-[#3a3e45] text-[#e8eaed]">
+                <DialogContent className="sm:max-w-[600px] bg-[#242830] border-[#3a3e45] text-[#e8eaed] shadow-2xl">
                     <DialogHeader>
-                        <DialogTitle className="text-white">{currentSupplier.id ? 'Editar Fornecedor' : 'Novo Fornecedor'}</DialogTitle>
+                        <DialogTitle className="text-white flex items-center gap-2">
+                            {currentSupplier.id ? <Pencil className="w-4 h-4 text-[#0084ff]" /> : <CirclePlus className="w-4 h-4 text-[#0084ff]" />}
+                            {currentSupplier.id ? 'Editar Fornecedor' : 'Novo Fornecedor'}
+                        </DialogTitle>
                         <DialogDescription className="text-[#a0a5b0]">
                             Preencha os dados do fornecedor abaixo.
                         </DialogDescription>
                     </DialogHeader>
                     <form onSubmit={handleSave} className="space-y-4 py-4">
                         <div className="space-y-2">
-                            <Label htmlFor="nome" className="text-sm font-medium">Razão Social <span className="text-red-500">*</span></Label>
+                            <Label htmlFor="nome" className="text-sm font-medium text-[#e8eaed]">Razão Social <span className="text-red-500">*</span></Label>
                             <Input
                                 id="nome"
                                 value={currentSupplier.nome || ''}
                                 onChange={e => setCurrentSupplier({ ...currentSupplier, nome: e.target.value })}
-                                className="bg-[#1e2329] border-[#3a3e45] text-white focus-visible:ring-[#0084ff]"
+                                className="bg-[#1e2329] border-[#3a3e45] text-white focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-[#71767f] placeholder:text-[#5f656f]"
                                 placeholder="Ex: Construtora ABC Ltda"
                                 required
+                                autoFocus
                             />
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label htmlFor="contato" className="text-sm font-medium">Nome do Vendedor</Label>
+                                <Label htmlFor="contato" className="text-sm font-medium text-[#e8eaed]">Nome do Vendedor</Label>
                                 <Input
                                     id="contato"
                                     value={currentSupplier.contato || ''}
                                     onChange={e => setCurrentSupplier({ ...currentSupplier, contato: e.target.value })}
-                                    className="bg-[#1e2329] border-[#3a3e45] text-white focus-visible:ring-[#0084ff]"
+                                    className="bg-[#1e2329] border-[#3a3e45] text-white focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-[#71767f] placeholder:text-[#5f656f]"
                                     placeholder="Ex: Carlos Souza"
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="cnpj" className="text-sm font-medium">CNPJ/CPF</Label>
+                                <Label htmlFor="cnpj" className="text-sm font-medium text-[#e8eaed]">CNPJ/CPF</Label>
                                 <Input
                                     id="cnpj"
                                     value={currentSupplier.cnpj || ''}
                                     onChange={e => setCurrentSupplier({ ...currentSupplier, cnpj: maskCNPJCPF(e.target.value) })}
-                                    className="bg-[#1e2329] border-[#3a3e45] text-white focus-visible:ring-[#0084ff]"
+                                    className="bg-[#1e2329] border-[#3a3e45] text-white focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-[#71767f] placeholder:text-[#5f656f] font-mono"
                                     maxLength={18}
                                     placeholder="12.345.678/0001-99"
                                 />
@@ -233,18 +365,18 @@ export const SuppliersSettings: React.FC<SuppliersSettingsProps> = ({ projectId 
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label htmlFor="email" className="text-sm font-medium">Email</Label>
+                                <Label htmlFor="email" className="text-sm font-medium text-[#e8eaed]">Email</Label>
                                 <Input
                                     id="email"
                                     type="email"
                                     value={currentSupplier.email || ''}
                                     onChange={e => setCurrentSupplier({ ...currentSupplier, email: e.target.value })}
-                                    className="bg-[#1e2329] border-[#3a3e45] text-white focus-visible:ring-[#0084ff]"
+                                    className="bg-[#1e2329] border-[#3a3e45] text-white focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-[#71767f] placeholder:text-[#5f656f]"
                                     placeholder="vendas@fornecedor.com.br"
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="telefone" className="text-sm font-medium">Telefone</Label>
+                                <Label htmlFor="telefone" className="text-sm font-medium text-[#e8eaed]">Telefone</Label>
                                 <Input
                                     id="telefone"
                                     value={currentSupplier.telefone || ''}
@@ -253,37 +385,37 @@ export const SuppliersSettings: React.FC<SuppliersSettingsProps> = ({ projectId 
                                         setCurrentSupplier({ ...currentSupplier, telefone: masked });
                                         setPhoneError("");
                                     }}
-                                    className={`bg-[#1e2329] border ${phoneError ? 'border-red-500' : 'border-[#3a3e45]'} text-white focus-visible:ring-[#0084ff]`}
+                                    className={`bg-[#1e2329] border ${phoneError ? 'border-red-500' : 'border-[#3a3e45]'} text-white focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-[#71767f] placeholder:text-[#5f656f]`}
                                     maxLength={15}
                                     placeholder="(11) 98765-4321"
                                 />
-                                {phoneError && <p className="text-xs text-red-500">{phoneError}</p>}
+                                {phoneError && <p className="text-xs text-red-500 mt-1">{phoneError}</p>}
                             </div>
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="endereco" className="text-sm font-medium">Endereço Completo</Label>
+                            <Label htmlFor="endereco" className="text-sm font-medium text-[#e8eaed]">Endereço Completo</Label>
                             <Input
                                 id="endereco"
                                 value={currentSupplier.endereco || ''}
                                 onChange={e => setCurrentSupplier({ ...currentSupplier, endereco: e.target.value })}
-                                className="bg-[#1e2329] border-[#3a3e45] text-white focus-visible:ring-[#0084ff]"
+                                className="bg-[#1e2329] border-[#3a3e45] text-white focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-[#71767f] placeholder:text-[#5f656f]"
                                 placeholder="Rua das Flores, 123, Centro - São Paulo - SP"
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="link" className="text-sm font-medium">Link (Site/Catálogo)</Label>
+                            <Label htmlFor="link" className="text-sm font-medium text-[#e8eaed]">Link (Site/Catálogo)</Label>
                             <Input
                                 id="link"
                                 type="url"
                                 value={currentSupplier.link || ''}
                                 onChange={e => setCurrentSupplier({ ...currentSupplier, link: e.target.value })}
-                                className="bg-[#1e2329] border-[#3a3e45] text-white focus-visible:ring-[#0084ff]"
+                                className="bg-[#1e2329] border-[#3a3e45] text-white focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-[#71767f] placeholder:text-[#5f656f]"
                                 placeholder="https://www.fornecedor.com.br"
                             />
                         </div>
-                        <DialogFooter>
-                            <Button variant="secondary" onClick={() => setIsModalOpen(false)} type="button">Cancelar</Button>
-                            <Button type="submit" className="bg-[#0084ff] hover:bg-[#0073e6] text-white">Salvar</Button>
+                        <DialogFooter className="gap-2 sm:gap-0">
+                            <Button variant="ghost" onClick={() => setIsModalOpen(false)} type="button" className="text-[#a0a5b0] hover:text-white hover:bg-[#3a3e45]">Cancelar</Button>
+                            <Button type="submit" className="bg-[#0084ff] hover:bg-[#0073e6] text-white shadow-lg shadow-blue-900/20">Salvar Alterações</Button>
                         </DialogFooter>
                     </form>
                 </DialogContent>
@@ -291,19 +423,22 @@ export const SuppliersSettings: React.FC<SuppliersSettingsProps> = ({ projectId 
 
             {/* Confirm Dialog */}
             <Dialog open={dialogState.isOpen} onOpenChange={(open) => !open && handleCancel()}>
-                <DialogContent className="sm:max-w-[425px] bg-[#242830] border-[#3a3e45] text-[#e8eaed]">
+                <DialogContent className="sm:max-w-[400px] bg-[#242830] border-[#3a3e45] text-[#e8eaed] shadow-2xl">
                     <DialogHeader>
-                        <DialogTitle className="text-white">{dialogState.title}</DialogTitle>
-                        <DialogDescription className="text-[#a0a5b0]">
+                        <DialogTitle className="text-white flex items-center gap-2">
+                            <Trash2 className="w-5 h-5 text-red-400" />
+                            {dialogState.title}
+                        </DialogTitle>
+                        <DialogDescription className="text-[#a0a5b0] pt-2">
                             {dialogState.message}
                         </DialogDescription>
                     </DialogHeader>
-                    <DialogFooter>
-                        <Button variant="secondary" onClick={handleCancel}>{dialogState.cancelText || 'Cancelar'}</Button>
-                        <Button variant="destructive" onClick={handleConfirm}>{dialogState.confirmText || 'Confirmar'}</Button>
+                    <DialogFooter className="gap-2 sm:gap-0 mt-4">
+                        <Button variant="ghost" onClick={handleCancel} className="text-[#a0a5b0] hover:text-white hover:bg-[#3a3e45]">{dialogState.cancelText || 'Cancelar'}</Button>
+                        <Button variant="destructive" onClick={handleConfirm} className="bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-900/20">{dialogState.confirmText || 'Confirmar'}</Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
-        </>
+        </TooltipProvider>
     );
 };
