@@ -85,7 +85,7 @@ export const useProjects = () => {
     return {
         projects,
         loading,
-        fetchProjects,
+        fetchProjects, // Exposto para refresh manual
         createProject,
         deleteProject
     };

@@ -1,16 +1,81 @@
-﻿
+﻿import { useBudgets } from '../hooks/useBudgets';
+import { ModuleHeader } from '../components/ModuleHeader';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import type { OrcamentoItem } from '../types';
 import { PageHeader } from '../components/PageHeader';
-import { Card, CardHeader } from '../components/Card';
-import { Button } from '../components/Button';
-import { ConfirmDialog } from '../components/ConfirmDialog';
+import {
+    Card,
+    CardContent,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { formatCurrency } from '../utils/formatters';
 import { initialOrcamentoData, DEFAULT_UNITS_DATA } from '../data/mockData';
 import { GoogleGenAI, Type } from "@google/genai";
 import { useConfirm } from '../utils/useConfirm';
 import { exportToCsv, exportToExcel } from '../utils/exportOrcamento';
+import {
+    Save,
+    Pencil,
+    Undo2,
+    Redo2,
+    X,
+    Briefcase,
+    CheckCircle2,
+    Info,
+    CirclePlus,
+    Trash2,
+    FileSpreadsheet,
+    FileText,
+    Bot,
+    Eye,
+    EyeOff,
+    Pin,
+    PinOff,
+    ChevronRight,
+    ChevronDown,
+    Copy,
+    MoreHorizontal,
+    UploadCloud,
+    AlertTriangle,
+    Check,
+    ArrowDownToLine
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const LOCAL_STORAGE_KEY_VIEW = 'vobi-orcamento-column-widths-view';
 const LOCAL_STORAGE_KEY_EDIT = 'vobi-orcamento-column-widths-edit';
@@ -38,12 +103,10 @@ const handleEnterNavigation = (e: React.KeyboardEvent<HTMLElement>, colId: strin
     const table = currentInput.closest('table');
     if (!table) return;
 
-    // Busca todos os inputs/selects da mesma coluna na tabela
     const allInputs = Array.from(table.querySelectorAll(`input[data-col-id="${colId}"], select[data-col-id="${colId}"]`)) as HTMLElement[];
 
     const currentIndex = allInputs.indexOf(currentInput);
     if (currentIndex !== -1) {
-        // Calcula o próximo índice, voltando para o início (0) se chegar ao fim (loop)
         const nextIndex = (currentIndex + 1) % allInputs.length;
         const nextInput = allInputs[nextIndex];
 
@@ -127,10 +190,12 @@ const EditableCell = ({ value, onCommit, isNumeric = false, className = "", onKe
             onFocus={e => e.target.select()}
             disabled={disabled}
             data-col-id={columnId}
-            className={`w-full border rounded-md p-1 text-xs ${className} 
-                ${disabled ? 'cursor-not-allowed bg-[#3a3e45] text-[#a0a5b0] border-[#3a3e45]' : ''}
-                ${isSelected ? 'bg-[#0084ff]/20 border-[#0084ff] text-white' : 'bg-[#242830] border-[#3a3e45]'}
-            `}
+            className={cn(
+                "w-full h-7 rounded px-1.5 text-xs transition-colors focus:outline-none",
+                disabled ? "cursor-not-allowed bg-transparent text-[#a0a5b0]" : "bg-[#1e2329] text-white border border-[#3a3e45] focus:border-[#71767f]",
+                isSelected && "bg-[#0084ff]/10 border-[#0084ff]",
+                className
+            )}
             style={{ textAlign: isNumeric ? 'right' : 'left' }}
         />
     );
@@ -149,22 +214,19 @@ const UnitAutocompleteCell = ({ value, onCommit, availableUnits, isSelected = fa
     const containerRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
-    // Update local state when prop changes
     useEffect(() => {
         setSearchTerm(value);
     }, [value]);
 
-    // Filter units based on search term
     const filteredUnits = useMemo(() => {
         const term = searchTerm.toLowerCase();
         return availableUnits.filter(u =>
             u.symbol.toLowerCase().includes(term) ||
             u.name.toLowerCase().includes(term) ||
             u.category.toLowerCase().includes(term)
-        ).slice(0, 50); // Limit results for performance
+        ).slice(0, 50);
     }, [searchTerm, availableUnits]);
 
-    // Handle outside click
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
@@ -173,7 +235,7 @@ const UnitAutocompleteCell = ({ value, onCommit, availableUnits, isSelected = fa
                 if (exactMatch) {
                     if (exactMatch.symbol !== value) onCommit(exactMatch.symbol);
                 } else {
-                    setSearchTerm(value); // Revert
+                    setSearchTerm(value);
                 }
             }
         };
@@ -234,10 +296,11 @@ const UnitAutocompleteCell = ({ value, onCommit, availableUnits, isSelected = fa
                 }}
                 onFocus={handleFocus}
                 onKeyDown={handleKeyDown}
-                className={`w-full border rounded-md p-1 text-xs text-center
-                    ${isSelected ? 'bg-[#0084ff]/20 border-[#0084ff] text-white' : 'bg-[#242830] border-[#3a3e45]'}
-                    focus:ring-1 focus:ring-[#0084ff] outline-none
-                `}
+                className={cn(
+                    "w-full h-7 rounded px-1.5 text-xs text-center transition-colors focus:outline-none",
+                    "bg-[#1e2329] text-white border border-[#3a3e45] focus:border-[#71767f]",
+                    isSelected && "bg-[#0084ff]/10 border-[#0084ff]"
+                )}
                 placeholder="-"
             />
             {isOpen && filteredUnits.length > 0 && (
@@ -246,19 +309,15 @@ const UnitAutocompleteCell = ({ value, onCommit, availableUnits, isSelected = fa
                         <div
                             key={`${unit.category}-${unit.symbol}-${index}`}
                             onClick={() => handleSelect(unit)}
-                            className={`px-3 py-2 cursor-pointer flex justify-between items-center border-b border-[#3a3e45]/30 last:border-0
-                                ${index === highlightedIndex ? 'bg-[#0084ff]/20 text-white' : 'text-[#a0a5b0] hover:bg-[#3a3e45]'}
-                            `}
+                            className={cn(
+                                "px-3 py-2 cursor-pointer flex justify-between items-center border-b border-[#3a3e45]/30 last:border-0 transition-colors",
+                                index === highlightedIndex ? "bg-[#0084ff]/20 text-white" : "text-[#a0a5b0] hover:bg-[#3a3e45]"
+                            )}
                         >
                             <span className="font-bold text-white w-10 text-center bg-[#3a3e45]/50 rounded px-1">{unit.symbol}</span>
                             <span className="text-xs truncate flex-1 text-right pl-2">{unit.name}</span>
                         </div>
                     ))}
-                </div>
-            )}
-            {isOpen && filteredUnits.length === 0 && (
-                <div className="absolute top-full left-0 w-48 bg-[#242830] border border-[#3a3e45] rounded-md shadow-xl z-[100] p-2 text-center text-xs text-gray-500 mt-1">
-                    Nenhuma unidade encontrada
                 </div>
             )}
         </div>
@@ -324,6 +383,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
     const [draggedItemId, setDraggedItemId] = useState<number | null>(null);
     const [selectedIds, setSelectedIds] = useState(new Set<number>());
     const [selectedColumn, setSelectedColumn] = useState<string | null>(null);
+    const [restoreMenuOpen, setRestoreMenuOpen] = useState(false);
 
     const [history, setHistory] = useState<OrcamentoItem[][]>([]);
     const [historyIndex, setHistoryIndex] = useState(-1);
@@ -346,21 +406,18 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
     const [isAiProcessing, setIsAiProcessing] = useState(false);
     const [hiddenColumns, setHiddenColumns] = useState<Set<string>>(new Set(['mat_mo_total']));
     const [pinnedColumns, setPinnedColumns] = useState<Set<string>>(new Set());
-    const [isRestoreMenuOpen, setRestoreMenuOpen] = useState(false);
     const [allUnits, setAllUnits] = useState<UnitItem[]>([]);
     const [areSettingsLoaded, setAreSettingsLoaded] = useState(false);
 
-    // Hook para diálogos de confirmação centralizados
-    const { confirm, alert, dialogState, handleConfirm, handleCancel } = useConfirm();
+    const { confirm, dialogState, handleConfirm, handleCancel } = useConfirm();
+
+    const { budgets, activeBudget, setActiveBudget, createBudget, deleteBudget, saveBudgetItems } = useBudgets();
 
     const headerCheckboxRef = useRef<HTMLInputElement>(null);
     const resizingColumnRef = useRef<{ index: number; startX: number; startWidth: number; } | null>(null);
     const measureCellRef = useRef<HTMLSpanElement | null>(null);
     const isInitialMount = useRef(true);
-    const restoreButtonRef = useRef<HTMLButtonElement>(null);
-    const restoreMenuRef = useRef<HTMLDivElement>(null);
 
-    // Abort Controller Ref for AI
     const abortAiRef = useRef(false);
 
     useEffect(() => {
@@ -369,7 +426,6 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
         }
     }, [orcamentoData, isEditing]);
 
-    // Load Units
     useEffect(() => {
         try {
             const savedUnits = localStorage.getItem(LOCAL_STORAGE_KEY_UNITS);
@@ -390,7 +446,6 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
             if (savedHidden) {
                 setHiddenColumns(new Set(JSON.parse(savedHidden)));
             } else {
-                // Se não houver salvo, usa o estado inicial (que já tem mat_mo_total) e salva
                 localStorage.setItem(LOCAL_STORAGE_KEY_HIDDEN_COLUMNS, JSON.stringify(Array.from(hiddenColumns)));
             }
             const savedPinned = localStorage.getItem(LOCAL_STORAGE_KEY_PINNED_COLUMNS);
@@ -423,25 +478,6 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
             console.error("Could not save pinned columns", e);
         }
     }, [pinnedColumns, areSettingsLoaded]);
-
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (
-                isRestoreMenuOpen &&
-                restoreButtonRef.current &&
-                !restoreButtonRef.current.contains(event.target as Node) &&
-                restoreMenuRef.current &&
-                !restoreMenuRef.current.contains(event.target as Node)
-            ) {
-                setRestoreMenuOpen(false);
-            }
-        };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
-    }, [isRestoreMenuOpen]);
-
 
     const updateOrcamento = useCallback((updater: React.SetStateAction<OrcamentoItem[]>) => {
         setLocalOrcamento(currentData => {
@@ -672,7 +708,6 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
         const parentIds = new Set(localOrcamento.map(i => i.pai).filter(p => p !== null));
         let grandTotal = 0;
 
-        // First pass: init items with self values
         localOrcamento.forEach(item => {
             const isParent = parentIds.has(item.id);
             const matTotal = item.quantidade * item.mat_unit;
@@ -685,23 +720,20 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                 matUnitTotal: matTotal,
                 moUnitTotal: moTotal,
                 matMoTotal: matTotal + moTotal,
-                totalNivel: 0, // Will be calculated recursively
+                totalNivel: 0,
                 percentNivel: 0,
             });
         });
 
-        // Recursive subtotal calculation
         const calculateSubtotals = (itemId: number) => {
             const item = itemsMap.get(itemId);
             if (!item) return { mat: 0, mo: 0, total: 0 };
 
-            // If item is a leaf, its subtotals are its own calculated totals
             if (!item.hasChildren) {
                 item.totalNivel = item.matMoTotal;
                 return { mat: item.matUnitTotal, mo: item.moUnitTotal, total: item.totalNivel };
             }
 
-            // If item is a parent, its subtotals are sum of children
             let sumMat = 0;
             let sumMo = 0;
             let sumTotal = 0;
@@ -909,7 +941,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
 
         let newItems: OrcamentoItem[] = [];
 
-        if (e.shiftKey) { // Outdent (Recuar)
+        if (e.shiftKey) { // Outdent
             const parentItem = items.find(i => i.id === currentItem.pai);
             if (!parentItem) return;
 
@@ -926,7 +958,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
             remainingItems.splice(insertionIndex, 0, ...newBlockToMove);
             newItems = remainingItems;
 
-        } else { // Indent (Avançar)
+        } else { // Indent
             const parentId = currentItem.pai;
             const currentItemIndexInFlatArray = items.findIndex(i => i.id === itemId);
 
@@ -1215,7 +1247,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
 
     const handleAiImport = async () => {
         if (!uploadedFileContent) {
-            await alert({ message: "Nenhum arquivo enviado." });
+            toast.error("Nenhum arquivo enviado.");
             return;
         }
 
@@ -1224,7 +1256,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
 
         let mappingDescription = '';
         if (isAutoAiMapping) {
-            mappingDescription = "Ignore any specific column headers provided below and automatically detect the columns based on their content (e.g., numbers resembling currency are costs, short strings are units, etc.). Infer the data structure intelligently.";
+            mappingDescription = "Usando sua inteligência detecte automaticamente as colunas com base em seu conteúdo seguindo o modelo (DE → PARA), Infira a estrutura de dados de forma inteligente.";
         } else {
             mappingDescription = (Object.entries(columnMapping) as [string, { enabled: boolean; name: string }][])
                 .filter(([, value]) => value.enabled && value.name)
@@ -1343,13 +1375,13 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
         try {
             const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY as string });
             const response = await ai.models.generateContent({
-                model: "gemini-2.5-pro",
+                model: "gemini-2.5-flash-lite",
                 contents: prompt,
                 config: {
-                    temperature: 0.1, // Baixa criatividade, alta precisão para dados estruturados
-                    topP: 0.95,       // Amostragem focada
-                    topK: 40,         // Padrão para equilíbrio
-                    maxOutputTokens: 16384, // Garante resposta completa para orçamentos grandes
+                    temperature: 0.1,
+                    topP: 0.95,
+                    topK: 40,
+                    maxOutputTokens: 16384,
                     responseMimeType: "application/json",
                     responseSchema: {
                         type: Type.ARRAY,
@@ -1378,18 +1410,12 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
             const newOrcamentoData = processAiResponseIntoOrcamento(aiData);
 
             if (newOrcamentoData.length > 0) {
-                // Check if Fonte and Codigo columns have data
                 const hasFonte = newOrcamentoData.some(item => item.fonte && item.fonte.trim() !== '');
                 const hasCodigo = newOrcamentoData.some(item => item.codigo && item.codigo.trim() !== '');
-
-                // Check if all items use total unit value (no separation)
                 const allUseTotalUnit = newOrcamentoData.every(item => item.use_total_unit === true);
-                // Check if all MO units are zero (alternative condition for hiding columns)
                 const allMoUnitZero = newOrcamentoData.every(item => item.mo_unit === 0);
-
                 const shouldHideSplitColumns = allUseTotalUnit || allMoUnitZero;
 
-                // Auto-hide empty columns
                 const columnsToHide: string[] = [];
                 if (!hasFonte) columnsToHide.push('Fonte');
                 if (!hasCodigo) columnsToHide.push('Código');
@@ -1418,32 +1444,113 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                 if (!abortAiRef.current) {
                     resetImport();
 
-                    // Show success message with auto-hide info
-                    let message = "✅ Orçamento importado com sucesso!";
+                    // 1. TOAST DE SUCESSO (Verde)
+                    toast.custom((t) => (
+                        <div className={`${t.visible ? 'animate-enter' : 'animate-leave'} max-w-md w-full bg-[#242830] shadow-2xl rounded-lg pointer-events-auto border border-[#3a3e45] flex ring-1 ring-black ring-opacity-5`}>
+                            <div className="flex-1 w-0 p-4">
+                                <div className="flex items-start">
+                                    <div className="flex-shrink-0 pt-0.5">
+                                        <CheckCircle2 className="h-10 w-10 text-green-500" />
+                                    </div>
+                                    <div className="ml-3 flex-1">
+                                        <p className="text-sm font-medium text-white">
+                                            Importação Concluída
+                                        </p>
+                                        <p className="mt-1 text-sm text-[#a0a5b0]">
+                                            O orçamento foi processado e importado com sucesso.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="flex border-l border-[#3a3e45]">
+                                <button
+                                    onClick={() => toast.dismiss(t.id)}
+                                    className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-[#a0a5b0] hover:text-white hover:bg-[#3a3e45] focus:outline-none transition-colors"
+                                >
+                                    <X className="h-5 w-5" />
+                                </button>
+                            </div>
+                        </div>
+                    ), { duration: 4000 });
 
-                    // Filter out unit columns for the generic message
+                    // 2. TOAST DE COLUNAS OCULTAS (Azul - Genérico)
                     const genericHiddenCols = columnsToHide.filter(c => !['Mat. Unit.', 'M.O. Unit.', 'Mat. Total', 'M.O. Total'].includes(c));
 
                     if (genericHiddenCols.length > 0) {
-                        message += `\n\nℹ️ Colunas '${genericHiddenCols.join("' e '")}' foram ocultadas automaticamente (sem dados)`;
+                        setTimeout(() => {
+                            toast.custom((t) => (
+                                <div className={`${t.visible ? 'animate-enter' : 'animate-leave'} max-w-md w-full bg-[#242830] shadow-2xl rounded-lg pointer-events-auto border border-[#3a3e45] flex ring-1 ring-black ring-opacity-5`}>
+                                    <div className="flex-1 w-0 p-4">
+                                        <div className="flex items-start">
+                                            <div className="flex-shrink-0 pt-0.5">
+                                                <Info className="h-10 w-10 text-[#0084ff]" />
+                                            </div>
+                                            <div className="ml-3 flex-1">
+                                                <p className="text-sm font-medium text-white">
+                                                    Colunas Ocultadas
+                                                </p>
+                                                <p className="mt-1 text-sm text-[#a0a5b0]">
+                                                    As colunas <span className="text-white font-medium">{genericHiddenCols.join("' e '")}</span> foram ocultadas automaticamente pois não continham dados.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="flex border-l border-[#3a3e45]">
+                                        <button
+                                            onClick={() => toast.dismiss(t.id)}
+                                            className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-[#a0a5b0] hover:text-white hover:bg-[#3a3e45] focus:outline-none transition-colors"
+                                        >
+                                            <X className="h-5 w-5" />
+                                        </button>
+                                    </div>
+                                </div>
+                            ), { duration: 6000 });
+                        }, 300); // Pequeno delay para efeito cascata
                     }
 
+                    // 3. TOAST DE COLUNAS DE CUSTO (Azul - Específico)
                     if (shouldHideSplitColumns) {
-                        message += `\n\nℹ️ Colunas 'Mat. Unit.' e 'M.O. Unit.' foram ocultadas automaticamente. O orçamento importado usa valor unitário total (sem separação Material/M.O.).`;
+                        setTimeout(() => {
+                            toast.custom((t) => (
+                                <div className={`${t.visible ? 'animate-enter' : 'animate-leave'} max-w-md w-full bg-[#242830] shadow-2xl rounded-lg pointer-events-auto border border-[#3a3e45] flex ring-1 ring-black ring-opacity-5`}>
+                                    <div className="flex-1 w-0 p-4">
+                                        <div className="flex items-start">
+                                            <div className="flex-shrink-0 pt-0.5">
+                                                <Info className="h-10 w-10 text-[#0084ff]" />
+                                            </div>
+                                            <div className="ml-3 flex-1">
+                                                <p className="text-sm font-medium text-white">
+                                                    Formato de Custo Detectado
+                                                </p>
+                                                <p className="mt-1 text-sm text-[#a0a5b0]">
+                                                    O orçamento usa valor unitário total. As colunas de separação (Material/M.O.) foram ocultadas para simplificar a visualização.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="flex border-l border-[#3a3e45]">
+                                        <button
+                                            onClick={() => toast.dismiss(t.id)}
+                                            className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-[#a0a5b0] hover:text-white hover:bg-[#3a3e45] focus:outline-none transition-colors"
+                                        >
+                                            <X className="h-5 w-5" />
+                                        </button>
+                                    </div>
+                                </div>
+                            ), { duration: 7000 });
+                        }, 600); // Delay maior para aparecer por último
                     }
-
-                    await alert({ message });
                 }
             } else {
                 if (!abortAiRef.current) {
-                    await alert({ message: "A IA não conseguiu processar o arquivo. Verifique o mapeamento e o conteúdo do arquivo." });
+                    toast.error("A IA não conseguiu processar o arquivo. Verifique o mapeamento e o conteúdo do arquivo.");
                 }
             }
 
         } catch (error) {
             if (!abortAiRef.current) {
                 console.error("Erro ao chamar a API Gemini:", error);
-                await alert({ message: "Ocorreu um erro ao processar o arquivo com a IA. Verifique o console para mais detalhes." });
+                toast.error("Ocorreu um erro ao processar o arquivo com a IA.");
             }
         } finally {
             if (!abortAiRef.current) {
@@ -1480,7 +1587,6 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
     };
 
     const handleShowAllColumns = () => {
-        // Mantém mat_mo_total oculta por padrão, a menos que o usuário a exiba individualmente
         setHiddenColumns(new Set(['mat_mo_total']));
         setRestoreMenuOpen(false);
     };
@@ -1587,9 +1693,32 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                 return isEditing && (
                                     <td key={col.id} className={`px-2 py-2 sticky right-0 z-10 ${stickyCellBgClass}`}>
                                         <div className="flex items-center gap-1">
-                                            <button title="Apagar Linha" onClick={() => handleDeleteRow(item.id)} className="hover:bg-red-500/50 p-1 rounded">🗑️</button>
-                                            <button title="Duplicar Linha" onClick={() => handleDuplicateRow(item.id)} className="hover:bg-blue-500/50 p-1 rounded">📋</button>
-                                            <button title="Nova Linha Abaixo" onClick={() => handleAddNewRow(item.id)} className="hover:bg-green-500/50 p-1 rounded">➕</button>
+                                            <TooltipProvider>
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <Button variant="ghost" size="icon" onClick={() => handleDeleteRow(item.id)} className="h-6 w-6 text-red-400 hover:text-red-300 hover:bg-red-400/10">
+                                                            <Trash2 className="h-3.5 w-3.5" />
+                                                        </Button>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>Apagar Linha</TooltipContent>
+                                                </Tooltip>
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <Button variant="ghost" size="icon" onClick={() => handleDuplicateRow(item.id)} className="h-6 w-6 text-blue-400 hover:text-blue-300 hover:bg-blue-400/10">
+                                                            <Copy className="h-3.5 w-3.5" />
+                                                        </Button>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>Duplicar Linha</TooltipContent>
+                                                </Tooltip>
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <Button variant="ghost" size="icon" onClick={() => handleAddNewRow(item.id)} className="h-6 w-6 text-green-400 hover:text-green-300 hover:bg-green-400/10">
+                                                            <CirclePlus className="h-3.5 w-3.5" />
+                                                        </Button>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>Nova Linha Abaixo</TooltipContent>
+                                                </Tooltip>
+                                            </TooltipProvider>
                                         </div>
                                     </td>
                                 );
@@ -1618,10 +1747,19 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
     };
 
     return (
-        <div>
+        <div className="w-full p-6 space-y-6">
             {isImportModalOpen && (
-                <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[2000]">
-                    <div className="bg-[#1e2329] rounded-lg shadow-xl p-6 w-full max-w-2xl transform transition-all relative">
+                <Dialog open={isImportModalOpen} onOpenChange={setImportModalOpen}>
+                    <DialogContent className="bg-[#1e2329] border-[#3a3e45] text-white sm:max-w-[700px]">
+                        <DialogHeader>
+                            <DialogTitle className="flex items-center gap-2">
+                                <Bot className="w-5 h-5 text-[#0084ff]" />
+                                Importar Orçamento com IA - Etapa {importStep}/2
+                            </DialogTitle>
+                            <DialogDescription className="text-[#a0a5b0]">
+                                {importStep === 1 ? "Envie seu arquivo para análise." : "Configure o mapeamento das colunas."}
+                            </DialogDescription>
+                        </DialogHeader>
 
                         {isAiProcessing && (
                             <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-[#1e2329]/95 rounded-lg transition-opacity duration-300">
@@ -1631,268 +1769,391 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                 </div>
                                 <h4 className="text-lg font-semibold text-white mb-1">Processando com IA</h4>
                                 <p className="text-sm text-[#a0a5b0] mb-4">Analisando estrutura e padronizando dados...</p>
-                                <Button variant="danger" size="sm" onClick={handleStopAi}>
+                                <Button variant="destructive" size="sm" onClick={handleStopAi}>
                                     Interromper
                                 </Button>
                             </div>
                         )}
 
-                        <div className="flex justify-between items-center mb-4">
-                            <h3 className="text-xl font-bold">🤖 Importar Orçamento com IA - Etapa {importStep}/2</h3>
-                            <button onClick={resetImport} className="text-2xl">&times;</button>
-                        </div>
-
                         {importStep === 1 && (
-                            <div className="text-center">
-                                <p className="text-[#a0a5b0] mb-4">Envie seu arquivo de orçamento (.csv, .txt, .xlsx) para a IA processar.</p>
-                                <div className="border-2 border-dashed border-[#3a3e45] p-10 rounded-lg">
+                            <div className="text-center py-8">
+                                <div className="border-2 border-dashed border-[#3a3e45] p-10 rounded-lg hover:border-[#0084ff]/50 transition-colors bg-[#0f1419]/50">
+                                    <UploadCloud className="w-12 h-12 text-[#0084ff] mx-auto mb-4" />
+                                    <p className="text-[#e8eaed] font-medium mb-2">Arraste e solte seu arquivo aqui</p>
+                                    <p className="text-sm text-[#a0a5b0] mb-6">Suporta .csv, .txt, .xlsx, .xls</p>
                                     <input type="file" id="file-upload" className="hidden" onChange={handleFileChange} accept=".csv,.txt,.xlsx,.xls" />
-                                    <label htmlFor="file-upload" className="cursor-pointer bg-[#0084ff] text-white px-4 py-2 rounded-md font-semibold hover:bg-[#0066cc]">
-                                        Selecionar Arquivo
+                                    <label htmlFor="file-upload">
+                                        <Button variant="default" className="bg-[#0084ff] hover:bg-[#0073e6] text-white cursor-pointer" asChild>
+                                            <span>Selecionar Arquivo</span>
+                                        </Button>
                                     </label>
-                                    <p className="text-xs text-[#a0a5b0] mt-2">ou arraste e solte aqui</p>
                                 </div>
                             </div>
                         )}
 
                         {importStep === 2 && (
-                            <div>
-                                <div className="mb-6 bg-[#242830] p-3 rounded border border-[#3a3e45] flex items-center gap-3">
+                            <div className="space-y-6">
+                                <div className="bg-[#242830] p-4 rounded-lg border border-[#3a3e45] flex items-start gap-3">
                                     <input
                                         type="checkbox"
                                         id="auto-ai"
                                         checked={isAutoAiMapping}
                                         onChange={e => setIsAutoAiMapping(e.target.checked)}
-                                        className="h-5 w-5 rounded accent-[#0084ff]"
+                                        className="mt-1 h-4 w-4 rounded border-[#3a3e45] bg-[#0f1419] text-[#0084ff] focus:ring-0 focus:ring-offset-0"
                                     />
                                     <div>
-                                        <label htmlFor="auto-ai" className="font-bold text-white cursor-pointer">Ajuste automático com IA</label>
-                                        <p className="text-xs text-[#a0a5b0]">Deixe a IA identificar automaticamente as colunas e a estrutura do arquivo sem configurações manuais.</p>
+                                        <label htmlFor="auto-ai" className="font-medium text-white cursor-pointer block mb-1">Ajuste automático com IA (Recomendado)</label>
+                                        <p className="text-xs text-[#a0a5b0]">A IA identificará automaticamente as colunas e a estrutura do arquivo, ignorando cabeçalhos irrelevantes.</p>
                                     </div>
                                 </div>
 
-                                <div className={`transition-opacity duration-300 ${isAutoAiMapping ? 'opacity-30 pointer-events-none' : 'opacity-100'}`}>
-                                    <p className="text-[#a0a5b0] mb-4">Ajude a IA a entender seu arquivo. Marque as colunas que existem e digite o nome exato delas como está no arquivo original.</p>
-                                    <div className="space-y-3 max-h-[40vh] overflow-y-auto pr-2 custom-scrollbar">
+                                <div className={`space-y-4 transition-opacity duration-300 ${isAutoAiMapping ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
+                                    <p className="text-sm text-[#a0a5b0]">Mapeamento manual das colunas (opcional):</p>
+                                    <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
                                         {(Object.entries(columnMapping) as [string, { enabled: boolean; name: string }][]).map(([key, { enabled, name }]) => (
-                                            <div key={key} className="flex items-center gap-4 p-2 bg-[#242830] rounded">
-                                                <input type="checkbox" id={`check-${key}`} checked={enabled} onChange={(e) => handleMappingChange(key, 'enabled', e.target.checked)} className="h-5 w-5 rounded accent-[#0084ff]" />
-                                                <label htmlFor={`check-${key}`} className="w-48">{columnMappingLabels[key]}</label>
-                                                <input type="text" value={name} onChange={(e) => handleMappingChange(key, 'name', e.target.value)} disabled={!enabled} placeholder={`Nome da coluna no arquivo`} className={`flex-1 bg-[#1e2329] border border-[#3a3e45] rounded p-2 text-sm ${!enabled ? 'opacity-50 cursor-not-allowed' : ''}`} />
+                                            <div key={key} className="flex items-center gap-3 p-2 bg-[#0f1419] rounded border border-[#3a3e45]">
+                                                <input
+                                                    type="checkbox"
+                                                    id={`check-${key}`}
+                                                    checked={enabled}
+                                                    onChange={(e) => handleMappingChange(key, 'enabled', e.target.checked)}
+                                                    className="h-4 w-4 rounded border-[#3a3e45] bg-[#1e2329] text-[#0084ff] focus:ring-0"
+                                                />
+                                                <label htmlFor={`check-${key}`} className="w-40 text-sm text-[#e8eaed]">{columnMappingLabels[key]}</label>
+                                                <Input
+                                                    value={name}
+                                                    onChange={(e) => handleMappingChange(key, 'name', e.target.value)}
+                                                    disabled={!enabled}
+                                                    placeholder={`Nome da coluna no arquivo`}
+                                                    className="flex-1 h-8 bg-[#1e2329] border-[#3a3e45] text-xs"
+                                                />
                                             </div>
                                         ))}
                                     </div>
                                 </div>
-                                <div className="flex justify-end gap-2 mt-6">
-                                    <Button variant="secondary" onClick={() => setImportStep(1)}>Voltar</Button>
-                                    <Button variant="primary" onClick={handleAiImport} disabled={isAiProcessing}>
-                                        {isAiProcessing ? 'Processando...' : 'Analisar e Preencher'}
-                                    </Button>
-                                </div>
                             </div>
                         )}
 
-                    </div>
-                </div>
-            )}
-            <span ref={measureCellRef} aria-hidden="true" className="text-xs absolute invisible whitespace-nowrap z-[-1]"></span>
-            <PageHeader title="💰 Orçamento de Obra" subtitle="Estrutura orçamentária completa" />
-            <Card>
-                <CardHeader title="Orçamento Detalhado">
-                    <div className="flex flex-wrap items-center justify-end gap-4">
-                        {!hiddenColumns.has('mat_unit') && (
-                            <>
-                                <div className="text-right">
-                                    <div className="text-xs text-[#a0a5b0]">TOTAL MATERIAIS</div>
-                                    <div className="text-lg font-bold text-blue-400">{formatCurrency(grandTotalMaterial)}</div>
-                                </div>
-                                <div className="text-right">
-                                    <div className="text-xs text-[#a0a5b0]">TOTAL MÃO DE OBRA</div>
-                                    <div className="text-lg font-bold text-yellow-400">{formatCurrency(grandTotalMaoDeObra)}</div>
-                                </div>
-                            </>
-                        )}
-                        <div className="text-right">
-                            <div className="text-xs text-[#a0a5b0]">VALOR TOTAL DO ORÇAMENTO</div>
-                            <div className="text-2xl font-bold text-green-400">{formatCurrency(grandTotalValue)}</div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            {hiddenColumns.size > 0 && (
-                                <div className="relative">
-                                    <Button ref={restoreButtonRef} variant="secondary" onClick={() => setRestoreMenuOpen(!isRestoreMenuOpen)}>
-                                        Reexibir ({hiddenColumns.size})
-                                    </Button>
-                                    {isRestoreMenuOpen && (
-                                        <div ref={restoreMenuRef} className="absolute right-0 mt-2 w-56 bg-[#242830] border border-[#3a3e45] rounded-md shadow-lg z-[100]">
-                                            <ul className="py-1 text-sm text-[#e8eaed] max-h-60 overflow-y-auto">
-                                                {columnsConfig.filter(c => hiddenColumns.has(c.id)).map(c => (
-                                                    <li key={c.id}>
-                                                        <a href="#" onClick={(e) => { e.preventDefault(); handleShowColumn(c.id); }} className="block px-4 py-2 hover:bg-[#3a3e45]">
-                                                            {c.label}
-                                                        </a>
-                                                    </li>
-                                                ))}
-                                                <li className="border-t border-[#3a3e45] my-1"></li>
-                                                <li>
-                                                    <a href="#" onClick={(e) => { e.preventDefault(); handleShowAllColumns(); }} className="block px-4 py-2 hover:bg-[#3a3e45] font-semibold">
-                                                        Reexibir Todas
-                                                    </a>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    )}
-                                </div>
+                        <DialogFooter>
+                            {importStep === 2 && (
+                                <Button variant="ghost" onClick={() => setImportStep(1)} className="text-[#a0a5b0] hover:text-white hover:bg-[#3a3e45]">Voltar</Button>
                             )}
-                            {isEditing && selectedIds.size > 0 && (
-                                <Button variant="danger" onClick={handleDeleteSelected}>
-                                    Apagar ({selectedIds.size})
+                            {importStep === 2 && (
+                                <Button onClick={handleAiImport} disabled={isAiProcessing} className="bg-[#0084ff] hover:bg-[#0073e6] text-white">
+                                    {isAiProcessing ? 'Processando...' : 'Analisar e Importar'}
                                 </Button>
                             )}
-                            {isEditing ? (
-                                <>
-                                    <Button variant="primary" onClick={handleSave}>💾 Salvar</Button>
-                                    <Button variant="secondary" onClick={handleExit}>Sair sem Salvar</Button>
-                                    <Button size="sm" variant="secondary" onClick={handleUndo} disabled={!canUndo} title="Desfazer (Ctrl+Z)">↩️</Button>
-                                    <Button size="sm" variant="secondary" onClick={handleRedo} disabled={!canRedo} title="Refazer (Ctrl+Y)">↪️</Button>
-                                </>
-                            ) : (
-                                <>
-                                    <Button variant="secondary" onClick={handleExportCsv} title="Exportar CSV">📄 CSV</Button>
-                                    <Button variant="secondary" onClick={handleExportExcel} title="Exportar Excel">📊 Excel</Button>
-                                    <Button onClick={handleEdit}>✏️ Editar</Button>
-                                    <Button onClick={() => setImportModalOpen(true)}>🤖 Importar com IA</Button>
-                                </>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+            )}
+
+            <span ref={measureCellRef} aria-hidden="true" className="text-xs absolute invisible whitespace-nowrap z-[-1]"></span>
+
+            <ModuleHeader
+                title="Orçamento de Obra"
+                subtitle="Gerencie a estrutura analítica, custos e insumos do projeto"
+                icon={FileSpreadsheet}
+            >
+                {/* Budget Selector */}
+                <Select value={activeBudget?.id} onValueChange={(id) => {
+                    const budget = budgets.find(b => b.id === id);
+                    if (budget) setActiveBudget(budget);
+                }}>
+                    <SelectTrigger className="w-[200px] h-8 bg-[#0f1419] border-[#3a3e45] text-white focus:ring-0 focus:ring-offset-0 focus:border-[#71767f]">
+                        <SelectValue placeholder="Selecione um orçamento" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-[#1e2329] border-[#3a3e45] text-white z-[100]">
+                        {budgets.map(b => (
+                            <SelectItem key={b.id} value={b.id} className="focus:bg-[#242830] focus:text-white cursor-pointer">
+                                {b.name}
+                            </SelectItem>
+                        ))}
+                        {budgets.length === 0 && <SelectItem value="none" disabled>Nenhum orçamento</SelectItem>}
+                    </SelectContent>
+                </Select>
+
+                <div className="w-px h-4 bg-[#3a3e45] mx-1" />
+
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => isEditing && handleSave()}
+                            disabled={!isEditing}
+                            className="h-8 w-8 text-[#0084ff] hover:bg-[#0084ff]/10 hover:text-[#0084ff] disabled:opacity-30"
+                        >
+                            <Save className="w-4 h-4" />
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" align="end">
+                        <p>Salvar Orçamento</p>
+                    </TooltipContent>
+                </Tooltip>
+            </ModuleHeader>
+
+            <Card className="bg-[#1e2329] border-[#3a3e45] shadow-sm">
+                <CardHeader className="border-b border-[#3a3e45] pb-4">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                        <CardTitle className="text-lg font-semibold text-white flex items-center gap-2">
+                            <FileText className="w-5 h-5 text-[#0084ff]" />
+                            Planilha Orçamentária
+                        </CardTitle>
+
+                        <div className="flex flex-wrap items-center gap-2">
+                            {/* Totais (Visíveis apenas se não estiver editando ou se houver espaço) */}
+                            {!isEditing && !hiddenColumns.has('mat_unit') && (
+                                <div className="flex gap-4 mr-4 bg-[#0f1419] px-3 py-1.5 rounded-lg border border-[#3a3e45]">
+                                    <div className="text-right">
+                                        <div className="text-[10px] text-[#a0a5b0] uppercase font-bold">Materiais</div>
+                                        <div className="text-sm font-bold text-blue-400">{formatCurrency(grandTotalMaterial)}</div>
+                                    </div>
+                                    <div className="w-px bg-[#3a3e45]"></div>
+                                    <div className="text-right">
+                                        <div className="text-[10px] text-[#a0a5b0] uppercase font-bold">Mão de Obra</div>
+                                        <div className="text-sm font-bold text-yellow-400">{formatCurrency(grandTotalMaoDeObra)}</div>
+                                    </div>
+                                    <div className="w-px bg-[#3a3e45]"></div>
+                                    <div className="text-right">
+                                        <div className="text-[10px] text-[#a0a5b0] uppercase font-bold">Total Geral</div>
+                                        <div className="text-sm font-bold text-green-400">{formatCurrency(grandTotalValue)}</div>
+                                    </div>
+                                </div>
                             )}
+
+                            {/* Botões de Ação */}
+                            <TooltipProvider>
+                                {hiddenColumns.size > 0 && (
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                            <Button variant="outline" size="sm" className="bg-[#1e2329] border-[#3a3e45] text-[#a0a5b0] hover:text-white hover:bg-[#242830]">
+                                                <Eye className="w-4 h-4 mr-2" />
+                                                Colunas ({hiddenColumns.size})
+                                            </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent align="end" className="bg-[#242830] border-[#3a3e45] text-[#e8eaed] w-56">
+                                            <DropdownMenuLabel>Colunas Ocultas</DropdownMenuLabel>
+                                            <DropdownMenuSeparator className="bg-[#3a3e45]" />
+                                            {columnsConfig.filter(c => hiddenColumns.has(c.id)).map(c => (
+                                                <DropdownMenuItem key={c.id} onClick={() => handleShowColumn(c.id)} className="cursor-pointer hover:bg-[#3a3e45]">
+                                                    <Eye className="w-4 h-4 mr-2 text-[#0084ff]" />
+                                                    {c.label}
+                                                </DropdownMenuItem>
+                                            ))}
+                                            <DropdownMenuSeparator className="bg-[#3a3e45]" />
+                                            <DropdownMenuItem onClick={handleShowAllColumns} className="cursor-pointer hover:bg-[#3a3e45] font-semibold text-[#0084ff]">
+                                                Mostrar Todas
+                                            </DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
+                                )}
+
+                                {isEditing ? (
+                                    <div className="flex items-center gap-2 animate-in fade-in slide-in-from-right-4">
+                                        {selectedIds.size > 0 && (
+                                            <Button variant="destructive" size="sm" onClick={handleDeleteSelected} className="bg-red-500 hover:bg-red-600 text-white">
+                                                <Trash2 className="w-4 h-4 mr-2" />
+                                                Apagar ({selectedIds.size})
+                                            </Button>
+                                        )}
+
+                                        <div className="flex items-center gap-1 mr-2 bg-[#0f1419] p-1 rounded-lg border border-[#3a3e45]">
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <Button size="icon" variant="ghost" onClick={handleUndo} disabled={!canUndo} className="h-7 w-7 text-[#a0a5b0] hover:text-white hover:bg-[#3a3e45]">
+                                                        <Undo2 className="h-4 w-4" />
+                                                    </Button>
+                                                </TooltipTrigger>
+                                                <TooltipContent side="bottom">Desfazer</TooltipContent>
+                                            </Tooltip>
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <Button size="icon" variant="ghost" onClick={handleRedo} disabled={!canRedo} className="h-7 w-7 text-[#a0a5b0] hover:text-white hover:bg-[#3a3e45]">
+                                                        <Redo2 className="h-4 w-4" />
+                                                    </Button>
+                                                </TooltipTrigger>
+                                                <TooltipContent side="bottom">Refazer</TooltipContent>
+                                            </Tooltip>
+                                        </div>
+
+                                        <Button variant="ghost" onClick={handleExit} className="text-[#a0a5b0] hover:text-white hover:bg-[#3a3e45]">
+                                            <X className="w-4 h-4 mr-2" /> Cancelar
+                                        </Button>
+                                        <Button onClick={handleSave} className="bg-[#0084ff] hover:bg-[#0073e6] text-white shadow-lg shadow-blue-900/20">
+                                            <Save className="w-4 h-4 mr-2" /> Salvar
+                                        </Button>
+                                    </div>
+                                ) : (
+                                    <div className="flex items-center gap-2">
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <Button variant="outline" size="icon" onClick={handleExportCsv} className="bg-[#1e2329] border-[#3a3e45] text-[#a0a5b0] hover:text-white hover:bg-[#242830]">
+                                                    <FileText className="w-4 h-4" />
+                                                </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>Exportar CSV</TooltipContent>
+                                        </Tooltip>
+
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <Button variant="outline" size="icon" onClick={handleExportExcel} className="bg-[#1e2329] border-[#3a3e45] text-[#a0a5b0] hover:text-white hover:bg-[#242830]">
+                                                    <ArrowDownToLine className="w-4 h-4" />
+                                                </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>Exportar Excel</TooltipContent>
+                                        </Tooltip>
+
+                                        <Button onClick={() => setImportModalOpen(true)} className="bg-[#1e2329] border border-[#3a3e45] hover:bg-[#242830] text-white">
+                                            <Bot className="w-4 h-4 mr-2 text-[#0084ff]" />
+                                            Importar IA
+                                        </Button>
+
+                                        <Button onClick={handleEdit} className="bg-[#0084ff] hover:bg-[#0073e6] text-white shadow-lg shadow-blue-900/20">
+                                            <Pencil className="w-4 h-4 mr-2" />
+                                            Editar
+                                        </Button>
+                                    </div>
+                                )}
+                            </TooltipProvider>
                         </div>
                     </div>
                 </CardHeader>
-                <div className="overflow-x-auto border rounded-md border-[#3a3e45]">
-                    <table className="w-full text-left text-[#a0a5b0] table-fixed">
-                        <colgroup>
-                            {visibleColumns.map(({ col, index }) => (
-                                <col key={col.id} style={{ width: `${columnWidths[index]}px` }} />
-                            ))}
-                        </colgroup>
-                        <thead className="text-xs text-[#e8eaed] uppercase bg-[#242830] sticky top-0 z-30 shadow-sm">
-                            <tr>
-                                {visibleColumns.map(({ col, index: originalIndex }, visibleIndex) => {
-                                    const isSelectCol = col.id === 'select';
-                                    const isActionCol = col.id === 'action';
-                                    const stickyHeaderClasses =
-                                        isSelectCol ? 'sticky left-0 z-40 bg-[#242830]' :
-                                            isActionCol ? 'sticky right-0 z-40 bg-[#242830]' : '';
-                                    const unhideableColumns = new Set(['select', 'action', 'nivel']);
-                                    // Editable columns that support batch delete
-                                    const batchEditableColumns = new Set(['fonte', 'codigo', 'discriminacao', 'un', 'quant', 'mat_unit', 'mo_unit']);
-                                    const isColSelected = selectedColumn === col.id;
-                                    const isPinned = pinnedColumns.has(col.id) && !isEditing;
 
-                                    const stickyStyle: React.CSSProperties = isPinned ? {
-                                        position: 'sticky',
-                                        left: getStickyLeft(visibleIndex),
-                                        zIndex: 30, // Higher than body sticky
-                                        backgroundColor: '#242830', // Ensure solid background for header
-                                    } : {};
+                <CardContent className="p-0">
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left text-[#a0a5b0] table-fixed border-collapse">
+                            <colgroup>
+                                {visibleColumns.map(({ col, index }) => (
+                                    <col key={col.id} style={{ width: `${columnWidths[index]}px` }} />
+                                ))}
+                            </colgroup>
+                            <thead className="text-xs text-[#e8eaed] uppercase bg-[#242830] sticky top-0 z-30 shadow-sm">
+                                <tr>
+                                    {visibleColumns.map(({ col, index: originalIndex }, visibleIndex) => {
+                                        const isSelectCol = col.id === 'select';
+                                        const isActionCol = col.id === 'action';
+                                        const stickyHeaderClasses =
+                                            isSelectCol ? 'sticky left-0 z-40 bg-[#242830]' :
+                                                isActionCol ? 'sticky right-0 z-40 bg-[#242830]' : '';
+                                        const unhideableColumns = new Set(['select', 'action', 'nivel']);
+                                        const batchEditableColumns = new Set(['fonte', 'codigo', 'discriminacao', 'un', 'quant', 'mat_unit', 'mo_unit']);
+                                        const isColSelected = selectedColumn === col.id;
+                                        const isPinned = pinnedColumns.has(col.id) && !isEditing;
 
-                                    return (
-                                        <th
-                                            key={col.id}
-                                            style={stickyStyle}
-                                            className={`group px-2 py-3 relative text-left ${visibleIndex < visibleColumns.length - 1 ? 'border-r border-[#3a3e45]' : ''} ${stickyHeaderClasses} ${isColSelected ? 'bg-[#0084ff]/20' : ''} ${isPinned ? 'shadow-[2px_0_5px_rgba(0,0,0,0.3)]' : ''}`}
-                                        >
-                                            {/* View Mode Pin Control - Right Side */}
-                                            {!isEditing && (
-                                                <div className="absolute right-1 top-0 bottom-0 flex flex-col justify-center opacity-0 group-hover:opacity-100 transition-opacity z-50">
-                                                    <button
-                                                        onClick={() => handleTogglePin(col.id)}
-                                                        className="w-5 h-5 rounded-full bg-[#3a3e45] text-white text-[10px] items-center justify-center flex hover:bg-[#0084ff] shadow-md"
-                                                        title={isPinned ? "Desafixar Coluna" : "Fixar Coluna"}
-                                                    >
-                                                        <span className={!isPinned ? 'transform rotate-90' : ''}>📌</span>
-                                                    </button>
-                                                </div>
-                                            )}
+                                        const stickyStyle: React.CSSProperties = isPinned ? {
+                                            position: 'sticky',
+                                            left: getStickyLeft(visibleIndex),
+                                            zIndex: 30,
+                                            backgroundColor: '#242830',
+                                        } : {};
 
-                                            {/* Hide Control - Left Side (Visible in both modes) */}
-                                            {!unhideableColumns.has(col.id) && (
-                                                <div className="absolute left-1 top-0 bottom-0 flex flex-col justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity md:flex z-20">
-                                                    {/* Selection Control (Editing Mode Only) */}
-                                                    {isEditing && batchEditableColumns.has(col.id) && (
+                                        return (
+                                            <th
+                                                key={col.id}
+                                                style={stickyStyle}
+                                                className={`group px-2 py-3 relative text-left border-b border-[#3a3e45] ${visibleIndex < visibleColumns.length - 1 ? 'border-r border-[#3a3e45]' : ''} ${stickyHeaderClasses} ${isColSelected ? 'bg-[#0084ff]/10' : ''} ${isPinned ? 'shadow-[2px_0_5px_rgba(0,0,0,0.3)]' : ''}`}
+                                            >
+                                                {/* Pin Control */}
+                                                {!isEditing && (
+                                                    <div className="absolute right-1 top-0 bottom-0 flex flex-col justify-center opacity-0 group-hover:opacity-100 transition-opacity z-50">
                                                         <button
-                                                            onClick={() => handleColumnSelect(col.id)}
-                                                            className={`w-4 h-4 rounded-full text-white text-[10px] items-center justify-center flex hover:bg-blue-500/80 ${isColSelected ? 'bg-[#0084ff] opacity-100' : 'bg-[#3a3e45]'}`}
-                                                            title={`Selecionar coluna ${col.label} (Delete para limpar)`}
+                                                            onClick={() => handleTogglePin(col.id)}
+                                                            className="w-5 h-5 rounded bg-[#3a3e45] text-[#a0a5b0] hover:text-white items-center justify-center flex hover:bg-[#0084ff] transition-colors"
+                                                            title={isPinned ? "Desafixar" : "Fixar"}
                                                         >
-                                                            ▼
+                                                            {isPinned ? <PinOff className="w-3 h-3" /> : <Pin className="w-3 h-3" />}
+                                                        </button>
+                                                    </div>
+                                                )}
+
+                                                {/* Hide/Select Controls */}
+                                                {!unhideableColumns.has(col.id) && (
+                                                    <div className="absolute left-1 top-0 bottom-0 flex flex-col justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-20">
+                                                        {isEditing && batchEditableColumns.has(col.id) && (
+                                                            <button
+                                                                onClick={() => handleColumnSelect(col.id)}
+                                                                className={`w-4 h-4 rounded text-white text-[10px] items-center justify-center flex hover:bg-blue-500/80 ${isColSelected ? 'bg-[#0084ff] opacity-100' : 'bg-[#3a3e45]'}`}
+                                                                title="Selecionar coluna"
+                                                            >
+                                                                <ChevronDown className="w-3 h-3" />
+                                                            </button>
+                                                        )}
+
+                                                        <button
+                                                            onClick={() => handleHideColumn(col.id)}
+                                                            className="w-4 h-4 rounded bg-[#3a3e45] text-[#a0a5b0] hover:text-white text-xs items-center justify-center flex hover:bg-red-500/80 transition-colors"
+                                                            title="Ocultar coluna"
+                                                        >
+                                                            <EyeOff className="w-3 h-3" />
+                                                        </button>
+                                                    </div>
+                                                )}
+
+                                                {col.id === 'select' && isEditing && (
+                                                    <div className="flex justify-center">
+                                                        <input
+                                                            type="checkbox"
+                                                            ref={headerCheckboxRef}
+                                                            onChange={handleSelectAll}
+                                                            className="w-3.5 h-3.5 bg-[#1e2329] border-[#3a3e45] rounded focus:ring-0 accent-[#0084ff] cursor-pointer"
+                                                        />
+                                                    </div>
+                                                )}
+
+                                                <div className="flex items-center gap-1">
+                                                    {col.id === 'nivel' && (
+                                                        <button
+                                                            title={areAllExpanded ? "Recolher Tudo" : "Expandir Tudo"}
+                                                            onClick={handleToggleExpandAll}
+                                                            className="hover:bg-[#3a3e45] p-0.5 rounded text-[#0084ff] mr-1 transition-colors"
+                                                        >
+                                                            {areAllExpanded ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
                                                         </button>
                                                     )}
-
-                                                    {/* Hide Button (Always visible on hover) */}
-                                                    <button
-                                                        onClick={() => handleHideColumn(col.id)}
-                                                        className="w-4 h-4 rounded-full bg-[#3a3e45] text-white text-xs items-center justify-center flex hover:bg-red-500/80"
-                                                        title={`Ocultar ${col.label}`}
-                                                    >
-                                                        &times;
-                                                    </button>
+                                                    <span className={cn("font-semibold tracking-wider", col.id !== 'select' && col.id !== 'nivel' && "pr-4")}>
+                                                        {col.label}
+                                                    </span>
                                                 </div>
-                                            )}
 
-                                            {col.id === 'select' && isEditing && (
-                                                <div className="flex justify-center">
-                                                    <input
-                                                        type="checkbox"
-                                                        ref={headerCheckboxRef}
-                                                        onChange={handleSelectAll}
-                                                        className="w-4 h-4 bg-[#1e2329] border-[#3a3e45] rounded focus:ring-[#0084ff] accent-[#0084ff]"
+                                                {(col.resizable ?? true) && (
+                                                    <div
+                                                        onMouseDown={(e) => handleResizeStart(e, visibleIndex)}
+                                                        onDoubleClick={() => handleAutoResize(visibleIndex)}
+                                                        className="absolute top-0 right-[-1px] h-full w-[3px] cursor-col-resize z-10 hover:bg-[#0084ff] transition-colors"
                                                     />
-                                                </div>
-                                            )}
-                                            {col.id === 'nivel' && (
-                                                <div className="flex items-center gap-2">
-                                                    <button
-                                                        title={areAllExpanded ? "Recolher Tudo" : "Expandir Tudo"}
-                                                        onClick={handleToggleExpandAll}
-                                                        className="hover:bg-blue-500/50 p-0.5 rounded text-sm mr-1"
-                                                    >
-                                                        {areAllExpanded ? '◢' : '◥'}
-                                                    </button>
-                                                    <span>{col.label}</span>
-                                                </div>
-                                            )}
-                                            {col.id !== 'select' && col.id !== 'nivel' && <span className="pr-6">{col.label}</span>}
-
-                                            {(col.resizable ?? true) && (
-                                                <div
-                                                    onMouseDown={(e) => handleResizeStart(e, visibleIndex)}
-                                                    onDoubleClick={() => handleAutoResize(visibleIndex)}
-                                                    className="absolute top-0 right-0 h-full w-2 cursor-col-resize z-10 hover:bg-blue-500/20"
-                                                    style={{ transform: 'translateX(50%)' }}
-                                                />
-                                            )}
-                                        </th>
-                                    )
-                                })}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {renderRows()}
-                        </tbody>
-                    </table>
-                </div>
+                                                )}
+                                            </th>
+                                        )
+                                    })}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {renderRows()}
+                            </tbody>
+                        </table>
+                    </div>
+                </CardContent>
             </Card>
 
             {/* Diálogo de Confirmação Centralizado */}
-            <ConfirmDialog
-                isOpen={dialogState.isOpen}
-                title={dialogState.title}
-                message={dialogState.message}
-                type={dialogState.type}
-                confirmText={dialogState.confirmText}
-                cancelText={dialogState.cancelText}
-                onConfirm={handleConfirm}
-                onCancel={handleCancel}
-            />
+            <Dialog open={dialogState.isOpen} onOpenChange={(open) => !open && handleCancel()}>
+                <DialogContent className="sm:max-w-[400px] bg-[#242830] border-[#3a3e45] text-[#e8eaed] shadow-2xl">
+                    <DialogHeader>
+                        <DialogTitle className="text-white flex items-center gap-2">
+                            <AlertTriangle className="w-5 h-5 text-yellow-500" />
+                            {dialogState.title}
+                        </DialogTitle>
+                        <DialogDescription className="text-[#a0a5b0] pt-2">
+                            {dialogState.message}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter className="gap-2 sm:gap-0 mt-4">
+                        <Button variant="ghost" onClick={handleCancel} className="text-[#a0a5b0] hover:text-white hover:bg-[#3a3e45]">{dialogState.cancelText || 'Cancelar'}</Button>
+                        <Button variant="destructive" onClick={handleConfirm} className="bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-900/20">{dialogState.confirmText || 'Confirmar'}</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 };

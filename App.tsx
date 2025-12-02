@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { ProjectProvider } from './contexts/ProjectContext';
 import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
 import { MobileHeader } from './components/MobileHeader';
@@ -59,30 +60,32 @@ const App: React.FC = () => {
   };
 
   return (
-    <>
-      <div
-        className={`fixed inset-0 bg-black/50 z-[999] transition-opacity md:hidden ${isMobileMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`}
-        onClick={() => setMobileMenuOpen(false)}
-      ></div>
+    <ProjectProvider>
+      <>
+        <div
+          className={`fixed inset-0 bg-black/50 z-[999] transition-opacity md:hidden ${isMobileMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`}
+          onClick={() => setMobileMenuOpen(false)}
+        ></div>
 
-      <MobileHeader isMobileMenuOpen={isMobileMenuOpen} setMobileMenuOpen={setMobileMenuOpen} />
+        <MobileHeader isMobileMenuOpen={isMobileMenuOpen} setMobileMenuOpen={setMobileMenuOpen} />
 
-      <div className="flex h-screen w-screen overflow-hidden bg-[#0f1419]">
-        <Sidebar
-          activeModule={activeModule}
-          setActiveModule={setActiveModule}
-          isMobileMenuOpen={isMobileMenuOpen}
-          setMobileMenuOpen={setMobileMenuOpen}
-        />
+        <div className="flex h-screen w-screen overflow-hidden bg-[#0f1419]">
+          <Sidebar
+            activeModule={activeModule}
+            setActiveModule={setActiveModule}
+            isMobileMenuOpen={isMobileMenuOpen}
+            setMobileMenuOpen={setMobileMenuOpen}
+          />
 
-        <div className="flex flex-col flex-1 overflow-hidden">
-          <Header />
-          <main className="flex-1 overflow-y-auto overflow-x-hidden p-3 md:p-5 lg:p-8">
-            {renderModule()}
-          </main>
+          <div className="flex flex-col flex-1 overflow-hidden">
+            <Header />
+            <main className="flex-1 overflow-y-auto overflow-x-hidden p-3 md:p-5 lg:p-8">
+              {renderModule()}
+            </main>
+          </div>
         </div>
-      </div>
-    </>
+      </>
+    </ProjectProvider>
   );
 };
 
