@@ -1,18 +1,11 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useProjects } from '../hooks/useProjects';
 
-interface Project {
-    id: string;
-    name: string;
-    created_at: string;
-    updated_at: string;
-}
-
 interface ProjectContextType {
     selectedProjectId: string | undefined;
     setSelectedProjectId: (id: string | undefined) => void;
-    projects: Project[];
-    createProject: (name: string) => Promise<Project | null>;
+    projects: any[];
+    createProject: (name: string) => Promise<any>;
     deleteProject: (id: string) => Promise<boolean>;
     loading: boolean;
 }

@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { ProjectProvider } from './contexts/ProjectContext';
+import { BudgetProvider } from './contexts/BudgetContext';
 import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
 import { MobileHeader } from './components/MobileHeader';
@@ -61,7 +62,7 @@ const App: React.FC = () => {
 
   return (
     <ProjectProvider>
-      <>
+      <BudgetProvider>
         <div
           className={`fixed inset-0 bg-black/50 z-[999] transition-opacity md:hidden ${isMobileMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`}
           onClick={() => setMobileMenuOpen(false)}
@@ -84,7 +85,7 @@ const App: React.FC = () => {
             </main>
           </div>
         </div>
-      </>
+      </BudgetProvider>
     </ProjectProvider>
   );
 };

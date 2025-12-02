@@ -51,9 +51,9 @@ export interface DiarioRegistro {
 }
 
 export interface OrcamentoItem {
-  id: number;
+  id: string | number;
   nivel: string;
-  pai: number | null;
+  pai: string | number | null;
   fonte: string;
   codigo: string;
   discriminacao: string;

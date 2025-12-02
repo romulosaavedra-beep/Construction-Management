@@ -1,5 +1,6 @@
 ﻿import { useBudgets } from '../hooks/useBudgets';
 import { ModuleHeader } from '../components/ModuleHeader';
+import { useProjectContext } from '../contexts/ProjectContext';
 import {
     Select,
     SelectContent,
@@ -329,7 +330,7 @@ const UnitAutocompleteCell = ({ value, onCommit, availableUnits, isSelected = fa
 const regenerateNiveles = (items: OrcamentoItem[]): OrcamentoItem[] => {
     const newItems = items.map(i => ({ ...i }));
 
-    const processLevel = (parentId: number | null, parentNivel: string) => {
+    const processLevel = (parentId: string | number | null, parentNivel: string) => {
         let siblingIndex = 1;
         const children = newItems.filter(item => item.pai === parentId);
         for (const child of children) {
@@ -344,8 +345,8 @@ const regenerateNiveles = (items: OrcamentoItem[]): OrcamentoItem[] => {
     return newItems;
 }
 
-const getAllDescendantIds = (items: OrcamentoItem[], parentId: number): number[] => {
-    const descendantIds: number[] = [];
+const getAllDescendantIds = (items: OrcamentoItem[], parentId: string | number): (string | number)[] => {
+    const descendantIds: (string | number)[] = [];
     const children = items.filter(item => item.pai === parentId);
     for (const child of children) {
         descendantIds.push(child.id);
@@ -380,8 +381,8 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
     const [localOrcamento, setLocalOrcamento] = useState<OrcamentoItem[]>(orcamentoData);
     const [isEditing, setIsEditing] = useState(false);
     const [originalOrcamento, setOriginalOrcamento] = useState<OrcamentoItem[] | null>(null);
-    const [draggedItemId, setDraggedItemId] = useState<number | null>(null);
-    const [selectedIds, setSelectedIds] = useState(new Set<number>());
+    const [draggedItemId, setDraggedItemId] = useState<string | number | null>(null);
+    const [selectedIds, setSelectedIds] = useState(new Set<string | number>());
     const [selectedColumn, setSelectedColumn] = useState<string | null>(null);
     const [restoreMenuOpen, setRestoreMenuOpen] = useState(false);
 
@@ -411,7 +412,8 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
 
     const { confirm, dialogState, handleConfirm, handleCancel } = useConfirm();
 
-    const { budgets, activeBudget, setActiveBudget, createBudget, deleteBudget, saveBudgetItems } = useBudgets();
+    const { selectedProjectId } = useProjectContext();
+    const { budgets, activeBudget, setActiveBudget, createBudget, deleteBudget, saveBudgetItems, updateBudget, budgetItems } = useBudgets(selectedProjectId);
 
     const headerCheckboxRef = useRef<HTMLInputElement>(null);
     const resizingColumnRef = useRef<{ index: number; startX: number; startWidth: number; } | null>(null);
@@ -425,6 +427,20 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
             setLocalOrcamento(orcamentoData);
         }
     }, [orcamentoData, isEditing]);
+
+    // Sync budgetItems from useBudgets to localOrcamento when activeBudget changes
+    useEffect(() => {
+        if (activeBudget && budgetItems && budgetItems.length > 0) {
+            setLocalOrcamento(budgetItems);
+            setOrcamentoData(budgetItems);
+        } else if (!activeBudget) {
+            setLocalOrcamento([]);
+            setOrcamentoData([]);
+        } else if (activeBudget && (!budgetItems || budgetItems.length === 0)) {
+            setLocalOrcamento([]);
+            setOrcamentoData([]);
+        }
+    }, [budgetItems, activeBudget]);
 
     useEffect(() => {
         try {
@@ -725,7 +741,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
             });
         });
 
-        const calculateSubtotals = (itemId: number) => {
+        const calculateSubtotals = (itemId: string | number) => {
             const item = itemsMap.get(itemId);
             if (!item) return { mat: 0, mo: 0, total: 0 };
 
@@ -831,7 +847,26 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
         setSelectedColumn(null);
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
+        if (activeBudget) {
+            try {
+                // 1. Save budget name (if changed)
+                await updateBudget(activeBudget.id, { name: activeBudget.name });
+
+                // 2. Save budget items
+                await saveBudgetItems(activeBudget.id, localOrcamento);
+
+                toast.success('Orçamento salvo com sucesso!');
+            } catch (error) {
+                console.error('Error saving budget:', error);
+                toast.error('Erro ao salvar orçamento');
+                return; // Don't reset state if save failed
+            }
+        } else {
+            toast.error('Nenhum orçamento selecionado para salvar.');
+            return;
+        }
+
         setOrcamentoData(localOrcamento);
         setIsEditing(false);
         setOriginalOrcamento(null);
@@ -839,7 +874,6 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
         setSelectedColumn(null);
         setHistory([]);
         setHistoryIndex(-1);
-        toast.success('Orçamento salvo com sucesso!');
     };
 
     const handleExit = async () => {
@@ -865,7 +899,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
         setHistoryIndex(-1);
     };
 
-    const handleValueCommit = (id: number, field: keyof OrcamentoItem, value: string | number) => {
+    const handleValueCommit = (id: string | number, field: keyof OrcamentoItem, value: string | number) => {
         updateOrcamento(prev => prev.map(item => {
             if (item.id === id) {
                 const updatedItem = { ...item, [field]: value };
@@ -880,7 +914,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
         }));
     };
 
-    const handleNivelChange = (id: number, newNivel: string) => {
+    const handleNivelChange = (id: string | number, newNivel: string) => {
         const currentItem = localOrcamento.find(i => i.id === id);
         if (!currentItem || currentItem.nivel === newNivel) return;
 
@@ -899,7 +933,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
             p = p.pai ? localOrcamento.find(i => i.id === p.pai) : null;
         }
 
-        const idsToMove = new Set<number>([id, ...getAllDescendantIds(localOrcamento, id)]);
+        const idsToMove = new Set<string | number>([id, ...getAllDescendantIds(localOrcamento, id)]);
         const itemsToMove = localOrcamento.filter(i => idsToMove.has(i.id));
         const remainingItems = localOrcamento.filter(i => !idsToMove.has(i.id));
 
@@ -931,7 +965,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
         updateOrcamento(updateHierarchy(remainingItems));
     };
 
-    const handleNivelKeyDown = (e: React.KeyboardEvent, itemId: number) => {
+    const handleNivelKeyDown = (e: React.KeyboardEvent, itemId: string | number) => {
         if (e.key !== 'Tab') return;
         e.preventDefault();
 
@@ -1008,12 +1042,12 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
         }
     };
 
-    const handleDragStart = (e: React.DragEvent, itemId: number) => {
+    const handleDragStart = (e: React.DragEvent, itemId: string | number) => {
         setDraggedItemId(itemId);
         e.dataTransfer.effectAllowed = 'move';
     };
 
-    const handleDrop = (e: React.DragEvent, targetItemId: number) => {
+    const handleDrop = (e: React.DragEvent, targetItemId: string | number) => {
         e.preventDefault();
         if (draggedItemId === null || draggedItemId === targetItemId) {
             setDraggedItemId(null);
@@ -1047,11 +1081,11 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
         setDraggedItemId(null);
     };
 
-    const handleAddNewRow = (afterId: number) => {
+    const handleAddNewRow = (afterId: string | number) => {
         const afterItem = localOrcamento.find(item => item.id === afterId);
         if (!afterItem) return;
 
-        const newId = Math.max(0, ...localOrcamento.map(o => o.id)) + 1;
+        const newId = crypto.randomUUID();
         const newItem: OrcamentoItem = {
             id: newId, nivel: '', pai: afterItem.pai, fonte: '', codigo: '',
             discriminacao: 'Novo Serviço', unidade: '', quantidade: 0,
@@ -1064,7 +1098,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
         updateOrcamento(updateHierarchy(newOrcamento));
     };
 
-    const handleDeleteRow = (idToDelete: number) => {
+    const handleDeleteRow = (idToDelete: string | number) => {
         const idsToDelete = new Set([idToDelete, ...getAllDescendantIds(localOrcamento, idToDelete)]);
         const newOrcamento = localOrcamento.filter(item => !idsToDelete.has(item.id));
         updateOrcamento(updateHierarchy(newOrcamento));
@@ -1073,7 +1107,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
     const handleDeleteSelected = () => {
         if (selectedIds.size === 0) return;
 
-        let idsToDelete = new Set<number>();
+        let idsToDelete = new Set<string | number>();
         for (const id of selectedIds) {
             idsToDelete.add(id);
             const descendants = getAllDescendantIds(localOrcamento, id);
@@ -1084,11 +1118,11 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
         setSelectedIds(new Set());
     };
 
-    const handleDuplicateRow = (idToDuplicate: number) => {
+    const handleDuplicateRow = (idToDuplicate: string | number) => {
         const originalItem = localOrcamento.find(item => item.id === idToDuplicate);
         if (!originalItem) return;
 
-        const newId = Math.max(0, ...localOrcamento.map(o => o.id)) + 1;
+        const newId = crypto.randomUUID();
         const newItem: OrcamentoItem = {
             ...originalItem, id: newId,
             discriminacao: `${originalItem.discriminacao} (Cópia)`,
@@ -1101,7 +1135,13 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
         updateOrcamento(updateHierarchy(newOrcamento));
     };
 
-    const handleSelectRow = (id: number) => {
+    const toggleExpand = (id: string | number) => {
+        updateOrcamento(prev => prev.map(item =>
+            item.id === id ? { ...item, expandido: !item.expandido } : item
+        ));
+    };
+
+    const handleSelectRow = (id: string | number) => {
         setSelectedIds(prev => {
             const newSelection = new Set(prev);
             if (newSelection.has(id)) {
@@ -1163,10 +1203,6 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
             grandTotalMaoDeObra: moTotal,
         };
     }, [processedOrcamento]);
-
-    const toggleExpand = (id: number) => {
-        updateOrcamento(localOrcamento.map(item => item.id === id ? { ...item, expandido: !item.expandido } : item));
-    };
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
@@ -1595,7 +1631,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
         setSelectedColumn(prev => prev === columnId ? null : columnId);
     };
 
-    const renderRows = (parentId: number | null = null, level = 0): React.ReactElement[] => {
+    const renderRows = (parentId: string | number | null = null, level = 0): React.ReactElement[] => {
         const itemsToRender = processedOrcamento.filter(item => item.pai === parentId);
 
         return itemsToRender.flatMap(item => {
@@ -1854,56 +1890,44 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                 title="Orçamento de Obra"
                 subtitle="Gerencie a estrutura analítica, custos e insumos do projeto"
                 icon={FileSpreadsheet}
-            >
-                {/* Budget Selector */}
-                <Select value={activeBudget?.id} onValueChange={(id) => {
-                    const budget = budgets.find(b => b.id === id);
-                    if (budget) setActiveBudget(budget);
-                }}>
-                    <SelectTrigger className="w-[200px] h-8 bg-[#0f1419] border-[#3a3e45] text-white focus:ring-0 focus:ring-offset-0 focus:border-[#71767f]">
-                        <SelectValue placeholder="Selecione um orçamento" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-[#1e2329] border-[#3a3e45] text-white z-[100]">
-                        {budgets.map(b => (
-                            <SelectItem key={b.id} value={b.id} className="focus:bg-[#242830] focus:text-white cursor-pointer">
-                                {b.name}
-                            </SelectItem>
-                        ))}
-                        {budgets.length === 0 && <SelectItem value="none" disabled>Nenhum orçamento</SelectItem>}
-                    </SelectContent>
-                </Select>
-
-                <div className="w-px h-4 bg-[#3a3e45] mx-1" />
-
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => isEditing && handleSave()}
-                            disabled={!isEditing}
-                            className="h-8 w-8 text-[#0084ff] hover:bg-[#0084ff]/10 hover:text-[#0084ff] disabled:opacity-30"
-                        >
-                            <Save className="w-4 h-4" />
-                        </Button>
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom" align="end">
-                        <p>Salvar Orçamento</p>
-                    </TooltipContent>
-                </Tooltip>
-            </ModuleHeader>
+                showBudgetSelector={true}
+            />
 
             <Card className="bg-[#1e2329] border-[#3a3e45] shadow-sm">
                 <CardHeader className="border-b border-[#3a3e45] pb-4">
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                        <CardTitle className="text-lg font-semibold text-white flex items-center gap-2">
-                            <FileText className="w-5 h-5 text-[#0084ff]" />
-                            Planilha Orçamentária
-                        </CardTitle>
+                        <div className="flex items-center gap-4 flex-1">
+                            <CardTitle className="text-lg font-semibold text-white flex items-center gap-2 shrink-0">
+                                <FileText className="w-5 h-5 text-[#0084ff]" />
+                                Planilha Orçamentária
+                            </CardTitle>
+
+                            {/* Budget Name - Editable only in edit mode, or empty state message */}
+                            {(() => {
+                                return activeBudget ? (
+                                    isEditing ? (
+                                        <Input
+                                            value={activeBudget.name}
+                                            onChange={(e) => setActiveBudget({ ...activeBudget, name: e.target.value })}
+                                            className="h-8 bg-[#0f1419] border-[#3a3e45] text-white focus-visible:ring-0 focus-visible:border-[#0084ff] max-w-md"
+                                            placeholder="Nome do Orçamento"
+                                        />
+                                    ) : (
+                                        <span className="text-sm text-[#a0a5b0] font-normal">
+                                            {activeBudget.name}
+                                        </span>
+                                    )
+                                ) : (
+                                    <span className="text-sm text-[#71767f] italic">
+                                        Crie um novo orçamento
+                                    </span>
+                                );
+                            })()}
+                        </div>
 
                         <div className="flex flex-wrap items-center gap-2">
-                            {/* Totais (Visíveis apenas se não estiver editando ou se houver espaço) */}
-                            {!isEditing && !hiddenColumns.has('mat_unit') && (
+                            {/* Totals - Visible only when not editing and has budget */}
+                            {!isEditing && activeBudget && !hiddenColumns.has('mat_unit') && (
                                 <div className="flex gap-4 mr-4 bg-[#0f1419] px-3 py-1.5 rounded-lg border border-[#3a3e45]">
                                     <div className="text-right">
                                         <div className="text-[10px] text-[#a0a5b0] uppercase font-bold">Materiais</div>
@@ -1922,33 +1946,8 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                 </div>
                             )}
 
-                            {/* Botões de Ação */}
+                            {/* Action Buttons */}
                             <TooltipProvider>
-                                {hiddenColumns.size > 0 && (
-                                    <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                            <Button variant="outline" size="sm" className="bg-[#1e2329] border-[#3a3e45] text-[#a0a5b0] hover:text-white hover:bg-[#242830]">
-                                                <Eye className="w-4 h-4 mr-2" />
-                                                Colunas ({hiddenColumns.size})
-                                            </Button>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent align="end" className="bg-[#242830] border-[#3a3e45] text-[#e8eaed] w-56">
-                                            <DropdownMenuLabel>Colunas Ocultas</DropdownMenuLabel>
-                                            <DropdownMenuSeparator className="bg-[#3a3e45]" />
-                                            {columnsConfig.filter(c => hiddenColumns.has(c.id)).map(c => (
-                                                <DropdownMenuItem key={c.id} onClick={() => handleShowColumn(c.id)} className="cursor-pointer hover:bg-[#3a3e45]">
-                                                    <Eye className="w-4 h-4 mr-2 text-[#0084ff]" />
-                                                    {c.label}
-                                                </DropdownMenuItem>
-                                            ))}
-                                            <DropdownMenuSeparator className="bg-[#3a3e45]" />
-                                            <DropdownMenuItem onClick={handleShowAllColumns} className="cursor-pointer hover:bg-[#3a3e45] font-semibold text-[#0084ff]">
-                                                Mostrar Todas
-                                            </DropdownMenuItem>
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
-                                )}
-
                                 {isEditing ? (
                                     <div className="flex items-center gap-2 animate-in fade-in slide-in-from-right-4">
                                         {selectedIds.size > 0 && (
@@ -1986,31 +1985,63 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                     </div>
                                 ) : (
                                     <div className="flex items-center gap-2">
-                                        <Tooltip>
-                                            <TooltipTrigger asChild>
-                                                <Button variant="outline" size="icon" onClick={handleExportCsv} className="bg-[#1e2329] border-[#3a3e45] text-[#a0a5b0] hover:text-white hover:bg-[#242830]">
-                                                    <FileText className="w-4 h-4" />
+                                        {/* Dropdown Menu for Export/Columns */}
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button variant="outline" size="icon" className="bg-[#1e2329] border-[#3a3e45] text-[#a0a5b0] hover:text-white hover:bg-[#242830]">
+                                                    <MoreHorizontal className="w-4 h-4" />
                                                 </Button>
-                                            </TooltipTrigger>
-                                            <TooltipContent>Exportar CSV</TooltipContent>
-                                        </Tooltip>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end" className="bg-[#242830] border-[#3a3e45] text-[#e8eaed] w-56">
+                                                <DropdownMenuLabel>Opções</DropdownMenuLabel>
+                                                <DropdownMenuSeparator className="bg-[#3a3e45]" />
 
-                                        <Tooltip>
-                                            <TooltipTrigger asChild>
-                                                <Button variant="outline" size="icon" onClick={handleExportExcel} className="bg-[#1e2329] border-[#3a3e45] text-[#a0a5b0] hover:text-white hover:bg-[#242830]">
-                                                    <ArrowDownToLine className="w-4 h-4" />
-                                                </Button>
-                                            </TooltipTrigger>
-                                            <TooltipContent>Exportar Excel</TooltipContent>
-                                        </Tooltip>
+                                                {/* Export Options */}
+                                                <DropdownMenuItem onClick={handleExportCsv} className="cursor-pointer hover:bg-[#3a3e45]">
+                                                    <FileText className="w-4 h-4 mr-2 text-[#0084ff]" />
+                                                    Exportar CSV
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem onClick={handleExportExcel} className="cursor-pointer hover:bg-[#3a3e45]">
+                                                    <ArrowDownToLine className="w-4 h-4 mr-2 text-[#0084ff]" />
+                                                    Exportar Excel
+                                                </DropdownMenuItem>
 
-                                        <Button onClick={() => setImportModalOpen(true)} className="bg-[#1e2329] border border-[#3a3e45] hover:bg-[#242830] text-white">
+                                                <DropdownMenuSeparator className="bg-[#3a3e45]" />
+
+                                                {/* Hidden Columns Submenu */}
+                                                {hiddenColumns.size > 0 && (
+                                                    <>
+                                                        <DropdownMenuLabel className="text-xs">Colunas Ocultas</DropdownMenuLabel>
+                                                        {columnsConfig.filter(c => hiddenColumns.has(c.id)).map(c => (
+                                                            <DropdownMenuItem key={c.id} onClick={() => handleShowColumn(c.id)} className="cursor-pointer hover:bg-[#3a3e45] text-sm">
+                                                                <Eye className="w-4 h-4 mr-2 text-[#0084ff]" />
+                                                                {c.label}
+                                                            </DropdownMenuItem>
+                                                        ))}
+                                                        <DropdownMenuSeparator className="bg-[#3a3e45]" />
+                                                        <DropdownMenuItem onClick={handleShowAllColumns} className="cursor-pointer hover:bg-[#3a3e45] font-semibold text-[#0084ff]">
+                                                            Mostrar Todas
+                                                        </DropdownMenuItem>
+                                                    </>
+                                                )}
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
+
+                                        {/* Import IA Button - Following Settings UI pattern */}
+                                        <Button
+                                            onClick={() => setImportModalOpen(true)}
+                                            className="bg-[#242830] border border-[#3a3e45] hover:bg-[#2f343d] text-white"
+                                        >
                                             <Bot className="w-4 h-4 mr-2 text-[#0084ff]" />
                                             Importar IA
                                         </Button>
 
-                                        <Button onClick={handleEdit} className="bg-[#0084ff] hover:bg-[#0073e6] text-white shadow-lg shadow-blue-900/20">
-                                            <Pencil className="w-4 h-4 mr-2" />
+                                        {/* Edit Button - Following Settings UI pattern */}
+                                        <Button
+                                            onClick={handleEdit}
+                                            className="bg-[#242830] border border-[#3a3e45] hover:bg-[#2f343d] text-white"
+                                        >
+                                            <Pencil className="w-4 h-4 mr-2 text-[#0084ff]" />
                                             Editar
                                         </Button>
                                     </div>
@@ -2021,118 +2052,126 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                 </CardHeader>
 
                 <CardContent className="p-0">
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left text-[#a0a5b0] table-fixed border-collapse">
-                            <colgroup>
-                                {visibleColumns.map(({ col, index }) => (
-                                    <col key={col.id} style={{ width: `${columnWidths[index]}px` }} />
-                                ))}
-                            </colgroup>
-                            <thead className="text-xs text-[#e8eaed] uppercase bg-[#242830] sticky top-0 z-30 shadow-sm">
-                                <tr>
-                                    {visibleColumns.map(({ col, index: originalIndex }, visibleIndex) => {
-                                        const isSelectCol = col.id === 'select';
-                                        const isActionCol = col.id === 'action';
-                                        const stickyHeaderClasses =
-                                            isSelectCol ? 'sticky left-0 z-40 bg-[#242830]' :
-                                                isActionCol ? 'sticky right-0 z-40 bg-[#242830]' : '';
-                                        const unhideableColumns = new Set(['select', 'action', 'nivel']);
-                                        const batchEditableColumns = new Set(['fonte', 'codigo', 'discriminacao', 'un', 'quant', 'mat_unit', 'mo_unit']);
-                                        const isColSelected = selectedColumn === col.id;
-                                        const isPinned = pinnedColumns.has(col.id) && !isEditing;
+                    {activeBudget ? (
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left text-[#a0a5b0] table-fixed border-collapse">
+                                <colgroup>
+                                    {visibleColumns.map(({ col, index }) => (
+                                        <col key={col.id} style={{ width: `${columnWidths[index]}px` }} />
+                                    ))}
+                                </colgroup>
+                                <thead className="text-xs text-[#e8eaed] uppercase bg-[#242830] sticky top-0 z-30 shadow-sm">
+                                    <tr>
+                                        {visibleColumns.map(({ col, index: originalIndex }, visibleIndex) => {
+                                            const isSelectCol = col.id === 'select';
+                                            const isActionCol = col.id === 'action';
+                                            const stickyHeaderClasses =
+                                                isSelectCol ? 'sticky left-0 z-40 bg-[#242830]' :
+                                                    isActionCol ? 'sticky right-0 z-40 bg-[#242830]' : '';
+                                            const unhideableColumns = new Set(['select', 'action', 'nivel']);
+                                            const batchEditableColumns = new Set(['fonte', 'codigo', 'discriminacao', 'un', 'quant', 'mat_unit', 'mo_unit']);
+                                            const isColSelected = selectedColumn === col.id;
+                                            const isPinned = pinnedColumns.has(col.id) && !isEditing;
 
-                                        const stickyStyle: React.CSSProperties = isPinned ? {
-                                            position: 'sticky',
-                                            left: getStickyLeft(visibleIndex),
-                                            zIndex: 30,
-                                            backgroundColor: '#242830',
-                                        } : {};
+                                            const stickyStyle: React.CSSProperties = isPinned ? {
+                                                position: 'sticky',
+                                                left: getStickyLeft(visibleIndex),
+                                                zIndex: 30,
+                                                backgroundColor: '#242830',
+                                            } : {};
 
-                                        return (
-                                            <th
-                                                key={col.id}
-                                                style={stickyStyle}
-                                                className={`group px-2 py-3 relative text-left border-b border-[#3a3e45] ${visibleIndex < visibleColumns.length - 1 ? 'border-r border-[#3a3e45]' : ''} ${stickyHeaderClasses} ${isColSelected ? 'bg-[#0084ff]/10' : ''} ${isPinned ? 'shadow-[2px_0_5px_rgba(0,0,0,0.3)]' : ''}`}
-                                            >
-                                                {/* Pin Control */}
-                                                {!isEditing && (
-                                                    <div className="absolute right-1 top-0 bottom-0 flex flex-col justify-center opacity-0 group-hover:opacity-100 transition-opacity z-50">
-                                                        <button
-                                                            onClick={() => handleTogglePin(col.id)}
-                                                            className="w-5 h-5 rounded bg-[#3a3e45] text-[#a0a5b0] hover:text-white items-center justify-center flex hover:bg-[#0084ff] transition-colors"
-                                                            title={isPinned ? "Desafixar" : "Fixar"}
-                                                        >
-                                                            {isPinned ? <PinOff className="w-3 h-3" /> : <Pin className="w-3 h-3" />}
-                                                        </button>
-                                                    </div>
-                                                )}
-
-                                                {/* Hide/Select Controls */}
-                                                {!unhideableColumns.has(col.id) && (
-                                                    <div className="absolute left-1 top-0 bottom-0 flex flex-col justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-20">
-                                                        {isEditing && batchEditableColumns.has(col.id) && (
+                                            return (
+                                                <th
+                                                    key={col.id}
+                                                    style={stickyStyle}
+                                                    className={`group px-2 py-3 relative text-left border-b border-[#3a3e45] ${visibleIndex < visibleColumns.length - 1 ? 'border-r border-[#3a3e45]' : ''} ${stickyHeaderClasses} ${isColSelected ? 'bg-[#0084ff]/10' : ''} ${isPinned ? 'shadow-[2px_0_5px_rgba(0,0,0,0.3)]' : ''}`}
+                                                >
+                                                    {/* Pin Control */}
+                                                    {!isEditing && (
+                                                        <div className="absolute right-1 top-0 bottom-0 flex flex-col justify-center opacity-0 group-hover:opacity-100 transition-opacity z-50">
                                                             <button
-                                                                onClick={() => handleColumnSelect(col.id)}
-                                                                className={`w-4 h-4 rounded text-white text-[10px] items-center justify-center flex hover:bg-blue-500/80 ${isColSelected ? 'bg-[#0084ff] opacity-100' : 'bg-[#3a3e45]'}`}
-                                                                title="Selecionar coluna"
+                                                                onClick={() => handleTogglePin(col.id)}
+                                                                className="w-5 h-5 rounded bg-[#3a3e45] text-[#a0a5b0] hover:text-white items-center justify-center flex hover:bg-[#0084ff] transition-colors"
+                                                                title={isPinned ? "Desafixar" : "Fixar"}
                                                             >
-                                                                <ChevronDown className="w-3 h-3" />
+                                                                {isPinned ? <PinOff className="w-3 h-3" /> : <Pin className="w-3 h-3" />}
+                                                            </button>
+                                                        </div>
+                                                    )}
+
+                                                    {/* Hide/Select Controls */}
+                                                    {!unhideableColumns.has(col.id) && (
+                                                        <div className="absolute left-1 top-0 bottom-0 flex flex-col justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-20">
+                                                            {isEditing && batchEditableColumns.has(col.id) && (
+                                                                <button
+                                                                    onClick={() => handleColumnSelect(col.id)}
+                                                                    className={`w-4 h-4 rounded text-white text-[10px] items-center justify-center flex hover:bg-blue-500/80 ${isColSelected ? 'bg-[#0084ff] opacity-100' : 'bg-[#3a3e45]'}`}
+                                                                    title="Selecionar coluna"
+                                                                >
+                                                                    <ChevronDown className="w-3 h-3" />
+                                                                </button>
+                                                            )}
+
+                                                            <button
+                                                                onClick={() => handleHideColumn(col.id)}
+                                                                className="w-4 h-4 rounded bg-[#3a3e45] text-[#a0a5b0] hover:text-white text-xs items-center justify-center flex hover:bg-red-500/80 transition-colors"
+                                                                title="Ocultar coluna"
+                                                            >
+                                                                <EyeOff className="w-3 h-3" />
+                                                            </button>
+                                                        </div>
+                                                    )}
+
+                                                    {col.id === 'select' && isEditing && (
+                                                        <div className="flex justify-center">
+                                                            <input
+                                                                type="checkbox"
+                                                                ref={headerCheckboxRef}
+                                                                onChange={handleSelectAll}
+                                                                className="w-3.5 h-3.5 bg-[#1e2329] border-[#3a3e45] rounded focus:ring-0 accent-[#0084ff] cursor-pointer"
+                                                            />
+                                                        </div>
+                                                    )}
+
+                                                    <div className="flex items-center gap-1">
+                                                        {col.id === 'nivel' && (
+                                                            <button
+                                                                title={areAllExpanded ? "Recolher Tudo" : "Expandir Tudo"}
+                                                                onClick={handleToggleExpandAll}
+                                                                className="hover:bg-[#3a3e45] p-0.5 rounded text-[#0084ff] mr-1 transition-colors"
+                                                            >
+                                                                {areAllExpanded ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
                                                             </button>
                                                         )}
-
-                                                        <button
-                                                            onClick={() => handleHideColumn(col.id)}
-                                                            className="w-4 h-4 rounded bg-[#3a3e45] text-[#a0a5b0] hover:text-white text-xs items-center justify-center flex hover:bg-red-500/80 transition-colors"
-                                                            title="Ocultar coluna"
-                                                        >
-                                                            <EyeOff className="w-3 h-3" />
-                                                        </button>
+                                                        <span className={cn("font-semibold tracking-wider", col.id !== 'select' && col.id !== 'nivel' && "pr-4")}>
+                                                            {col.label}
+                                                        </span>
                                                     </div>
-                                                )}
 
-                                                {col.id === 'select' && isEditing && (
-                                                    <div className="flex justify-center">
-                                                        <input
-                                                            type="checkbox"
-                                                            ref={headerCheckboxRef}
-                                                            onChange={handleSelectAll}
-                                                            className="w-3.5 h-3.5 bg-[#1e2329] border-[#3a3e45] rounded focus:ring-0 accent-[#0084ff] cursor-pointer"
+                                                    {(col.resizable ?? true) && (
+                                                        <div
+                                                            onMouseDown={(e) => handleResizeStart(e, visibleIndex)}
+                                                            onDoubleClick={() => handleAutoResize(visibleIndex)}
+                                                            className="absolute top-0 right-[-1px] h-full w-[3px] cursor-col-resize z-10 hover:bg-[#0084ff] transition-colors"
                                                         />
-                                                    </div>
-                                                )}
-
-                                                <div className="flex items-center gap-1">
-                                                    {col.id === 'nivel' && (
-                                                        <button
-                                                            title={areAllExpanded ? "Recolher Tudo" : "Expandir Tudo"}
-                                                            onClick={handleToggleExpandAll}
-                                                            className="hover:bg-[#3a3e45] p-0.5 rounded text-[#0084ff] mr-1 transition-colors"
-                                                        >
-                                                            {areAllExpanded ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
-                                                        </button>
                                                     )}
-                                                    <span className={cn("font-semibold tracking-wider", col.id !== 'select' && col.id !== 'nivel' && "pr-4")}>
-                                                        {col.label}
-                                                    </span>
-                                                </div>
-
-                                                {(col.resizable ?? true) && (
-                                                    <div
-                                                        onMouseDown={(e) => handleResizeStart(e, visibleIndex)}
-                                                        onDoubleClick={() => handleAutoResize(visibleIndex)}
-                                                        className="absolute top-0 right-[-1px] h-full w-[3px] cursor-col-resize z-10 hover:bg-[#0084ff] transition-colors"
-                                                    />
-                                                )}
-                                            </th>
-                                        )
-                                    })}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {renderRows()}
-                            </tbody>
-                        </table>
-                    </div>
+                                                </th>
+                                            )
+                                        })}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {renderRows()}
+                                </tbody>
+                            </table>
+                        </div>
+                    ) : (
+                        <div className="flex flex-col items-center justify-center py-20 text-center">
+                            <FileSpreadsheet className="w-16 h-16 text-[#3a3e45] mb-4" />
+                            <h3 className="text-lg font-semibold text-[#a0a5b0] mb-2">Nenhum orçamento selecionado</h3>
+                            <p className="text-sm text-[#71767f] mb-4">Selecione um orçamento existente ou crie um novo para começar</p>
+                        </div>
+                    )}
                 </CardContent>
             </Card>
 
