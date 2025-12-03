@@ -1,6 +1,6 @@
 import React from 'react';
-import { Button } from '../../../components/Button';
-import { formatCurrency } from '../../../utils/formatters';
+import { Button } from '@/components/ui/button';
+import { formatCurrency } from '@/utils/formatters';
 import { ColumnConfig } from '../types';
 
 interface OrcamentoToolbarProps {

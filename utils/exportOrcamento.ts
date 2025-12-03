@@ -1,6 +1,6 @@
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
-import type { OrcamentoItem } from '../types';
+import type { OrcamentoItem } from '@/types';
 
 // Helper to format numbers (non‑currency) with two decimals
 const formatNumber = (value: number) =>

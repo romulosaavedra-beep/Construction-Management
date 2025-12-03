@@ -1,8 +1,8 @@
 
 import React, { useState } from 'react';
-import { PageHeader } from '../components/PageHeader';
-import { Card, CardHeader } from '../components/Card';
-import { Button } from '../components/Button';
+import { PageHeader } from '../components/layout/page-header';
+import { Card, CardHeader } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { formatCurrency } from '../utils/formatters';
 
 const initialComposition = [

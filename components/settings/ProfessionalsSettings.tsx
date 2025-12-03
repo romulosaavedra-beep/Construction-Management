@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { supabase } from '../../services/supabase';
-import { Card, CardHeader } from '../Card';
+import { Card, CardHeader } from '@/components/ui/card';
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -13,8 +13,8 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog"
-import { DataTable } from '../Table/DataTable';
-import { SearchableDropdown } from '../SearchableDropdown';
+import { DataTable } from '@/components/data-table/DataTable';
+import { SearchableDropdown } from '@/components/ui/searchable-dropdown';
 import { useProfessionals } from '../../hooks/useProfessionals';
 import { useConfirm } from '../../utils/useConfirm';
 import { maskMobilePhone } from '../../utils/formatters';

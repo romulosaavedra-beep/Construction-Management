@@ -1,9 +1,9 @@
 
 import React, { useState, useEffect } from 'react';
-import { PageHeader } from '../components/PageHeader';
-import { Card, CardHeader } from '../components/Card';
+import { PageHeader } from '../components/layout/page-header';
+import { Card, CardHeader } from '@/components/ui/card';
 import { clima15DiasData, climaIntraDiarioData } from '../data/mockData';
-import { Button } from '../components/Button';
+import { Button } from '@/components/ui/button';
 import type { Module } from '../types';
 
 interface ClimaProps {

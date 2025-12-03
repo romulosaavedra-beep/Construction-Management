@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ModuleHeader } from '../components/ModuleHeader';
+import { ModuleHeader } from '../components/layout/module-header';
 import { GeneralSettings } from '../components/settings/GeneralSettings';
 import { ProfessionalsSettings } from '../components/settings/ProfessionalsSettings';
 import { SuppliersSettings } from '../components/settings/SuppliersSettings';

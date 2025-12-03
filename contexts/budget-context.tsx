@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, Rea
 import { supabase } from '../services/supabase';
 import toast from 'react-hot-toast';
 import type { OrcamentoItem } from '../types';
-import { useProjectContext } from './ProjectContext';
+import { useProjectContext } from './project-context';
 
 export interface Budget {
     id: string;

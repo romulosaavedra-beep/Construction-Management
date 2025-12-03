@@ -1,10 +1,10 @@
 
 import React, { useState, useMemo } from 'react';
 import type { DiarioRegistro, ServicoExecutado } from '../types';
-import { PageHeader } from '../components/PageHeader';
-import { Card, CardHeader } from '../components/Card';
-import { Button } from '../components/Button';
-import { StatusBadge } from '../components/StatusBadge';
+import { PageHeader } from '../components/layout/page-header';
+import { Card, CardHeader } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { StatusBadge } from '@/components/ui/status-badge';
 import { diarioRegistrosData, profissionaisData, initialOrcamentoData } from '../data/mockData';
 import { formatDate, getTodayDateString } from '../utils/formatters';
 
@@ -14,7 +14,7 @@ type SortKey = 'data' | 'responsavel' | 'etapa' | 'status';
 const DiarioDeObra: React.FC = () => {
     const [activeTab, setActiveTab] = useState<Tab>('form');
     const [registros, setRegistros] = useState<DiarioRegistro[]>(diarioRegistrosData);
-    
+
     // Form State
     const [formData, setFormData] = useState<Partial<DiarioRegistro>>({ data: getTodayDateString(), clima: 'Ensolarado' });
     const [servicos, setServicos] = useState<Partial<ServicoExecutado>[]>([]);
@@ -45,16 +45,16 @@ const DiarioDeObra: React.FC = () => {
     const addServico = () => {
         setServicos([...servicos, { id: Date.now(), equipe: 1 }]);
     };
-    
+
     const handleServicoChange = (index: number, field: keyof ServicoExecutado, value: any) => {
         const newServicos = [...servicos];
         const servico = newServicos[index];
-        if(servico) {
+        if (servico) {
             (servico as any)[field] = value;
 
             if (field === 'servico') {
                 const orcamentoItem = initialOrcamentoData.find(i => i.discriminacao === value);
-                if(orcamentoItem) {
+                if (orcamentoItem) {
                     servico.unidade = orcamentoItem.unidade;
                     servico.quantidadePrevista = orcamentoItem.quantidade;
                 }
@@ -62,7 +62,7 @@ const DiarioDeObra: React.FC = () => {
             setServicos(newServicos);
         }
     };
-    
+
     const removeServico = (index: number) => {
         setServicos(servicos.filter((_, i) => i !== index));
     };
@@ -95,13 +95,13 @@ const DiarioDeObra: React.FC = () => {
             const dataRegistro = new Date(r.data + 'T00:00:00');
             const dataInicio = filters.dataInicio ? new Date(filters.dataInicio + 'T00:00:00') : null;
             const dataFim = filters.dataFim ? new Date(filters.dataFim + 'T00:00:00') : null;
-            
+
             if (dataInicio && dataRegistro < dataInicio) return false;
             if (dataFim && dataRegistro > dataFim) return false;
             if (filters.responsavel && r.responsavel !== filters.responsavel) return false;
             if (filters.etapa && !r.etapa.includes(filters.etapa)) return false;
             if (filters.servico && !r.servicos.some(s => s.servico.toLowerCase().includes(filters.servico.toLowerCase()))) return false;
-            
+
             return true;
         });
 
@@ -126,16 +126,16 @@ const DiarioDeObra: React.FC = () => {
         }
         setSortConfig({ key, direction });
     };
-    
+
     const getSortIndicator = (key: SortKey) => {
-      if (!sortConfig || sortConfig.key !== key) return '↕';
-      return sortConfig.direction === 'asc' ? '↑' : '↓';
+        if (!sortConfig || sortConfig.key !== key) return '↕';
+        return sortConfig.direction === 'asc' ? '↑' : '↓';
     }
 
     return (
         <div>
             <PageHeader title="📝 Diário de Obra" subtitle="Registros diários de atividades e ocorrências" />
-             <div className="border-b border-[#3a3e45] mb-6">
+            <div className="border-b border-[#3a3e45] mb-6">
                 <nav className="flex space-x-4">
                     <button onClick={() => setActiveTab('form')} className={`px-3 py-2 font-medium text-sm rounded-t-lg transition-colors whitespace-nowrap ${activeTab === 'form' ? 'text-[#0084ff] border-b-2 border-[#0084ff]' : 'text-[#a0a5b0] hover:text-white'}`}>
                         + Novo Registro
@@ -153,11 +153,11 @@ const DiarioDeObra: React.FC = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-sm font-medium mb-1">Data *</label>
-                                <input type="date" name="data" value={formData.data} onChange={e => setFormData({...formData, data: e.target.value})} required className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none" />
+                                <input type="date" name="data" value={formData.data} onChange={e => setFormData({ ...formData, data: e.target.value })} required className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none" />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium mb-1">Responsável *</label>
-                                <select name="responsavel" value={formData.responsavel || ''} onChange={e => setFormData({...formData, responsavel: e.target.value})} required className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none">
+                                <select name="responsavel" value={formData.responsavel || ''} onChange={e => setFormData({ ...formData, responsavel: e.target.value })} required className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none">
                                     <option value="">Selecione...</option>
                                     {profissionaisData.map(p => <option key={p.nome} value={p.nome}>{p.nome}</option>)}
                                 </select>
@@ -186,15 +186,15 @@ const DiarioDeObra: React.FC = () => {
                                             </div>
                                             <div className="col-span-6 sm:col-span-2">
                                                 <label className="text-xs">Qtd. Exec. *</label>
-                                                <input type="number" step="any" value={servico.quantidadeExecutada || ''} onChange={e => handleServicoChange(index, 'quantidadeExecutada', parseFloat(e.target.value))} className="w-full bg-[#1e2329] border border-[#3a3e45] text-sm rounded p-1"/>
+                                                <input type="number" step="any" value={servico.quantidadeExecutada || ''} onChange={e => handleServicoChange(index, 'quantidadeExecutada', parseFloat(e.target.value))} className="w-full bg-[#1e2329] border border-[#3a3e45] text-sm rounded p-1" />
                                             </div>
                                             <div className="col-span-6 sm:col-span-2">
                                                 <label className="text-xs">Qtd. Prev.</label>
-                                                <input type="text" readOnly value={`${servico.quantidadePrevista || '-'} ${servico.unidade || ''}`} className="w-full bg-[#3a3e45] border border-[#3a3e45] text-sm rounded p-1 cursor-not-allowed"/>
+                                                <input type="text" readOnly value={`${servico.quantidadePrevista || '-'} ${servico.unidade || ''}`} className="w-full bg-[#3a3e45] border border-[#3a3e45] text-sm rounded p-1 cursor-not-allowed" />
                                             </div>
                                             <div className="col-span-6 sm:col-span-2">
                                                 <label className="text-xs">Equipe (nº) *</label>
-                                                <input type="number" value={servico.equipe || ''} onChange={e => handleServicoChange(index, 'equipe', parseInt(e.target.value))} className="w-full bg-[#1e2329] border border-[#3a3e45] text-sm rounded p-1"/>
+                                                <input type="number" value={servico.equipe || ''} onChange={e => handleServicoChange(index, 'equipe', parseInt(e.target.value))} className="w-full bg-[#1e2329] border border-[#3a3e45] text-sm rounded p-1" />
                                             </div>
                                             <div className="col-span-6 sm:col-span-2 flex justify-end">
                                                 <Button type="button" variant="danger" onClick={() => removeServico(index)}>Remover</Button>
@@ -205,10 +205,10 @@ const DiarioDeObra: React.FC = () => {
                                 <Button type="button" variant="secondary" onClick={addServico} className="mt-3">+ Adicionar outro Serviço</Button>
                             </div>
                         )}
-                        
+
                         <div>
                             <label className="block text-sm font-medium mb-1">Observação *</label>
-                            <textarea name="observacoes" value={formData.observacoes || ''} onChange={e => setFormData({...formData, observacoes: e.target.value})} required rows={3} placeholder="Descreva as condições gerais do dia, ocorrências, etc." className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none"></textarea>
+                            <textarea name="observacoes" value={formData.observacoes || ''} onChange={e => setFormData({ ...formData, observacoes: e.target.value })} required rows={3} placeholder="Descreva as condições gerais do dia, ocorrências, etc." className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none"></textarea>
                         </div>
                         <div className="flex justify-end gap-2">
                             <Button type="submit" variant="primary">Salvar Registro</Button>
@@ -222,15 +222,15 @@ const DiarioDeObra: React.FC = () => {
                     <CardHeader title="Histórico de Registros">
                         {/* Filtros aqui */}
                     </CardHeader>
-                     <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4 p-3 bg-[#242830] rounded-lg">
-                        <input type="date" value={filters.dataInicio} onChange={e => setFilters({...filters, dataInicio: e.target.value})} className="bg-[#1e2329] border border-[#3a3e45] rounded p-2 text-sm" />
-                        <input type="date" value={filters.dataFim} onChange={e => setFilters({...filters, dataFim: e.target.value})} className="bg-[#1e2329] border border-[#3a3e45] rounded p-2 text-sm" />
-                        <select value={filters.responsavel} onChange={e => setFilters({...filters, responsavel: e.target.value})} className="bg-[#1e2329] border border-[#3a3e45] rounded p-2 text-sm">
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4 p-3 bg-[#242830] rounded-lg">
+                        <input type="date" value={filters.dataInicio} onChange={e => setFilters({ ...filters, dataInicio: e.target.value })} className="bg-[#1e2329] border border-[#3a3e45] rounded p-2 text-sm" />
+                        <input type="date" value={filters.dataFim} onChange={e => setFilters({ ...filters, dataFim: e.target.value })} className="bg-[#1e2329] border border-[#3a3e45] rounded p-2 text-sm" />
+                        <select value={filters.responsavel} onChange={e => setFilters({ ...filters, responsavel: e.target.value })} className="bg-[#1e2329] border border-[#3a3e45] rounded p-2 text-sm">
                             <option value="">Todos Responsáveis</option>
                             {profissionaisData.map(p => <option key={p.nome} value={p.nome}>{p.nome}</option>)}
                         </select>
-                         <input type="text" placeholder="Filtrar por Etapa..." value={filters.etapa} onChange={e => setFilters({...filters, etapa: e.target.value})} className="bg-[#1e2329] border border-[#3a3e45] rounded p-2 text-sm" />
-                         <input type="text" placeholder="Filtrar por Serviço..." value={filters.servico} onChange={e => setFilters({...filters, servico: e.target.value})} className="bg-[#1e2329] border border-[#3a3e45] rounded p-2 text-sm" />
+                        <input type="text" placeholder="Filtrar por Etapa..." value={filters.etapa} onChange={e => setFilters({ ...filters, etapa: e.target.value })} className="bg-[#1e2329] border border-[#3a3e45] rounded p-2 text-sm" />
+                        <input type="text" placeholder="Filtrar por Serviço..." value={filters.servico} onChange={e => setFilters({ ...filters, servico: e.target.value })} className="bg-[#1e2329] border border-[#3a3e45] rounded p-2 text-sm" />
                     </div>
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm text-left text-[#a0a5b0]">

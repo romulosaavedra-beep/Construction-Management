@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { PageHeader } from './PageHeader';
+import { PageHeader } from './page-header';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -7,9 +7,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Briefcase, CirclePlus, Trash2, LucideIcon, FileSpreadsheet } from "lucide-react";
-import { useProjectContext } from '../contexts/ProjectContext';
-import { useBudgets } from '../hooks/useBudgets';
-import { useConfirm } from '../utils/useConfirm';
+import { useProjectContext } from '@/contexts/project-context';
+import { useBudgets } from '@/hooks/useBudgets';
+import { useConfirm } from '@/utils/useConfirm';
 import toast from 'react-hot-toast';
 
 interface ModuleHeaderProps {

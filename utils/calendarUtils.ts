@@ -1,6 +1,6 @@
 import holidays from 'holidays-calendar-brazil';
-import { CalendarConfig, HolidayInfo, WorkDayInfo } from '../types/calendar.ts';
-import { STATE_HOLIDAYS, MUNICIPAL_HOLIDAYS } from '../data/regionalHolidays.ts';
+import { CalendarConfig, HolidayInfo, WorkDayInfo } from '@/types/calendar.ts';
+import { STATE_HOLIDAYS, MUNICIPAL_HOLIDAYS } from '@/data/regionalHolidays.ts';
 
 // Helper to format date as YYYY-MM-DD
 const formatDate = (date: Date): string => {

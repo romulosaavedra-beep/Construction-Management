@@ -1,9 +1,9 @@
 
 import React, { useState, useMemo } from 'react';
-import { PageHeader } from '../components/PageHeader';
-import { Card, CardHeader } from '../components/Card';
-import { Button } from '../components/Button';
-import { ProgressBar } from '../components/ProgressBar';
+import { PageHeader } from '../components/layout/page-header';
+import { Card, CardHeader } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { ProgressBar } from '@/components/ui/progress-bar';
 import { formatCurrency } from '../utils/formatters';
 import type { MedicaoItem, OrcamentoItem } from '../types';
 import { initialOrcamentoData } from '../data/mockData';
@@ -32,7 +32,7 @@ const Medicao: React.FC = () => {
     const processarHierarquia = (items: MedicaoItem[]) => {
         const itemsMap = new Map(items.map(item => [item.id, { ...item, totalMat: 0, totalMo: 0, totalGeral: 0, medidoAcumulado: 0 }]));
 
-        const calculateTotals = (itemId: number) => {
+        const calculateTotals = (itemId: number | string) => {
             const item = itemsMap.get(itemId);
             if (!item) return { totalMat: 0, totalMo: 0, medidoAcumulado: 0 };
             
@@ -40,7 +40,7 @@ const Medicao: React.FC = () => {
             let childrenTotalMo = 0;
             let childrenMedidoAcum = 0;
 
-            const children = items.filter(child => child.pai === itemId);
+            const children = items.filter(child => Number(child.pai) === itemId);
             children.forEach(child => {
                 const childTotals = calculateTotals(child.id);
                 childrenTotalMat += childTotals.totalMat;
@@ -56,7 +56,7 @@ const Medicao: React.FC = () => {
             return { totalMat: item.totalMat, totalMo: item.totalMo, medidoAcumulado: item.medidoAcumulado };
         };
         
-        items.filter(item => item.pai === null).forEach(root => calculateTotals(root.id));
+        items.filter(item => item.pai === null).forEach(root => calculateTotals(Number(root.id)));
         return Array.from(itemsMap.values());
     };
 

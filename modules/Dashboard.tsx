@@ -1,10 +1,10 @@
 
 import React from 'react';
-import { PageHeader } from '../components/PageHeader';
-import { Card, CardHeader } from '../components/Card';
-import { KpiCard } from '../components/KpiCard';
-import { ProgressBar } from '../components/ProgressBar';
-import { StatusBadge } from '../components/StatusBadge';
+import { PageHeader } from '../components/layout/page-header';
+import { Card, CardHeader } from '@/components/ui/card'
+import { KpiCard } from '@/components/ui/kpi-card';
+import { ProgressBar } from '@/components/ui/progress-bar';
+import { StatusBadge } from '@/components/ui/status-badge';
 import { obraInfo, kpiData, etapasData, diarioRegistrosData } from '../data/mockData';
 import { formatCurrency, formatDate } from '../utils/formatters';
 
@@ -41,7 +41,7 @@ const Dashboard: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                 <Card>
+                <Card>
                     <CardHeader title="Progresso por Etapa" />
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm text-left text-[#a0a5b0]">
@@ -79,7 +79,7 @@ const Dashboard: React.FC = () => {
                 <Card>
                     <CardHeader title="Últimos Registros do Diário" />
                     <div className="overflow-x-auto">
-                         <table className="w-full text-sm text-left text-[#a0a5b0]">
+                        <table className="w-full text-sm text-left text-[#a0a5b0]">
                             <thead className="text-xs text-[#e8eaed] uppercase bg-[#242830]">
                                 <tr>
                                     <th scope="col" className="px-4 py-3">Data</th>

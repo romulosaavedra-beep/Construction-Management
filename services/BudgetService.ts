@@ -1,5 +1,5 @@
 
-import type { OrcamentoItem } from '../types';
+import type { OrcamentoItem } from '@/types';
 
 const STORAGE_KEY = 'vobi-orcamento-data';
 

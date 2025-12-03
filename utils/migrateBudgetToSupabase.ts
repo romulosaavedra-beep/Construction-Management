@@ -1,6 +1,6 @@
-import { supabase } from '../services/supabase';
-import { BudgetService } from '../services/BudgetService';
-import type { OrcamentoItem } from '../types';
+import { supabase } from '@/services/supabase';
+import { BudgetService } from '@/services/BudgetService';
+import type { OrcamentoItem } from '@/types';
 
 export interface MigrationResult {
     success: boolean;

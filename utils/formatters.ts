@@ -1,5 +1,5 @@
 
-import { regionalHolidaysMock } from '../data/mockData';
+import { regionalHolidaysMock } from '@/data/mockData';
 
 export function formatCurrency(value: number): string {
     if (isNaN(value)) return 'R$ 0,00';

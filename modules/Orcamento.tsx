@@ -1,6 +1,6 @@
 ﻿import { useBudgets } from '../hooks/useBudgets';
-import { ModuleHeader } from '../components/ModuleHeader';
-import { useProjectContext } from '../contexts/ProjectContext';
+import { ModuleHeader } from '../components/layout/module-header';
+import { useProjectContext } from '../contexts/project-context';
 import {
     Select,
     SelectContent,
@@ -12,7 +12,7 @@ import {
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import type { OrcamentoItem } from '../types';
-import { PageHeader } from '../components/PageHeader';
+import { PageHeader } from '../components/layout/page-header';
 import {
     Card,
     CardContent,

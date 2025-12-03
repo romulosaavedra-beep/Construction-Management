@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { OrcamentoItem } from '../../../types';
+import { OrcamentoItem } from '@/types';
 
 interface UseOrcamentoDataProps {
     orcamentoData: OrcamentoItem[];

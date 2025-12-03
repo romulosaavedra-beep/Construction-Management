@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import type { Compra, Fornecedor } from '../types';
-import { PageHeader } from '../components/PageHeader';
-import { Card, CardHeader } from '../components/Card';
-import { Button } from '../components/Button';
-import { StatusBadge } from '../components/StatusBadge';
+import { PageHeader } from '../components/layout/page-header';
+import { Card, CardHeader } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { StatusBadge } from '@/components/ui/status-badge';
 import { comprasData, fornecedoresData } from '../data/mockData';
 import { formatDate } from '../utils/formatters';
 
@@ -26,14 +26,14 @@ const Compras: React.FC = () => {
                 return null;
         }
     };
-    
+
     return (
         <div>
             <PageHeader title="🛒 Gestão de Compras" subtitle="Controle de solicitações, cotações e workflow de aprovação" />
-            
+
             <Card>
                 <CardHeader title="Pipeline de Compras">
-                     <Button variant="primary">+ Nova Solicitação</Button>
+                    <Button variant="primary">+ Nova Solicitação</Button>
                 </CardHeader>
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm text-left text-[#a0a5b0]">
@@ -63,7 +63,7 @@ const Compras: React.FC = () => {
                 </div>
             </Card>
 
-             <Card>
+            <Card>
                 <CardHeader title="Histórico de Fornecedores" />
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm text-left text-[#a0a5b0]">

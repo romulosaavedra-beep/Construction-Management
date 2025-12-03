@@ -1,10 +1,10 @@
 
 import React, { useState, useEffect } from 'react';
-import { ProjectProvider } from './contexts/ProjectContext';
-import { BudgetProvider } from './contexts/BudgetContext';
-import { Sidebar } from './components/Sidebar';
-import { Header } from './components/Header';
-import { MobileHeader } from './components/MobileHeader';
+import { ProjectProvider } from './contexts/project-context';
+import { BudgetProvider } from './contexts/budget-context';
+import { Sidebar } from './components/layout/sidebar';
+import { Header } from './components/layout/header';
+import { MobileHeader } from './components/layout/mobile-header';
 import Dashboard from './modules/Dashboard';
 import DiarioDeObra from './modules/DiarioDeObra';
 import Orcamento from './modules/Orcamento';
