@@ -60,7 +60,7 @@ export const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
                         "flex h-10 w-full items-center justify-between rounded-md border bg-surface px-3 py-2 text-sm ring-offset-background",
                         "border-default",
                         "placeholder:text-secondary",
-                        "focus:outline-none focus:border-[#71767f]", // Foco cinza claro
+                        "focus:outline-none focus:border-default", // Foco cinza claro
                         "disabled:cursor-not-allowed disabled:opacity-50",
                         required && !value ? "border-red-500" : "",
                         value ? "text-white" : "text-secondary"
@@ -82,7 +82,7 @@ export const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                     placeholder="Buscar..."
-                                    className="w-full bg-base border border-default rounded-sm py-1.5 pl-8 pr-2 text-xs text-white focus:outline-none focus:border-[#71767f] placeholder:text-secondary"
+                                    className="w-full bg-base border border-default rounded-sm py-1.5 pl-8 pr-2 text-xs text-white focus:outline-none focus:border-default placeholder:text-secondary"
                                     autoFocus
                                 />
                             </div>
@@ -95,8 +95,8 @@ export const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
                                         onClick={() => handleSelect(option)}
                                         className={cn(
                                             "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors",
-                                            "hover:bg-[#242830] hover:text-white",
-                                            option === value ? "text-accent-500 font-medium bg-[#0084ff]/10" : "text-primary"
+                                            "hover:bg-surface hover:text-white",
+                                            option === value ? "text-accent-500 font-medium bg-accent-500/10" : "text-primary"
                                         )}
                                     >
                                         {option}

@@ -48,7 +48,7 @@ const Clima: React.FC = () => {
                 </CardHeader>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-4">
                     {clima15DiasData.map((dia, index) => (
-                        <div key={index} className={`bg-[#242830] p-3 rounded-lg text-center border-l-4 ${getCardClass(dia.chuva)}`}>
+                        <div key={index} className={`bg-surface p-3 rounded-lg text-center border-l-4 ${getCardClass(dia.chuva)}`}>
                             <p className="font-semibold text-sm">{dia.dia}</p>
                             <p className="text-4xl my-2">{dia.icone}</p>
                             <p className="font-bold text-xl">{dia.max}°</p>
@@ -63,7 +63,7 @@ const Clima: React.FC = () => {
                 <CardHeader title="⏰ INTRADIÁRIO (Próximas Horas)" />
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
                     {climaIntraDiarioData.map((hora, index) => (
-                        <div key={index} className="bg-[#242830] p-3 rounded-lg text-center">
+                        <div key={index} className="bg-surface p-3 rounded-lg text-center">
                             <p className="font-semibold text-sm">{hora.hora}</p>
                             <p className="text-4xl my-2">{hora.icone}</p>
                             <p className="font-bold text-xl">{hora.temp}°C</p>

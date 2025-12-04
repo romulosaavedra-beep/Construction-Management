@@ -46,7 +46,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
                     <p className="text-gray-300 whitespace-pre-line leading-relaxed">{message}</p>
                 </div>
 
-                <div className="px-6 py-4 bg-[#181c21] rounded-b-lg flex justify-end gap-3 border-t border-gray-700">
+                <div className="px-6 py-4 bg-surface rounded-b-lg flex justify-end gap-3 border-t border-gray-700">
                     {type === 'confirm' && (
                         <Button
                             variant="secondary"

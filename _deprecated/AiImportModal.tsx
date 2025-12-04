@@ -55,7 +55,7 @@ export const AiImportModal: React.FC<AiImportModalProps> = ({ isOpen, onClose, o
                         </div>
                     ) : (
                         <>
-                            <div className="mb-6 bg-[#242830] p-4 rounded-md border border-default">
+                            <div className="mb-6 bg-surface p-4 rounded-md border border-default">
                                 <h4 className="font-semibold text-primary mb-2">💡 Como funciona?</h4>
                                 <ul className="list-disc list-inside text-sm text-secondary space-y-1">
                                     <li>A IA detecta automaticamente colunas como <strong>Discriminação</strong>, <strong>Unidade</strong>, <strong>Quantidade</strong> e <strong>Valores</strong>.</li>
@@ -82,7 +82,7 @@ export const AiImportModal: React.FC<AiImportModalProps> = ({ isOpen, onClose, o
                             {activeTab === 'paste' && (
                                 <div className="space-y-4">
                                     <textarea
-                                        className="w-full h-64 bg-base border border-default rounded-md p-3 text-sm text-primary font-mono focus:ring-1 focus:ring-[#0084ff] outline-none resize-none"
+                                        className="w-full h-64 bg-base border border-default rounded-md p-3 text-sm text-primary font-mono focus:ring-1 focus:ring-accent-500 outline-none resize-none"
                                         placeholder="Cole aqui as células do Excel ou o texto do seu orçamento..."
                                         value={pasteContent}
                                         onChange={(e) => setPasteContent(e.target.value)}
@@ -96,7 +96,7 @@ export const AiImportModal: React.FC<AiImportModalProps> = ({ isOpen, onClose, o
                             )}
 
                             {activeTab === 'file' && (
-                                <div className="border-2 border-dashed border-default rounded-lg p-10 text-center hover:bg-[#242830] transition-colors cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+                                <div className="border-2 border-dashed border-default rounded-lg p-10 text-center hover:bg-surface transition-colors cursor-pointer" onClick={() => fileInputRef.current?.click()}>
                                     <input
                                         type="file"
                                         ref={fileInputRef}

@@ -115,19 +115,19 @@ export const UnitAutocompleteCell: React.FC<UnitAutocompleteCellProps> = ({
                 onFocus={handleFocus}
                 onKeyDown={handleKeyDown}
                 className={`w-full border rounded-md p-1 text-xs text-center
-                    ${isSelected ? 'bg-[#0084ff]/20 border-accent-500 text-white' : 'bg-[#242830] border-default'}
-                    focus:ring-1 focus:ring-[#0084ff] outline-none
+                    ${isSelected ? 'bg-accent-500/20 border-accent-500 text-white' : 'bg-surface border-default'}
+                    focus:ring-1 focus:ring-accent-500 outline-none
                 `}
                 placeholder="-"
             />
             {isOpen && filteredUnits.length > 0 && (
-                <div className="absolute top-full left-0 w-64 bg-[#242830] border border-default rounded-md shadow-xl z-[100] max-h-60 overflow-y-auto mt-1 custom-scrollbar">
+                <div className="absolute top-full left-0 w-64 bg-surface border border-default rounded-md shadow-xl z-[100] max-h-60 overflow-y-auto mt-1 custom-scrollbar">
                     {filteredUnits.map((unit, index) => (
                         <div
                             key={`${unit.category}-${unit.symbol}-${index}`}
                             onClick={() => handleSelect(unit)}
                             className={`px-3 py-2 cursor-pointer flex justify-between items-center border-b border-default/30 last:border-0
-                                ${index === highlightedIndex ? 'bg-[#0084ff]/20 text-white' : 'text-secondary hover:bg-elevated'}
+                                ${index === highlightedIndex ? 'bg-accent-500/20 text-white' : 'text-secondary hover:bg-elevated'}
                             `}
                         >
                             <span className="font-bold text-white w-10 text-center bg-elevated/50 rounded px-1">{unit.symbol}</span>
@@ -137,7 +137,7 @@ export const UnitAutocompleteCell: React.FC<UnitAutocompleteCellProps> = ({
                 </div>
             )}
             {isOpen && filteredUnits.length === 0 && (
-                <div className="absolute top-full left-0 w-48 bg-[#242830] border border-default rounded-md shadow-xl z-[100] p-2 text-center text-xs text-gray-500 mt-1">
+                <div className="absolute top-full left-0 w-48 bg-surface border border-default rounded-md shadow-xl z-[100] p-2 text-center text-xs text-gray-500 mt-1">
                     Nenhuma unidade encontrada
                 </div>
             )}

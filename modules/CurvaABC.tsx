@@ -28,17 +28,17 @@ const CurvaABC: React.FC = () => {
             <Card>
                 <CardHeader title="Distribuição por Classificação" />
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-                    <div className="bg-[#242830] p-4 rounded-lg">
+                    <div className="bg-surface p-4 rounded-lg">
                         <h4 className="font-bold text-lg text-red-400">CLASSE A</h4>
                         <p className="text-2xl font-bold">63.75%</p>
                         <p className="text-xs text-secondary">2 Itens (80% do Custo)</p>
                     </div>
-                    <div className="bg-[#242830] p-4 rounded-lg">
+                    <div className="bg-surface p-4 rounded-lg">
                         <h4 className="font-bold text-lg text-yellow-400">CLASSE B</h4>
                         <p className="text-2xl font-bold">25.00%</p>
                         <p className="text-xs text-secondary">2 Itens (15% do Custo)</p>
                     </div>
-                    <div className="bg-[#242830] p-4 rounded-lg">
+                    <div className="bg-surface p-4 rounded-lg">
                         <h4 className="font-bold text-lg text-blue-400">CLASSE C</h4>
                         <p className="text-2xl font-bold">11.25%</p>
                         <p className="text-xs text-secondary">3 Itens (5% do Custo)</p>
@@ -64,7 +64,7 @@ const CurvaABC: React.FC = () => {
                 </CardHeader>
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm text-left text-secondary">
-                        <thead className="text-xs text-primary uppercase bg-[#242830]">
+                        <thead className="text-xs text-primary uppercase bg-surface">
                             <tr>
                                 <th className="px-4 py-3">Classe</th>
                                 <th className="px-4 py-3">Item</th>
@@ -75,7 +75,7 @@ const CurvaABC: React.FC = () => {
                         </thead>
                         <tbody>
                             {filteredData.map(item => (
-                                <tr key={item.item} className="border-b border-default hover:bg-[#24282f]">
+                                <tr key={item.item} className="border-b border-default hover:bg-elevated">
                                     <td className="px-4 py-3">
                                         <span className={`font-bold ${item.class === 'A' ? 'text-red-400' : item.class === 'B' ? 'text-yellow-400' : 'text-blue-400'}`}>
                                             {item.class}

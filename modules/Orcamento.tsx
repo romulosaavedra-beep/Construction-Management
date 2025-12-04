@@ -97,7 +97,7 @@ const formatCurrencyOrDash = (value: number): string => {
     return formatCurrency(value);
 };
 
-// Helper para navegação com Enter
+// Helper para navegaï¿½ï¿½o com Enter
 const handleEnterNavigation = (e: React.KeyboardEvent<HTMLElement>, colId: string) => {
     e.preventDefault();
     const currentInput = e.currentTarget;
@@ -193,8 +193,8 @@ const EditableCell = ({ value, onCommit, isNumeric = false, className = "", onKe
             data-col-id={columnId}
             className={cn(
                 "w-full h-7 rounded px-1.5 text-xs transition-colors focus:outline-none",
-                disabled ? "cursor-not-allowed bg-transparent text-secondary" : "bg-surface text-white border border-default focus:border-[#71767f]",
-                isSelected && "bg-[#0084ff]/10 border-accent-500",
+                disabled ? "cursor-not-allowed bg-transparent text-secondary" : "bg-surface text-white border border-default focus:border-default",
+                isSelected && "bg-accent-500/10 border-accent-500",
                 className
             )}
             style={{ textAlign: isNumeric ? 'right' : 'left' }}
@@ -299,20 +299,20 @@ const UnitAutocompleteCell = ({ value, onCommit, availableUnits, isSelected = fa
                 onKeyDown={handleKeyDown}
                 className={cn(
                     "w-full h-7 rounded px-1.5 text-xs text-center transition-colors focus:outline-none",
-                    "bg-surface text-white border border-default focus:border-[#71767f]",
-                    isSelected && "bg-[#0084ff]/10 border-accent-500"
+                    "bg-surface text-white border border-default focus:border-default",
+                    isSelected && "bg-accent-500/10 border-accent-500"
                 )}
                 placeholder="-"
             />
             {isOpen && filteredUnits.length > 0 && (
-                <div className="absolute top-full left-0 w-64 bg-[#242830] border border-default rounded-md shadow-xl z-[100] max-h-60 overflow-y-auto mt-1 custom-scrollbar">
+                <div className="absolute top-full left-0 w-64 bg-surface border border-default rounded-md shadow-xl z-[100] max-h-60 overflow-y-auto mt-1 custom-scrollbar">
                     {filteredUnits.map((unit, index) => (
                         <div
                             key={`${unit.category}-${unit.symbol}-${index}`}
                             onClick={() => handleSelect(unit)}
                             className={cn(
                                 "px-3 py-2 cursor-pointer flex justify-between items-center border-b border-default/30 last:border-0 transition-colors",
-                                index === highlightedIndex ? "bg-[#0084ff]/20 text-white" : "text-secondary hover:bg-elevated"
+                                index === highlightedIndex ? "bg-accent-500/20 text-white" : "text-secondary hover:bg-elevated"
                             )}
                         >
                             <span className="font-bold text-white w-10 text-center bg-elevated/50 rounded px-1">{unit.symbol}</span>
@@ -397,7 +397,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
         nivel: { enabled: false, name: '' },
         fonte: { enabled: false, name: '' },
         codigo: { enabled: false, name: '' },
-        discriminacao: { enabled: true, name: 'Discriminação' },
+        discriminacao: { enabled: true, name: 'Discriminaï¿½ï¿½o' },
         unidade: { enabled: true, name: 'Un.' },
         quantidade: { enabled: true, name: 'Quant.' },
         mat_unit: { enabled: true, name: 'Mat. Unit.' },
@@ -576,10 +576,10 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
 
     const columnsConfig = useMemo((): ColumnConfig[] => {
         const baseColumns: ColumnConfig[] = [
-            { id: 'nivel', label: 'Nível', initialWidth: 100, minWidth: 60 },
+            { id: 'nivel', label: 'Nï¿½vel', initialWidth: 100, minWidth: 60 },
             { id: 'fonte', label: 'Fonte', initialWidth: 60, minWidth: 60, align: 'left' },
-            { id: 'codigo', label: 'Código', initialWidth: 60, minWidth: 60, align: 'left' },
-            { id: 'discriminacao', label: 'Discriminação', initialWidth: 250, minWidth: 150, align: 'left' },
+            { id: 'codigo', label: 'Cï¿½digo', initialWidth: 60, minWidth: 60, align: 'left' },
+            { id: 'discriminacao', label: 'Discriminaï¿½ï¿½o', initialWidth: 250, minWidth: 150, align: 'left' },
             { id: 'un', label: 'Un.', initialWidth: 60, minWidth: 50, align: 'center' },
             { id: 'quant', label: 'Quant.', initialWidth: 70, minWidth: 70, align: 'right' },
             { id: 'mat_unit', label: 'Mat. Unit.', initialWidth: 80, minWidth: 80, align: 'right' },
@@ -588,15 +588,15 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
             { id: 'mat_total', label: 'Mat. Total', initialWidth: 80, minWidth: 80, align: 'right' },
             { id: 'mo_total', label: 'M.O. Total', initialWidth: 80, minWidth: 80, align: 'right' },
             { id: 'mat_mo_total', label: 'Mat.+M.O Total', initialWidth: 100, minWidth: 100, align: 'right' },
-            { id: 'total_nivel', label: 'Total Nível', initialWidth: 80, minWidth: 80, align: 'right' },
-            { id: 'percent_nivel', label: '% Nível', initialWidth: 70, minWidth: 70, align: 'right' },
+            { id: 'total_nivel', label: 'Total Nï¿½vel', initialWidth: 80, minWidth: 80, align: 'right' },
+            { id: 'percent_nivel', label: '% Nï¿½vel', initialWidth: 70, minWidth: 70, align: 'right' },
         ];
 
         if (isEditing) {
             return [
                 { id: 'select', label: '', initialWidth: 50, minWidth: 50, resizable: false, align: 'center' },
                 ...baseColumns,
-                { id: 'action', label: 'Ação', initialWidth: 100, minWidth: 100, align: 'left' },
+                { id: 'action', label: 'Aï¿½ï¿½o', initialWidth: 100, minWidth: 100, align: 'left' },
             ];
         }
         return baseColumns;
@@ -856,14 +856,14 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                 // 2. Save budget items
                 await saveBudgetItems(activeBudget.id, localOrcamento);
 
-                toast.success('Orçamento salvo com sucesso!');
+                toast.success('Orï¿½amento salvo com sucesso!');
             } catch (error) {
                 console.error('Error saving budget:', error);
-                toast.error('Erro ao salvar orçamento');
+                toast.error('Erro ao salvar orï¿½amento');
                 return; // Don't reset state if save failed
             }
         } else {
-            toast.error('Nenhum orçamento selecionado para salvar.');
+            toast.error('Nenhum orï¿½amento selecionado para salvar.');
             return;
         }
 
@@ -878,8 +878,8 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
 
     const handleExit = async () => {
         const confirmExit = await confirm({
-            title: 'Confirmar Saída',
-            message: 'Tem certeza que deseja sair sem salvar? Todas as alterações serão perdidas.',
+            title: 'Confirmar Saï¿½da',
+            message: 'Tem certeza que deseja sair sem salvar? Todas as alteraï¿½ï¿½es serï¿½o perdidas.',
             confirmText: 'Sair sem Salvar',
             cancelText: 'Cancelar'
         });
@@ -1088,7 +1088,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
         const newId = crypto.randomUUID();
         const newItem: OrcamentoItem = {
             id: newId, nivel: '', pai: afterItem.pai, fonte: '', codigo: '',
-            discriminacao: 'Novo Serviço', unidade: '', quantidade: 0,
+            discriminacao: 'Novo Serviï¿½o', unidade: '', quantidade: 0,
             mat_unit: 0, mo_unit: 0, expandido: false,
         };
 
@@ -1125,7 +1125,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
         const newId = crypto.randomUUID();
         const newItem: OrcamentoItem = {
             ...originalItem, id: newId,
-            discriminacao: `${originalItem.discriminacao} (Cópia)`,
+            discriminacao: `${originalItem.discriminacao} (Cï¿½pia)`,
             expandido: false,
         };
 
@@ -1278,7 +1278,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
     };
 
     const getStandardizedUnitsReference = () => {
-        return allUnits.map(u => `Nome: "${u.name}" | Símbolo: "${u.symbol}"`).join('\n');
+        return allUnits.map(u => `Nome: "${u.name}" | Sï¿½mbolo: "${u.symbol}"`).join('\n');
     };
 
     const handleAiImport = async () => {
@@ -1292,7 +1292,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
 
         let mappingDescription = '';
         if (isAutoAiMapping) {
-            mappingDescription = "Usando sua inteligência detecte automaticamente as colunas com base em seu conteúdo seguindo o modelo (DE ? PARA), Infira a estrutura de dados de forma inteligente.";
+            mappingDescription = "Usando sua inteligï¿½ncia detecte automaticamente as colunas com base em seu conteï¿½do seguindo o modelo (DE ? PARA), Infira a estrutura de dados de forma inteligente.";
         } else {
             mappingDescription = (Object.entries(columnMapping) as [string, { enabled: boolean; name: string }][])
                 .filter(([, value]) => value.enabled && value.name)
@@ -1303,89 +1303,89 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
         const unitsReference = getStandardizedUnitsReference();
 
         const prompt = `
-            Analise o seguinte conteúdo de um arquivo de orçamento de construção civil. O conteúdo é:
+            Analise o seguinte conteï¿½do de um arquivo de orï¿½amento de construï¿½ï¿½o civil. O conteï¿½do ï¿½:
             ---
             ${uploadedFileContent}
             ---
-            As regras de mapeamento de colunas são: ${mappingDescription}.
-            Sua tarefa é extrair os dados e estruturá-los em um JSON.
+            As regras de mapeamento de colunas sï¿½o: ${mappingDescription}.
+            Sua tarefa ï¿½ extrair os dados e estruturï¿½-los em um JSON.
             
-            TABELA DE REFERÊNCIA DE UNIDADES DE MEDIDA (PADRÃO DO SISTEMA):
-            --- INÍCIO DA LISTA DE UNIDADES ---
+            TABELA DE REFERï¿½NCIA DE UNIDADES DE MEDIDA (PADRï¿½O DO SISTEMA):
+            --- INï¿½CIO DA LISTA DE UNIDADES ---
             ${unitsReference}
             --- FIM DA LISTA DE UNIDADES ---
 
             Regras Importantes:
-            1.  **Estrutura e Hierarquia (LÓGICA DE INFERÊNCIA AVANÇADA):** Se a coluna "nível" (ex: 1, 1.1, 2.1.3) NÃO for fornecida explicitamente no texto, você DEVE inferir a estrutura hierárquica (WBS/EAP) seguindo estritamente este critério lógico:
-                *   **Critério para Nível FILHO (Item Executável):**
-                    - Qualquer linha que POSSUA valores explícitos de **Quantidade** E **Valor Unitário** (maiores que zero).
-                    - Estes são os itens finais da composição.
+            1.  **Estrutura e Hierarquia (Lï¿½GICA DE INFERï¿½NCIA AVANï¿½ADA):** Se a coluna "nï¿½vel" (ex: 1, 1.1, 2.1.3) Nï¿½O for fornecida explicitamente no texto, vocï¿½ DEVE inferir a estrutura hierï¿½rquica (WBS/EAP) seguindo estritamente este critï¿½rio lï¿½gico:
+                *   **Critï¿½rio para Nï¿½vel FILHO (Item Executï¿½vel):**
+                    - Qualquer linha que POSSUA valores explï¿½citos de **Quantidade** E **Valor Unitï¿½rio** (maiores que zero).
+                    - Estes sï¿½o os itens finais da composiï¿½ï¿½o.
                 
-                *   **Critério para Nível PAI (Agrupador/Título):**
-                    - Qualquer linha que possua uma Descrição, mas **NÃO POSSUA** Quantidade ou Valor Unitário (ou sejam vazios/zero).
-                    - Estes itens servem apenas como cabeçalhos ou categorias para os itens abaixo deles.
+                *   **Critï¿½rio para Nï¿½vel PAI (Agrupador/Tï¿½tulo):**
+                    - Qualquer linha que possua uma Descriï¿½ï¿½o, mas **Nï¿½O POSSUA** Quantidade ou Valor Unitï¿½rio (ou sejam vazios/zero).
+                    - Estes itens servem apenas como cabeï¿½alhos ou categorias para os itens abaixo deles.
                     
-                *   **Construção da Numeração:**
-                    - Ao identificar um "Pai", inicie ou aprofunde a numeração (ex: de "2" para "2.1").
-                    - Ao identificar um "Filho", ele deve herdar a numeração do último "Pai" ativo (ex: se o pai é "2.1.1", o filho será "2.1.1.1", "2.1.1.2", etc.).
+                *   **Construï¿½ï¿½o da Numeraï¿½ï¿½o:**
+                    - Ao identificar um "Pai", inicie ou aprofunde a numeraï¿½ï¿½o (ex: de "2" para "2.1").
+                    - Ao identificar um "Filho", ele deve herdar a numeraï¿½ï¿½o do ï¿½ltimo "Pai" ativo (ex: se o pai ï¿½ "2.1.1", o filho serï¿½ "2.1.1.1", "2.1.1.2", etc.).
                     - A hierarquia pode ser profunda (ex: 2 -> 2.1 -> 2.1.1 -> 2.1.1.1).
-                    - **Exemplo de Lógica:**
-                        - "Fundação" (Sem qtd/valor) -> Nível 2 (Pai)
-                        - "Terraplenagem" (Sem qtd/valor) -> Nível 2.1 (Sub-Pai)
-                        - "Estacas" (Sem qtd/valor) -> Nível 2.1.1 (Sub-Pai)
-                        - "Estaca Raiz..." (COM qtd 200 e valor 1200) -> Nível 2.1.1.1 (Filho)
+                    - **Exemplo de Lï¿½gica:**
+                        - "Fundaï¿½ï¿½o" (Sem qtd/valor) -> Nï¿½vel 2 (Pai)
+                        - "Terraplenagem" (Sem qtd/valor) -> Nï¿½vel 2.1 (Sub-Pai)
+                        - "Estacas" (Sem qtd/valor) -> Nï¿½vel 2.1.1 (Sub-Pai)
+                        - "Estaca Raiz..." (COM qtd 200 e valor 1200) -> Nï¿½vel 2.1.1.1 (Filho)
 
-            2.  **Unidades (CRÍTICO):** Para cada linha, verifique o valor da unidade no arquivo original.
-                - Procure esse valor na tabela de referência acima (compare com "Nome" ou "Símbolo", ignorando maiúsculas/minúsculas).
-                - **SE encontrar correspondência:** Preencha o campo "unidade" OBRIGATORIAMENTE com o valor do **Símbolo** listado na tabela. Exemplo: Se o arquivo diz "Metro", e a tabela tem "Nome: Metro | Símbolo: m", você DEVE usar "m".
-                - **SE NÃO encontrar correspondência exata:** Tente padronizar para o símbolo mais próximo e comum (ex: "M2", "m2", "metro q" -> "m²").
+            2.  **Unidades (CRï¿½TICO):** Para cada linha, verifique o valor da unidade no arquivo original.
+                - Procure esse valor na tabela de referï¿½ncia acima (compare com "Nome" ou "Sï¿½mbolo", ignorando maiï¿½sculas/minï¿½sculas).
+                - **SE encontrar correspondï¿½ncia:** Preencha o campo "unidade" OBRIGATORIAMENTE com o valor do **Sï¿½mbolo** listado na tabela. Exemplo: Se o arquivo diz "Metro", e a tabela tem "Nome: Metro | Sï¿½mbolo: m", vocï¿½ DEVE usar "m".
+                - **SE Nï¿½O encontrar correspondï¿½ncia exata:** Tente padronizar para o sï¿½mbolo mais prï¿½ximo e comum (ex: "M2", "m2", "metro q" -> "mï¿½").
                 - Unidades como "UN", "Unid" devem virar "un".
             
-            3.  **FONTE e CÓDIGO (MUITO IMPORTANTE):**
-                - **Fonte:** É a ORIGEM/REFERÊNCIA de onde vem o serviço/atividade. Exemplos comuns: "SINAPI", "SICRO", "SEINFRA", "ORSE", "SBC", "Próprio", "Cotação", etc.
-                - **Código:** É o CÓDIGO IDENTIFICADOR específico da fonte. Exemplos: "73983/001", "C00123", "SUB-01234", "12345.678", etc.
+            3.  **FONTE e Cï¿½DIGO (MUITO IMPORTANTE):**
+                - **Fonte:** ï¿½ a ORIGEM/REFERï¿½NCIA de onde vem o serviï¿½o/atividade. Exemplos comuns: "SINAPI", "SICRO", "SEINFRA", "ORSE", "SBC", "Prï¿½prio", "Cotaï¿½ï¿½o", etc.
+                - **Cï¿½digo:** ï¿½ o Cï¿½DIGO IDENTIFICADOR especï¿½fico da fonte. Exemplos: "73983/001", "C00123", "SUB-01234", "12345.678", etc.
                 
-                **?? ATENÇÃO CRÍTICA - NÃO CONFUNDIR:**
-                - **"nível"** = Hierarquia pai/filho (ex: "1", "1.1", "1.1.1", "1.1.2", "2", "2.1") ? Campo separado
-                - **"codigo"** = Identificador da fonte (ex: "73983", "C-00123") ? NUNCA será hierárquico como "1.1.1"
-                - Se você encontrar valores como "1", "1.1", "1.2" ? isso é "nível", NÃO é "codigo"!
+                **?? ATENï¿½ï¿½O CRï¿½TICA - Nï¿½O CONFUNDIR:**
+                - **"nï¿½vel"** = Hierarquia pai/filho (ex: "1", "1.1", "1.1.1", "1.1.2", "2", "2.1") ? Campo separado
+                - **"codigo"** = Identificador da fonte (ex: "73983", "C-00123") ? NUNCA serï¿½ hierï¿½rquico como "1.1.1"
+                - Se vocï¿½ encontrar valores como "1", "1.1", "1.2" ? isso ï¿½ "nï¿½vel", Nï¿½O ï¿½ "codigo"!
                 
                 **Como identificar:**
-                a) **Colunas Separadas:** Se houver colunas com nomes como "Fonte", "Ref", "Referência", "Origem", "Base", "Tabela" ? use como "fonte"
-                   E colunas como "Código", "Cód", "Cód. Ref", "Item", "Composição", "ID" ? use como "codigo"
+                a) **Colunas Separadas:** Se houver colunas com nomes como "Fonte", "Ref", "Referï¿½ncia", "Origem", "Base", "Tabela" ? use como "fonte"
+                   E colunas como "Cï¿½digo", "Cï¿½d", "Cï¿½d. Ref", "Item", "Composiï¿½ï¿½o", "ID" ? use como "codigo"
                 
                 b) **Mesma Coluna (Formato Combinado):** Se houver uma coluna com valores como:
                    - "SINAPI 73983/001" ? fonte: "SINAPI", codigo: "73983/001"
                    - "SICRO C00123-SUB" ? fonte: "SICRO", codigo: "C00123-SUB"
                    - "SEINFRA 12345.678/9" ? fonte: "SEINFRA", codigo: "12345.678/9"
-                   **Regra de Separação:** A primeira palavra em MAIÚSCULAS geralmente é a fonte, o restante é o código.
+                   **Regra de Separaï¿½ï¿½o:** A primeira palavra em MAIï¿½SCULAS geralmente ï¿½ a fonte, o restante ï¿½ o cï¿½digo.
                 
-                c) **Identificação Inteligente:** Mesmo que as colunas NÃO sejam especificamente nomeadas "Fonte" ou "Código", identifique-as pelo conteúdo:
-                   - Valores curtos e geralmente em maiúsculas como "SINAPI", "SICRO" ? provavelmente fonte
-                   - Valores alfanuméricos com números, traços, pontos como "73983/001", "C-123" ? provavelmente código
+                c) **Identificaï¿½ï¿½o Inteligente:** Mesmo que as colunas Nï¿½O sejam especificamente nomeadas "Fonte" ou "Cï¿½digo", identifique-as pelo conteï¿½do:
+                   - Valores curtos e geralmente em maiï¿½sculas como "SINAPI", "SICRO" ? provavelmente fonte
+                   - Valores alfanumï¿½ricos com nï¿½meros, traï¿½os, pontos como "73983/001", "C-123" ? provavelmente cï¿½digo
                 
-                d) **Se NÃO houver fonte/código:** Deixe os campos vazios (""). NÃO invente valores.
+                d) **Se Nï¿½O houver fonte/cï¿½digo:** Deixe os campos vazios (""). Nï¿½O invente valores.
                 
-                e) **Se houver dúvida:** É melhor deixar vazio do que preencher incorretamente.
+                e) **Se houver dï¿½vida:** ï¿½ melhor deixar vazio do que preencher incorretamente.
             
-            4.  **CUSTOS - DETECÇÃO INTELIGENTE (MUITO IMPORTANTE):**
+            4.  **CUSTOS - DETECï¿½ï¿½O INTELIGENTE (MUITO IMPORTANTE):**
                 
-                **Cenário A: Valores Separados (Material + Mão de Obra)**
-                Se o arquivo tiver colunas separadas para Material e Mão de Obra:
-                - Preencha "mat_unit" com custo unitário de material
-                - Preencha "mo_unit" com custo unitário de mão de obra
+                **Cenï¿½rio A: Valores Separados (Material + Mï¿½o de Obra)**
+                Se o arquivo tiver colunas separadas para Material e Mï¿½o de Obra:
+                - Preencha "mat_unit" com custo unitï¿½rio de material
+                - Preencha "mo_unit" com custo unitï¿½rio de mï¿½o de obra
                 - use_total_unit: false (ou omita o campo)
                 
-                **Cenário B: Apenas Valor Unitário Total**
-                Se houver apenas UMA coluna de custo unitário (sem separação Material/M.O.):
+                **Cenï¿½rio B: Apenas Valor Unitï¿½rio Total**
+                Se houver apenas UMA coluna de custo unitï¿½rio (sem separaï¿½ï¿½o Material/M.O.):
                 - Coloque o valor total em "mat_unit"
                 - mo_unit: 0
                 - use_total_unit: true
                 
-                **Como detectar qual cenário:**
-                - **Cenário A**: Se houver colunas como "Material", "Mat", "Materiais", "Mat. Unit." E simultaneamente "M.O.", "Mão de Obra", "MO", "Labor", "M.O. Unit."
-                - **Cenário B**: Se houver apenas colunas como "Valor Unit.", "Preço", "Custo Unit.", "P.U.", "Unitário", "Valor", "Custo" (sem separação)
-                - **Em caso de dúvida:** Use Cenário B (valor total é mais comum)
+                **Como detectar qual cenï¿½rio:**
+                - **Cenï¿½rio A**: Se houver colunas como "Material", "Mat", "Materiais", "Mat. Unit." E simultaneamente "M.O.", "Mï¿½o de Obra", "MO", "Labor", "M.O. Unit."
+                - **Cenï¿½rio B**: Se houver apenas colunas como "Valor Unit.", "Preï¿½o", "Custo Unit.", "P.U.", "Unitï¿½rio", "Valor", "Custo" (sem separaï¿½ï¿½o)
+                - **Em caso de dï¿½vida:** Use Cenï¿½rio B (valor total ï¿½ mais comum)
                 
                 **Exemplos:**
                 | Entrada | mat_unit | mo_unit | use_total_unit |
@@ -1395,15 +1395,15 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                 | P.U.: 75.50 | 75.50 | 0 | true |
                 | Custo: 45.00 | 45.00 | 0 | true |
             
-            5.  **Tipos de Dados:** "quantidade", "mat_unit", "mo_unit" devem ser números (float). "discriminacao" é string obrigatória. "fonte", "codigo" e "use_total_unit" são opcionais.
+            5.  **Tipos de Dados:** "quantidade", "mat_unit", "mo_unit" devem ser nï¿½meros (float). "discriminacao" ï¿½ string obrigatï¿½ria. "fonte", "codigo" e "use_total_unit" sï¿½o opcionais.
             
-            6.  Ignore cabeçalhos e rodapés.
+            6.  Ignore cabeï¿½alhos e rodapï¿½s.
 
-            **Exemplos de Identificação Fonte/Código:**
+            **Exemplos de Identificaï¿½ï¿½o Fonte/Cï¿½digo:**
             - "SINAPI 94521" ? fonte: "SINAPI", codigo: "94521"
             - Coluna "Ref: SICRO" + Coluna "Comp: 123.456" ? fonte: "SICRO", codigo: "123.456"
-            - "Próprio" ? fonte: "Próprio", codigo: ""
-            - Sem referência visível ? fonte: "", codigo: ""
+            - "Prï¿½prio" ? fonte: "Prï¿½prio", codigo: ""
+            - Sem referï¿½ncia visï¿½vel ? fonte: "", codigo: ""
 
             Retorne APENAS o array de objetos JSON.
         `;
@@ -1454,7 +1454,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
 
                 const columnsToHide: string[] = [];
                 if (!hasFonte) columnsToHide.push('Fonte');
-                if (!hasCodigo) columnsToHide.push('Código');
+                if (!hasCodigo) columnsToHide.push('Cï¿½digo');
                 if (shouldHideSplitColumns) {
                     columnsToHide.push('Mat. Unit.', 'M.O. Unit.', 'Mat. Total', 'M.O. Total');
                 }
@@ -1482,7 +1482,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
 
                     // 1. TOAST DE SUCESSO (Verde)
                     toast.custom((t) => (
-                        <div className="max-w-md w-full bg-[#242830] shadow-2xl rounded-lg pointer-events-auto border border-default flex ring-1 ring-black ring-opacity-5">
+                        <div className="max-w-md w-full bg-surface shadow-2xl rounded-lg pointer-events-auto border border-default flex ring-1 ring-black ring-opacity-5">
                             <div className="flex-1 w-0 p-4">
                                 <div className="flex items-start">
                                     <div className="flex-shrink-0 pt-0.5">
@@ -1490,10 +1490,10 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                     </div>
                                     <div className="ml-3 flex-1">
                                         <p className="text-sm font-medium text-white">
-                                            Importação Concluída
+                                            Importaï¿½ï¿½o Concluï¿½da
                                         </p>
                                         <p className="mt-1 text-sm text-secondary">
-                                            O orçamento foi processado e importado com sucesso.
+                                            O orï¿½amento foi processado e importado com sucesso.
                                         </p>
                                     </div>
                                 </div>
@@ -1509,13 +1509,13 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                         </div>
                     ), { duration: 4000 });
 
-                    // 2. TOAST DE COLUNAS OCULTAS (Azul - Genérico)
+                    // 2. TOAST DE COLUNAS OCULTAS (Azul - Genï¿½rico)
                     const genericHiddenCols = columnsToHide.filter(c => !['Mat. Unit.', 'M.O. Unit.', 'Mat. Total', 'M.O. Total'].includes(c));
 
                     if (genericHiddenCols.length > 0) {
                         setTimeout(() => {
                             toast.custom((t) => (
-                                <div className="max-w-md w-full bg-[#242830] shadow-2xl rounded-lg pointer-events-auto border border-default flex ring-1 ring-black ring-opacity-5">
+                                <div className="max-w-md w-full bg-surface shadow-2xl rounded-lg pointer-events-auto border border-default flex ring-1 ring-black ring-opacity-5">
                                     <div className="flex-1 w-0 p-4">
                                         <div className="flex items-start">
                                             <div className="flex-shrink-0 pt-0.5">
@@ -1526,7 +1526,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                                     Colunas Ocultadas
                                                 </p>
                                                 <p className="mt-1 text-sm text-secondary">
-                                                    As colunas <span className="text-white font-medium">{genericHiddenCols.join("' e '")}</span> foram ocultadas automaticamente pois não continham dados.
+                                                    As colunas <span className="text-white font-medium">{genericHiddenCols.join("' e '")}</span> foram ocultadas automaticamente pois nï¿½o continham dados.
                                                 </p>
                                             </div>
                                         </div>
@@ -1544,11 +1544,11 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                         }, 300); // Pequeno delay para efeito cascata
                     }
 
-                    // 3. TOAST DE COLUNAS DE CUSTO (Azul - Específico)
+                    // 3. TOAST DE COLUNAS DE CUSTO (Azul - Especï¿½fico)
                     if (shouldHideSplitColumns) {
                         setTimeout(() => {
                             toast.custom((t) => (
-                                <div className="max-w-md w-full bg-[#242830] shadow-2xl rounded-lg pointer-events-auto border border-default flex ring-1 ring-black ring-opacity-5">
+                                <div className="max-w-md w-full bg-surface shadow-2xl rounded-lg pointer-events-auto border border-default flex ring-1 ring-black ring-opacity-5">
                                     <div className="flex-1 w-0 p-4">
                                         <div className="flex items-start">
                                             <div className="flex-shrink-0 pt-0.5">
@@ -1559,7 +1559,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                                     Formato de Custo Detectado
                                                 </p>
                                                 <p className="mt-1 text-sm text-secondary">
-                                                    O orçamento usa valor unitário total. As colunas de separação (Material/M.O.) foram ocultadas para simplificar a visualização.
+                                                    O orï¿½amento usa valor unitï¿½rio total. As colunas de separaï¿½ï¿½o (Material/M.O.) foram ocultadas para simplificar a visualizaï¿½ï¿½o.
                                                 </p>
                                             </div>
                                         </div>
@@ -1574,12 +1574,12 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                     </div>
                                 </div>
                             ), { duration: 7000 });
-                        }, 600); // Delay maior para aparecer por último
+                        }, 600); // Delay maior para aparecer por ï¿½ltimo
                     }
                 }
             } else {
                 if (!abortAiRef.current) {
-                    toast.error("A IA não conseguiu processar o arquivo. Verifique o mapeamento e o conteúdo do arquivo.");
+                    toast.error("A IA nï¿½o conseguiu processar o arquivo. Verifique o mapeamento e o conteï¿½do do arquivo.");
                 }
             }
 
@@ -1597,13 +1597,13 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
 
     const handleExportCsv = () => {
         exportToCsv(localOrcamento, 'orcamento_vobi');
-        toast.success('Exportação CSV iniciada!');
+        toast.success('Exportaï¿½ï¿½o CSV iniciada!');
     };
 
     const handleExportExcel = async () => {
         try {
             await exportToExcel(localOrcamento, 'orcamento_vobi', hiddenColumns);
-            toast.success('Exportação Excel iniciada!');
+            toast.success('Exportaï¿½ï¿½o Excel iniciada!');
         } catch (error) {
             console.error('Erro ao exportar Excel:', error);
             toast.error('Erro ao exportar Excel');
@@ -1648,7 +1648,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                     onDragStart={e => handleDragStart(e, item.id)}
                     onDragOver={e => e.preventDefault()}
                     onDrop={e => handleDrop(e, item.id)}
-                    className={`border-b border-default hover:bg-[#24282f] text-xs ${isEditing ? 'cursor-move' : ''} ${isDragged ? 'opacity-50' : ''} ${rowBgClass}`}
+                    className={`border-b border-default hover:bg-elevated text-xs ${isEditing ? 'cursor-move' : ''} ${isDragged ? 'opacity-50' : ''} ${rowBgClass}`}
                 >
                     {visibleColumns.map(({ col }, visibleIndex) => {
                         const isPinned = pinnedColumns.has(col.id) && !isEditing;
@@ -1661,12 +1661,12 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                         } : {};
 
                         const stickyCellBgClass = isService
-                            ? `bg-surface hover:bg-[#24282f]`
-                            : `bg-[rgba(42,50,60,0.3)] hover:bg-[#24282f]`;
+                            ? `bg-surface hover:bg-elevated`
+                            : `bg-[rgba(42,50,60,0.3)] hover:bg-elevated`;
 
-                        const finalBgClass = isPinned ? 'bg-surface group-hover:bg-[#24282f]' : stickyCellBgClass;
+                        const finalBgClass = isPinned ? 'bg-surface group-hover:bg-elevated' : stickyCellBgClass;
                         const isColSelected = selectedColumn === col.id;
-                        const cellSelectionClass = isColSelected ? 'bg-[#0084ff]/10' : '';
+                        const cellSelectionClass = isColSelected ? 'bg-accent-500/10' : '';
 
                         switch (col.id) {
                             case 'select':
@@ -1676,7 +1676,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                             type="checkbox"
                                             checked={selectedIds.has(item.id)}
                                             onChange={() => handleSelectRow(item.id)}
-                                            className="w-4 h-4 bg-surface border-default rounded focus:ring-[#0084ff] accent-[#0084ff]"
+                                            className="w-4 h-4 bg-surface border-default rounded focus:ring-accent-500 accent-accent-500"
                                         />
                                     </td>
                                 );
@@ -1771,15 +1771,15 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
     const canUndo = historyIndex > 0;
     const canRedo = historyIndex < history.length - 1;
     const columnMappingLabels: { [key: string]: string } = {
-        nivel: 'Nível',
+        nivel: 'Nï¿½vel',
         fonte: 'Fonte',
-        codigo: 'Código',
-        discriminacao: 'Discriminação',
+        codigo: 'Cï¿½digo',
+        discriminacao: 'Discriminaï¿½ï¿½o',
         unidade: 'Unidade',
         quantidade: 'Quantidade',
-        mat_unit: 'Valor Material Unitário',
-        mo_unit: 'Valor Mão de Obra Unitário',
-        mat_mo_unit: 'Valor Material + Mão de Obra Unitários',
+        mat_unit: 'Valor Material Unitï¿½rio',
+        mo_unit: 'Valor Mï¿½o de Obra Unitï¿½rio',
+        mat_mo_unit: 'Valor Material + Mï¿½o de Obra Unitï¿½rios',
     };
 
     return (
@@ -1790,10 +1790,10 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                         <DialogHeader>
                             <DialogTitle className="flex items-center gap-2">
                                 <Bot className="w-5 h-5 text-accent-500" />
-                                Importar Orçamento com IA - Etapa {importStep}/2
+                                Importar Orï¿½amento com IA - Etapa {importStep}/2
                             </DialogTitle>
                             <DialogDescription className="text-secondary">
-                                {importStep === 1 ? "Envie seu arquivo para análise." : "Configure o mapeamento das colunas."}
+                                {importStep === 1 ? "Envie seu arquivo para anï¿½lise." : "Configure o mapeamento das colunas."}
                             </DialogDescription>
                         </DialogHeader>
 
@@ -1819,7 +1819,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                     <p className="text-sm text-secondary mb-6">Suporta .csv, .txt, .xlsx, .xls</p>
                                     <input type="file" id="file-upload" className="hidden" onChange={handleFileChange} accept=".csv,.txt,.xlsx,.xls" />
                                     <label htmlFor="file-upload">
-                                        <Button variant="default" className="bg-[#0084ff] hover:bg-[#0073e6] text-white cursor-pointer" asChild>
+                                        <Button variant="default" className="bg-accent-500 hover:bg-accent-600 text-white cursor-pointer" asChild>
                                             <span>Selecionar Arquivo</span>
                                         </Button>
                                     </label>
@@ -1829,7 +1829,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
 
                         {importStep === 2 && (
                             <div className="space-y-6">
-                                <div className="bg-[#242830] p-4 rounded-lg border border-default flex items-start gap-3">
+                                <div className="bg-surface p-4 rounded-lg border border-default flex items-start gap-3">
                                     <input
                                         type="checkbox"
                                         id="auto-ai"
@@ -1838,8 +1838,8 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                         className="mt-1 h-4 w-4 rounded border-default bg-base text-accent-500 focus:ring-0 focus:ring-offset-0"
                                     />
                                     <div>
-                                        <label htmlFor="auto-ai" className="font-medium text-white cursor-pointer block mb-1">Ajuste automático com IA (Recomendado)</label>
-                                        <p className="text-xs text-secondary">A IA identificará automaticamente as colunas e a estrutura do arquivo, ignorando cabeçalhos irrelevantes.</p>
+                                        <label htmlFor="auto-ai" className="font-medium text-white cursor-pointer block mb-1">Ajuste automï¿½tico com IA (Recomendado)</label>
+                                        <p className="text-xs text-secondary">A IA identificarï¿½ automaticamente as colunas e a estrutura do arquivo, ignorando cabeï¿½alhos irrelevantes.</p>
                                     </div>
                                 </div>
 
@@ -1875,7 +1875,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                 <Button variant="ghost" onClick={() => setImportStep(1)} className="text-secondary hover:text-white hover:bg-elevated">Voltar</Button>
                             )}
                             {importStep === 2 && (
-                                <Button onClick={handleAiImport} disabled={isAiProcessing} className="bg-[#0084ff] hover:bg-[#0073e6] text-white">
+                                <Button onClick={handleAiImport} disabled={isAiProcessing} className="bg-accent-500 hover:bg-accent-600 text-white">
                                     {isAiProcessing ? 'Processando...' : 'Analisar e Importar'}
                                 </Button>
                             )}
@@ -1887,8 +1887,8 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
             <span ref={measureCellRef} aria-hidden="true" className="text-xs absolute invisible whitespace-nowrap z-[-1]"></span>
 
             <ModuleHeader
-                title="Orçamento de Obra"
-                subtitle="Gerencie a estrutura analítica, custos e insumos do projeto"
+                title="Orï¿½amento de Obra"
+                subtitle="Gerencie a estrutura analï¿½tica, custos e insumos do projeto"
                 icon={FileSpreadsheet}
                 showBudgetSelector={true}
             />
@@ -1899,7 +1899,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                         <div className="flex items-center gap-4 flex-1">
                             <CardTitle className="text-lg font-semibold text-white flex items-center gap-2 shrink-0">
                                 <FileText className="w-5 h-5 text-accent-500" />
-                                Planilha Orçamentária
+                                Planilha Orï¿½amentï¿½ria
                             </CardTitle>
 
                             {/* Budget Name - Editable only in edit mode, or empty state message */}
@@ -1910,7 +1910,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                             value={activeBudget.name}
                                             onChange={(e) => setActiveBudget({ ...activeBudget, name: e.target.value })}
                                             className="h-8 bg-base border-default text-white focus-visible:ring-0 focus-visible:border-accent-500 max-w-md"
-                                            placeholder="Nome do Orçamento"
+                                            placeholder="Nome do Orï¿½amento"
                                         />
                                     ) : (
                                         <span className="text-sm text-secondary font-normal">
@@ -1918,8 +1918,8 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                         </span>
                                     )
                                 ) : (
-                                    <span className="text-sm text-[#71767f] italic">
-                                        Crie um novo orçamento
+                                    <span className="text-sm text-secondary italic">
+                                        Crie um novo orï¿½amento
                                     </span>
                                 );
                             })()}
@@ -1935,7 +1935,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                     </div>
                                     <div className="w-px bg-elevated"></div>
                                     <div className="text-right">
-                                        <div className="text-[10px] text-secondary uppercase font-bold">Mão de Obra</div>
+                                        <div className="text-[10px] text-secondary uppercase font-bold">Mï¿½o de Obra</div>
                                         <div className="text-sm font-bold text-yellow-400">{formatCurrency(grandTotalMaoDeObra)}</div>
                                     </div>
                                     <div className="w-px bg-elevated"></div>
@@ -1979,7 +1979,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                         <Button variant="ghost" onClick={handleExit} className="text-secondary hover:text-white hover:bg-elevated">
                                             <X className="w-4 h-4 mr-2" /> Cancelar
                                         </Button>
-                                        <Button onClick={handleSave} className="bg-[#0084ff] hover:bg-[#0073e6] text-white shadow-lg shadow-blue-900/20">
+                                        <Button onClick={handleSave} className="bg-accent-500 hover:bg-accent-600 text-white shadow-lg shadow-blue-900/20">
                                             <Save className="w-4 h-4 mr-2" /> Salvar
                                         </Button>
                                     </div>
@@ -1988,12 +1988,12 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                         {/* Dropdown Menu for Export/Columns */}
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
-                                                <Button variant="outline" size="icon" className="bg-surface border-default text-secondary hover:text-white hover:bg-[#242830]">
+                                                <Button variant="outline" size="icon" className="bg-surface border-default text-secondary hover:text-white hover:bg-surface">
                                                     <MoreHorizontal className="w-4 h-4" />
                                                 </Button>
                                             </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end" className="bg-[#242830] border-default text-primary w-56">
-                                                <DropdownMenuLabel>Opções</DropdownMenuLabel>
+                                            <DropdownMenuContent align="end" className="bg-surface border-default text-primary w-56">
+                                                <DropdownMenuLabel>Opï¿½ï¿½es</DropdownMenuLabel>
                                                 <DropdownMenuSeparator className="bg-elevated" />
 
                                                 {/* Export Options */}
@@ -2030,7 +2030,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                         {/* Import IA Button - Following Settings UI pattern */}
                                         <Button
                                             onClick={() => setImportModalOpen(true)}
-                                            className="bg-[#242830] border border-default hover:bg-[#2f343d] text-white"
+                                            className="bg-surface border border-default hover:bg-elevated text-white"
                                         >
                                             <Bot className="w-4 h-4 mr-2 text-accent-500" />
                                             Importar IA
@@ -2039,7 +2039,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                         {/* Edit Button - Following Settings UI pattern */}
                                         <Button
                                             onClick={handleEdit}
-                                            className="bg-[#242830] border border-default hover:bg-[#2f343d] text-white"
+                                            className="bg-surface border border-default hover:bg-elevated text-white"
                                         >
                                             <Pencil className="w-4 h-4 mr-2 text-accent-500" />
                                             Editar
@@ -2060,14 +2060,14 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                         <col key={col.id} style={{ width: `${columnWidths[index]}px` }} />
                                     ))}
                                 </colgroup>
-                                <thead className="text-xs text-primary uppercase bg-[#242830] sticky top-0 z-30 shadow-sm">
+                                <thead className="text-xs text-primary uppercase bg-surface sticky top-0 z-30 shadow-sm">
                                     <tr>
                                         {visibleColumns.map(({ col, index: originalIndex }, visibleIndex) => {
                                             const isSelectCol = col.id === 'select';
                                             const isActionCol = col.id === 'action';
                                             const stickyHeaderClasses =
-                                                isSelectCol ? 'sticky left-0 z-40 bg-[#242830]' :
-                                                    isActionCol ? 'sticky right-0 z-40 bg-[#242830]' : '';
+                                                isSelectCol ? 'sticky left-0 z-40 bg-surface' :
+                                                    isActionCol ? 'sticky right-0 z-40 bg-surface' : '';
                                             const unhideableColumns = new Set(['select', 'action', 'nivel']);
                                             const batchEditableColumns = new Set(['fonte', 'codigo', 'discriminacao', 'un', 'quant', 'mat_unit', 'mo_unit']);
                                             const isColSelected = selectedColumn === col.id;
@@ -2084,14 +2084,14 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                                 <th
                                                     key={col.id}
                                                     style={stickyStyle}
-                                                    className={`group px-2 py-3 relative text-left border-b border-default ${visibleIndex < visibleColumns.length - 1 ? 'border-r border-default' : ''} ${stickyHeaderClasses} ${isColSelected ? 'bg-[#0084ff]/10' : ''} ${isPinned ? 'shadow-[2px_0_5px_rgba(0,0,0,0.3)]' : ''}`}
+                                                    className={`group px-2 py-3 relative text-left border-b border-default ${visibleIndex < visibleColumns.length - 1 ? 'border-r border-default' : ''} ${stickyHeaderClasses} ${isColSelected ? 'bg-accent-500/10' : ''} ${isPinned ? 'shadow-[2px_0_5px_rgba(0,0,0,0.3)]' : ''}`}
                                                 >
                                                     {/* Pin Control */}
                                                     {!isEditing && (
                                                         <div className="absolute right-1 top-0 bottom-0 flex flex-col justify-center opacity-0 group-hover:opacity-100 transition-opacity z-50">
                                                             <button
                                                                 onClick={() => handleTogglePin(col.id)}
-                                                                className="w-5 h-5 rounded bg-elevated text-secondary hover:text-white items-center justify-center flex hover:bg-[#0084ff] transition-colors"
+                                                                className="w-5 h-5 rounded bg-elevated text-secondary hover:text-white items-center justify-center flex hover:bg-accent-500 transition-colors"
                                                                 title={isPinned ? "Desafixar" : "Fixar"}
                                                             >
                                                                 {isPinned ? <PinOff className="w-3 h-3" /> : <Pin className="w-3 h-3" />}
@@ -2105,7 +2105,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                                             {isEditing && batchEditableColumns.has(col.id) && (
                                                                 <button
                                                                     onClick={() => handleColumnSelect(col.id)}
-                                                                    className={`w-4 h-4 rounded text-white text-[10px] items-center justify-center flex hover:bg-blue-500/80 ${isColSelected ? 'bg-[#0084ff] opacity-100' : 'bg-elevated'}`}
+                                                                    className={`w-4 h-4 rounded text-white text-[10px] items-center justify-center flex hover:bg-blue-500/80 ${isColSelected ? 'bg-accent-500 opacity-100' : 'bg-elevated'}`}
                                                                     title="Selecionar coluna"
                                                                 >
                                                                     <ChevronDown className="w-3 h-3" />
@@ -2128,7 +2128,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                                                 type="checkbox"
                                                                 ref={headerCheckboxRef}
                                                                 onChange={handleSelectAll}
-                                                                className="w-3.5 h-3.5 bg-surface border-default rounded focus:ring-0 accent-[#0084ff] cursor-pointer"
+                                                                className="w-3.5 h-3.5 bg-surface border-default rounded focus:ring-0 accent-accent-500 cursor-pointer"
                                                             />
                                                         </div>
                                                     )}
@@ -2152,7 +2152,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                                         <div
                                                             onMouseDown={(e) => handleResizeStart(e, visibleIndex)}
                                                             onDoubleClick={() => handleAutoResize(visibleIndex)}
-                                                            className="absolute top-0 right-[-1px] h-full w-[3px] cursor-col-resize z-10 hover:bg-[#0084ff] transition-colors"
+                                                            className="absolute top-0 right-[-1px] h-full w-[3px] cursor-col-resize z-10 hover:bg-accent-500 transition-colors"
                                                         />
                                                     )}
                                                 </th>
@@ -2167,17 +2167,17 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                         </div>
                     ) : (
                         <div className="flex flex-col items-center justify-center py-20 text-center">
-                            <FileSpreadsheet className="w-16 h-16 text-[#3a3e45] mb-4" />
-                            <h3 className="text-lg font-semibold text-secondary mb-2">Nenhum orçamento selecionado</h3>
-                            <p className="text-sm text-[#71767f] mb-4">Selecione um orçamento existente ou crie um novo para começar</p>
+                            <FileSpreadsheet className="w-16 h-16 text-secondary mb-4" />
+                            <h3 className="text-lg font-semibold text-secondary mb-2">Nenhum orï¿½amento selecionado</h3>
+                            <p className="text-sm text-secondary mb-4">Selecione um orï¿½amento existente ou crie um novo para comeï¿½ar</p>
                         </div>
                     )}
                 </CardContent>
             </Card>
 
-            {/* Diálogo de Confirmação Centralizado */}
+            {/* Diï¿½logo de Confirmaï¿½ï¿½o Centralizado */}
             <Dialog open={dialogState.isOpen} onOpenChange={(open) => !open && handleCancel()}>
-                <DialogContent className="sm:max-w-[400px] bg-[#242830] border-default text-primary shadow-2xl">
+                <DialogContent className="sm:max-w-[400px] bg-surface border-default text-primary shadow-2xl">
                     <DialogHeader>
                         <DialogTitle className="text-white flex items-center gap-2">
                             <AlertTriangle className="w-5 h-5 text-yellow-500" />

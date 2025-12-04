@@ -71,7 +71,7 @@ export const EditableCell: React.FC<EditableCellProps> = ({
             data-col-id={columnId}
             className={`w-full border rounded-md p-1 text-xs ${className} 
                 ${disabled ? 'cursor-not-allowed bg-elevated text-secondary border-default' : ''}
-                ${isSelected ? 'bg-[#0084ff]/20 border-accent-500 text-white' : 'bg-[#242830] border-default'}
+                ${isSelected ? 'bg-accent-500/20 border-accent-500 text-white' : 'bg-surface border-default'}
             `}
             style={{ textAlign: isNumeric ? 'right' : 'left' }}
         />

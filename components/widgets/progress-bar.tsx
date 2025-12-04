@@ -8,8 +8,8 @@ interface ProgressBarProps {
 export const ProgressBar: React.FC<ProgressBarProps> = ({ percentage }) => {
   return (
     <div className="w-full bg-elevated rounded-full h-2.5">
-      <div 
-        className="bg-[#00cc44] h-2.5 rounded-full transition-all duration-500" 
+      <div
+        className="bg-success h-2.5 rounded-full transition-all duration-500"
         style={{ width: `${percentage}%` }}
       ></div>
     </div>

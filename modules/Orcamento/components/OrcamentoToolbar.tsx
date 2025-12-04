@@ -81,7 +81,7 @@ export const OrcamentoToolbar: React.FC<OrcamentoToolbarProps> = ({
                             Reexibir ({hiddenColumns.size})
                         </Button>
                         {isRestoreMenuOpen && (
-                            <div ref={restoreMenuRef} className="absolute right-0 mt-2 w-56 bg-[#242830] border border-default rounded-md shadow-lg z-[100]">
+                            <div ref={restoreMenuRef} className="absolute right-0 mt-2 w-56 bg-surface border border-default rounded-md shadow-lg z-[100]">
                                 <ul className="py-1 text-sm text-primary max-h-60 overflow-y-auto">
                                     {columnsConfig.filter(c => hiddenColumns.has(c.id)).map(c => (
                                         <li key={c.id}>

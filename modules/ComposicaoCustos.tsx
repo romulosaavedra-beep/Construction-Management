@@ -34,9 +34,9 @@ const ComposicaoCustos: React.FC = () => {
                         <input
                             type="text"
                             placeholder="Pesquisar por nome ou código..."
-                            className="w-full sm:w-64 bg-surface border border-default rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none text-sm"
+                            className="w-full sm:w-64 bg-surface border border-default rounded-md p-2 focus:ring-2 focus:ring-accent-500 outline-none text-sm"
                         />
-                        <select className="bg-surface border border-default rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none text-sm">
+                        <select className="bg-surface border border-default rounded-md p-2 focus:ring-2 focus:ring-accent-500 outline-none text-sm">
                             <option value="">Filtrar por unidade</option>
                             <option value="m2">m²</option>
                             <option value="m3">m³</option>
@@ -62,7 +62,7 @@ const ComposicaoCustos: React.FC = () => {
                     </div>
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm text-left text-secondary">
-                            <thead className="text-xs text-primary uppercase bg-[#242830]">
+                            <thead className="text-xs text-primary uppercase bg-surface">
                                 <tr>
                                     <th className="px-4 py-3">Insumo</th>
                                     <th className="px-4 py-3">Coef.</th>
@@ -75,23 +75,23 @@ const ComposicaoCustos: React.FC = () => {
                                 {composition.map(item => (
                                     <tr key={item.id} className="border-b border-default">
                                         <td className="px-4 py-3 font-medium text-white">
-                                            {isEditing ? <input type="text" value={item.insumo} onChange={e => handleInputChange(item.id, 'insumo', e.target.value)} className="w-full bg-[#242830] p-1 rounded" /> : item.insumo}
+                                            {isEditing ? <input type="text" value={item.insumo} onChange={e => handleInputChange(item.id, 'insumo', e.target.value)} className="w-full bg-surface p-1 rounded" /> : item.insumo}
                                         </td>
                                         <td className="px-4 py-3">
-                                            {isEditing ? <input type="number" value={item.coef} onChange={e => handleInputChange(item.id, 'coef', parseFloat(e.target.value))} className="w-20 bg-[#242830] p-1 rounded" /> : item.coef.toFixed(3)}
+                                            {isEditing ? <input type="number" value={item.coef} onChange={e => handleInputChange(item.id, 'coef', parseFloat(e.target.value))} className="w-20 bg-surface p-1 rounded" /> : item.coef.toFixed(3)}
                                         </td>
                                         <td className="px-4 py-3">
-                                            {isEditing ? <input type="text" value={item.un} onChange={e => handleInputChange(item.id, 'un', e.target.value)} className="w-12 bg-[#242830] p-1 rounded" /> : item.un}
+                                            {isEditing ? <input type="text" value={item.un} onChange={e => handleInputChange(item.id, 'un', e.target.value)} className="w-12 bg-surface p-1 rounded" /> : item.un}
                                         </td>
                                         <td className="px-4 py-3">
-                                            {isEditing ? <input type="number" value={item.preco} onChange={e => handleInputChange(item.id, 'preco', parseFloat(e.target.value))} className="w-24 bg-[#242830] p-1 rounded" /> : formatCurrency(item.preco)}
+                                            {isEditing ? <input type="number" value={item.preco} onChange={e => handleInputChange(item.id, 'preco', parseFloat(e.target.value))} className="w-24 bg-surface p-1 rounded" /> : formatCurrency(item.preco)}
                                         </td>
                                         <td className="px-4 py-3">{formatCurrency(item.coef * item.preco)}</td>
                                     </tr>
                                 ))}
                             </tbody>
                             <tfoot>
-                                <tr className="font-semibold text-white bg-[#242830]">
+                                <tr className="font-semibold text-white bg-surface">
                                     <td colSpan={4} className="px-4 py-3 text-right">CUSTO TOTAL POR M²</td>
                                     <td className="px-4 py-3">{formatCurrency(totalCost)}</td>
                                 </tr>

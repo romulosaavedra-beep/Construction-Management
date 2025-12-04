@@ -59,7 +59,7 @@ const RechartsLikeChart = ({ data }: { data: typeof cashFlowData }) => {
             </svg>
             <div className="flex justify-center gap-4 mt-2 text-sm">
                 <div className="flex items-center gap-2"><div className="w-3 h-3 bg-elevated rounded-sm"></div><span>Projetado</span></div>
-                <div className="flex items-center gap-2"><div className="w-3 h-3 bg-[#0084ff] rounded-sm"></div><span>Realizado</span></div>
+                <div className="flex items-center gap-2"><div className="w-3 h-3 bg-accent-500 rounded-sm"></div><span>Realizado</span></div>
             </div>
         </div>
     );

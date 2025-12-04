@@ -153,11 +153,11 @@ const DiarioDeObra: React.FC = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-sm font-medium mb-1">Data *</label>
-                                <input type="date" name="data" value={formData.data} onChange={e => setFormData({ ...formData, data: e.target.value })} required className="w-full bg-surface border border-default rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none" />
+                                <input type="date" name="data" value={formData.data} onChange={e => setFormData({ ...formData, data: e.target.value })} required className="w-full bg-surface border border-default rounded-md p-2 focus:ring-2 focus:ring-accent-500 outline-none" />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium mb-1">Responsável *</label>
-                                <select name="responsavel" value={formData.responsavel || ''} onChange={e => setFormData({ ...formData, responsavel: e.target.value })} required className="w-full bg-surface border border-default rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none">
+                                <select name="responsavel" value={formData.responsavel || ''} onChange={e => setFormData({ ...formData, responsavel: e.target.value })} required className="w-full bg-surface border border-default rounded-md p-2 focus:ring-2 focus:ring-accent-500 outline-none">
                                     <option value="">Selecione...</option>
                                     {profissionaisData.map(p => <option key={p.nome} value={p.nome}>{p.nome}</option>)}
                                 </select>
@@ -165,7 +165,7 @@ const DiarioDeObra: React.FC = () => {
                         </div>
                         <div>
                             <label className="block text-sm font-medium mb-1">Etapa *</label>
-                            <select name="etapa" value={formData.etapa || ''} onChange={handleEtapaChange} required className="w-full bg-surface border border-default rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none">
+                            <select name="etapa" value={formData.etapa || ''} onChange={handleEtapaChange} required className="w-full bg-surface border border-default rounded-md p-2 focus:ring-2 focus:ring-accent-500 outline-none">
                                 <option value="">Selecione a etapa...</option>
                                 {orcamentoEtapas.map(e => <option key={e.id} value={`${e.nivel} - ${e.discriminacao}`} disabled={e.isParent}>{e.nivel} - {e.discriminacao}</option>)}
                             </select>
@@ -176,7 +176,7 @@ const DiarioDeObra: React.FC = () => {
                                 <h4 className="font-semibold mb-2">Serviços Executados</h4>
                                 <div className="space-y-3">
                                     {servicos.map((servico, index) => (
-                                        <div key={servico.id} className="grid grid-cols-12 gap-2 items-end p-2 bg-[#242830] rounded">
+                                        <div key={servico.id} className="grid grid-cols-12 gap-2 items-end p-2 bg-surface rounded">
                                             <div className="col-span-12 sm:col-span-4">
                                                 <label className="text-xs">Serviço *</label>
                                                 <select value={servico.servico || ''} onChange={e => handleServicoChange(index, 'servico', e.target.value)} className="w-full bg-surface border border-default text-sm rounded p-1">
@@ -208,7 +208,7 @@ const DiarioDeObra: React.FC = () => {
 
                         <div>
                             <label className="block text-sm font-medium mb-1">Observação *</label>
-                            <textarea name="observacoes" value={formData.observacoes || ''} onChange={e => setFormData({ ...formData, observacoes: e.target.value })} required rows={3} placeholder="Descreva as condições gerais do dia, ocorrências, etc." className="w-full bg-surface border border-default rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none"></textarea>
+                            <textarea name="observacoes" value={formData.observacoes || ''} onChange={e => setFormData({ ...formData, observacoes: e.target.value })} required rows={3} placeholder="Descreva as condições gerais do dia, ocorrências, etc." className="w-full bg-surface border border-default rounded-md p-2 focus:ring-2 focus:ring-accent-500 outline-none"></textarea>
                         </div>
                         <div className="flex justify-end gap-2">
                             <Button type="submit" variant="primary">Salvar Registro</Button>
@@ -222,7 +222,7 @@ const DiarioDeObra: React.FC = () => {
                     <CardHeader title="Histórico de Registros">
                         {/* Filtros aqui */}
                     </CardHeader>
-                    <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4 p-3 bg-[#242830] rounded-lg">
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4 p-3 bg-surface rounded-lg">
                         <input type="date" value={filters.dataInicio} onChange={e => setFilters({ ...filters, dataInicio: e.target.value })} className="bg-surface border border-default rounded p-2 text-sm" />
                         <input type="date" value={filters.dataFim} onChange={e => setFilters({ ...filters, dataFim: e.target.value })} className="bg-surface border border-default rounded p-2 text-sm" />
                         <select value={filters.responsavel} onChange={e => setFilters({ ...filters, responsavel: e.target.value })} className="bg-surface border border-default rounded p-2 text-sm">
@@ -234,7 +234,7 @@ const DiarioDeObra: React.FC = () => {
                     </div>
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm text-left text-secondary">
-                            <thead className="text-xs text-primary uppercase bg-[#242830]">
+                            <thead className="text-xs text-primary uppercase bg-surface">
                                 <tr>
                                     <th className="px-4 py-3 cursor-pointer" onClick={() => requestSort('data')}>Data {getSortIndicator('data')}</th>
                                     <th className="px-4 py-3 cursor-pointer" onClick={() => requestSort('responsavel')}>Responsável {getSortIndicator('responsavel')}</th>
@@ -246,7 +246,7 @@ const DiarioDeObra: React.FC = () => {
                             </thead>
                             <tbody>
                                 {sortedAndFilteredRegistros.map(r => (
-                                    <tr key={r.id} className="border-b border-default hover:bg-[#24282f]">
+                                    <tr key={r.id} className="border-b border-default hover:bg-elevated">
                                         <td className="px-4 py-3">{formatDate(r.data)}</td>
                                         <td className="px-4 py-3 font-medium text-white">{r.responsavel}</td>
                                         <td className="px-4 py-3">{r.etapa}</td>
@@ -262,7 +262,7 @@ const DiarioDeObra: React.FC = () => {
                                             <div className="relative inline-block">
                                                 <Button variant="secondary" onClick={() => setActionMenu(actionMenu === r.id ? null : r.id)}>⚙️</Button>
                                                 {actionMenu === r.id && (
-                                                    <div className="absolute right-0 mt-2 w-48 bg-[#242830] border border-default rounded-md shadow-lg z-10 text-left">
+                                                    <div className="absolute right-0 mt-2 w-48 bg-surface border border-default rounded-md shadow-lg z-10 text-left">
                                                         <a href="#" className="block px-4 py-2 text-sm text-primary hover:bg-elevated">✏️ Editar</a>
                                                         <a href="#" className="block px-4 py-2 text-sm text-primary hover:bg-elevated">🗑️ Apagar</a>
                                                         <a href="#" className="block px-4 py-2 text-sm text-primary hover:bg-elevated">📋 Duplicar</a>

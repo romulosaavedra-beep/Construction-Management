@@ -258,7 +258,7 @@ export const AdvancedAIModal: React.FC<AdvancedAIModalProps> = ({
                 {/* Help Modal Overlay */}
                 {helpModalOpen && (
                     <div className="absolute inset-0 bg-black/60 z-[2050] flex items-center justify-center p-4 rounded-lg">
-                        <div className="bg-[#242830] border border-default p-6 rounded-lg max-w-lg shadow-2xl relative animate-in fade-in zoom-in duration-200">
+                        <div className="bg-surface border border-default p-6 rounded-lg max-w-lg shadow-2xl relative animate-in fade-in zoom-in duration-200">
                             <button
                                 onClick={() => setHelpModalOpen(false)}
                                 className="absolute top-3 right-3 text-gray-400 hover:text-white"
@@ -285,7 +285,7 @@ export const AdvancedAIModal: React.FC<AdvancedAIModalProps> = ({
                 </div>
 
                 {/* Tabs */}
-                <div className="flex border-b border-default bg-[#242830]">
+                <div className="flex border-b border-default bg-surface">
                     {[
                         { id: 'builder', label: '1. Gerador de Cronograma', icon: '📅' },
                         { id: 'predictor', label: '2. Predição & Ajuste', icon: '🔮' },
@@ -321,7 +321,7 @@ export const AdvancedAIModal: React.FC<AdvancedAIModalProps> = ({
                     {/* TAB 1: BUILDER */}
                     {activeTab === 'builder' && (
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-full">
-                            <div className="md:col-span-1 space-y-4 bg-[#242830] p-4 rounded-lg h-fit">
+                            <div className="md:col-span-1 space-y-4 bg-surface p-4 rounded-lg h-fit">
                                 <div className="flex justify-between items-center mb-2">
                                     <h4 className="font-bold text-white">Parâmetros</h4>
                                     <button onClick={() => setHelpModalOpen(true)} className="text-accent-500 hover:text-white" title="Ajuda">ℹ️</button>
@@ -333,7 +333,7 @@ export const AdvancedAIModal: React.FC<AdvancedAIModalProps> = ({
                                         type="date"
                                         value={dates.start}
                                         onChange={handleStartDateChange}
-                                        className="w-full bg-surface border border-default rounded p-2 text-sm focus:ring-1 focus:ring-[#0084ff]"
+                                        className="w-full bg-surface border border-default rounded p-2 text-sm focus:ring-1 focus:ring-accent-500"
                                     />
                                 </div>
 
@@ -345,7 +345,7 @@ export const AdvancedAIModal: React.FC<AdvancedAIModalProps> = ({
                                             value={duration}
                                             onChange={e => handleDurationChange(e.target.value === '' ? '' : parseFloat(e.target.value))}
                                             placeholder="Ex: 6"
-                                            className="w-full bg-surface border border-default rounded p-2 text-sm focus:ring-1 focus:ring-[#0084ff]"
+                                            className="w-full bg-surface border border-default rounded p-2 text-sm focus:ring-1 focus:ring-accent-500"
                                         />
                                     </div>
                                     <div className="w-24">
@@ -353,7 +353,7 @@ export const AdvancedAIModal: React.FC<AdvancedAIModalProps> = ({
                                         <select
                                             value={durationUnit}
                                             onChange={e => handleUnitChange(e.target.value as 'days' | 'months')}
-                                            className="w-full bg-surface border border-default rounded p-2 text-sm focus:ring-1 focus:ring-[#0084ff]"
+                                            className="w-full bg-surface border border-default rounded p-2 text-sm focus:ring-1 focus:ring-accent-500"
                                         >
                                             <option value="months">Meses</option>
                                             <option value="days">Dias</option>
@@ -367,7 +367,7 @@ export const AdvancedAIModal: React.FC<AdvancedAIModalProps> = ({
                                         type="date"
                                         value={dates.end}
                                         onChange={handleEndDateChange}
-                                        className="w-full bg-surface border border-default rounded p-2 text-sm focus:ring-1 focus:ring-[#0084ff]"
+                                        className="w-full bg-surface border border-default rounded p-2 text-sm focus:ring-1 focus:ring-accent-500"
                                     />
                                 </div>
 
@@ -382,7 +382,7 @@ export const AdvancedAIModal: React.FC<AdvancedAIModalProps> = ({
                                 </div>
                             </div>
 
-                            <div className="md:col-span-2 bg-[#242830] p-4 rounded-lg overflow-y-auto max-h-[600px]">
+                            <div className="md:col-span-2 bg-surface p-4 rounded-lg overflow-y-auto max-h-[600px]">
                                 <h4 className="font-bold text-white mb-2">Preview / Resultado</h4>
                                 {result ? (
                                     <div>
@@ -407,7 +407,7 @@ export const AdvancedAIModal: React.FC<AdvancedAIModalProps> = ({
                     {/* TAB 2: PREDICTOR */}
                     {activeTab === 'predictor' && (
                         <div className="space-y-6">
-                            <div className="flex items-end gap-4 bg-[#242830] p-4 rounded-lg">
+                            <div className="flex items-end gap-4 bg-surface p-4 rounded-lg">
                                 <div className="flex-1">
                                     <div className="flex justify-between mb-1">
                                         <label className="block text-xs font-bold text-secondary">Data de Corte (Data Date)</label>
@@ -420,7 +420,7 @@ export const AdvancedAIModal: React.FC<AdvancedAIModalProps> = ({
 
                             {result && result.analise ? (
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="bg-[#242830] p-5 rounded-lg border-l-4 border-blue-500">
+                                    <div className="bg-surface p-5 rounded-lg border-l-4 border-blue-500">
                                         <h4 className="text-lg font-bold text-white mb-4">Análise EVM</h4>
                                         <div className="grid grid-cols-2 gap-4">
                                             <div>
@@ -438,7 +438,7 @@ export const AdvancedAIModal: React.FC<AdvancedAIModalProps> = ({
                                         </div>
                                     </div>
 
-                                    <div className="bg-[#242830] p-5 rounded-lg">
+                                    <div className="bg-surface p-5 rounded-lg">
                                         <h4 className="text-lg font-bold text-white mb-4">Recomendações de Ajuste</h4>
                                         <div className="space-y-3 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
                                             {result.ajustesRecomendados?.map((adj: any, idx: number) => (
@@ -456,7 +456,7 @@ export const AdvancedAIModal: React.FC<AdvancedAIModalProps> = ({
                                 </div>
                             ) : (
                                 result && (
-                                    <div className="p-4 text-center bg-[#242830] rounded text-red-400">
+                                    <div className="p-4 text-center bg-surface rounded text-red-400">
                                         Dados de análise indisponíveis ou formato inválido.
                                     </div>
                                 )
@@ -467,7 +467,7 @@ export const AdvancedAIModal: React.FC<AdvancedAIModalProps> = ({
                     {/* TAB 3: OPTIMIZER */}
                     {activeTab === 'optimizer' && (
                         <div className="h-full flex flex-col">
-                            <div className="bg-[#242830] p-4 rounded-lg mb-6 relative">
+                            <div className="bg-surface p-4 rounded-lg mb-6 relative">
                                 <button onClick={() => setHelpModalOpen(true)} className="absolute top-4 right-4 text-accent-500 hover:text-white" title="Ajuda">ℹ️</button>
                                 <p className="text-sm text-secondary mb-4 pr-8">
                                     O otimizador buscará oportunidades de compressão do cronograma (Crashing/Fast-Tracking) respeitando o orçamento máximo.
@@ -477,15 +477,15 @@ export const AdvancedAIModal: React.FC<AdvancedAIModalProps> = ({
 
                             {result && (
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                    <div className="bg-[#242830] p-4 rounded-lg text-center">
+                                    <div className="bg-surface p-4 rounded-lg text-center">
                                         <div className="text-3xl font-bold text-green-400">{result.compressaoAlcancada || 0} dias</div>
                                         <div className="text-sm text-secondary">Compressão Possível</div>
                                     </div>
-                                    <div className="bg-[#242830] p-4 rounded-lg text-center">
+                                    <div className="bg-surface p-4 rounded-lg text-center">
                                         <div className="text-3xl font-bold text-yellow-400">R$ {result.custo_adicional || 0}</div>
                                         <div className="text-sm text-secondary">Custo Adicional</div>
                                     </div>
-                                    <div className="md:col-span-3 bg-[#242830] p-4 rounded-lg">
+                                    <div className="md:col-span-3 bg-surface p-4 rounded-lg">
                                         <h4 className="font-bold text-white mb-2">Estratégia Sugerida</h4>
                                         <p className="text-sm text-gray-300 mb-4">{result.estrategia || "Nenhuma estratégia gerada."}</p>
                                         <h5 className="font-bold text-xs text-secondary uppercase mb-2">Detalhes das Ações</h5>
@@ -519,7 +519,7 @@ export const AdvancedAIModal: React.FC<AdvancedAIModalProps> = ({
                     {/* TAB 4: CONSTRAINTS */}
                     {activeTab === 'constraints' && (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 h-full">
-                            <div className="bg-[#242830] p-4 rounded-lg flex flex-col relative">
+                            <div className="bg-surface p-4 rounded-lg flex flex-col relative">
                                 <button onClick={() => setHelpModalOpen(true)} className="absolute top-4 right-4 text-accent-500 hover:text-white" title="Ajuda">ℹ️</button>
                                 <h4 className="font-bold text-white mb-4">Registro de Restrições</h4>
                                 <div className="flex-1 overflow-y-auto space-y-2 mb-4 custom-scrollbar">
@@ -566,7 +566,7 @@ export const AdvancedAIModal: React.FC<AdvancedAIModalProps> = ({
                                 <Button variant="primary" className="mt-4" onClick={handleAnalyzeConstraints}>⚡ Analisar Impactos</Button>
                             </div>
 
-                            <div className="bg-[#242830] p-4 rounded-lg overflow-y-auto">
+                            <div className="bg-surface p-4 rounded-lg overflow-y-auto">
                                 <h4 className="font-bold text-white mb-4">Análise de Impacto & Mitigação</h4>
                                 {result && result.restricoes_criticas ? (
                                     result.restricoes_criticas.map((rc: any, i: number) => (
@@ -577,7 +577,7 @@ export const AdvancedAIModal: React.FC<AdvancedAIModalProps> = ({
                                             <div className="space-y-2">
                                                 <span className="text-xs font-bold text-white">Mitigações Sugeridas:</span>
                                                 {rc.mitigacoes.map((m: any, idx: number) => (
-                                                    <div key={idx} className="text-xs bg-[#242830] p-2 rounded flex justify-between items-center">
+                                                    <div key={idx} className="text-xs bg-surface p-2 rounded flex justify-between items-center">
                                                         <span>{m.acao}</span>
                                                         <span className={`px-2 py-0.5 rounded ${m.viabilidade === 'ALTA' ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'}`}>{m.viabilidade}</span>
                                                     </div>
@@ -597,7 +597,7 @@ export const AdvancedAIModal: React.FC<AdvancedAIModalProps> = ({
                     {/* TAB 5: REPORT */}
                     {activeTab === 'report' && (
                         <div className="h-full flex flex-col">
-                            <div className="flex justify-between items-center bg-[#242830] p-4 rounded-lg mb-4 relative">
+                            <div className="flex justify-between items-center bg-surface p-4 rounded-lg mb-4 relative">
                                 <div>
                                     <h4 className="font-bold text-white">Relatório Executivo</h4>
                                     <p className="text-xs text-secondary">Gere relatórios completos em Markdown com insights da IA.</p>
