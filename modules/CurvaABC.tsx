@@ -18,30 +18,30 @@ const mockCurvaABCData = [
 
 const CurvaABC: React.FC = () => {
     const [activeTab, setActiveTab] = useState<ActiveTab>('Todos');
-    
+
     const filteredData = mockCurvaABCData.filter(d => activeTab === 'Todos' || d.class === activeTab);
 
     return (
         <div>
             <PageHeader title="📈 Curva ABC (Análise de Pareto)" subtitle="Classificação de insumos por impacto de valor no orçamento" />
-            
+
             <Card>
                 <CardHeader title="Distribuição por Classificação" />
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
                     <div className="bg-[#242830] p-4 rounded-lg">
                         <h4 className="font-bold text-lg text-red-400">CLASSE A</h4>
                         <p className="text-2xl font-bold">63.75%</p>
-                        <p className="text-xs text-[#a0a5b0]">2 Itens (80% do Custo)</p>
+                        <p className="text-xs text-secondary">2 Itens (80% do Custo)</p>
                     </div>
                     <div className="bg-[#242830] p-4 rounded-lg">
                         <h4 className="font-bold text-lg text-yellow-400">CLASSE B</h4>
                         <p className="text-2xl font-bold">25.00%</p>
-                        <p className="text-xs text-[#a0a5b0]">2 Itens (15% do Custo)</p>
+                        <p className="text-xs text-secondary">2 Itens (15% do Custo)</p>
                     </div>
                     <div className="bg-[#242830] p-4 rounded-lg">
                         <h4 className="font-bold text-lg text-blue-400">CLASSE C</h4>
                         <p className="text-2xl font-bold">11.25%</p>
-                        <p className="text-xs text-[#a0a5b0]">3 Itens (5% do Custo)</p>
+                        <p className="text-xs text-secondary">3 Itens (5% do Custo)</p>
                     </div>
                 </div>
             </Card>
@@ -49,12 +49,12 @@ const CurvaABC: React.FC = () => {
             <Card>
                 {/* FIX: Added the required 'title' prop to the CardHeader component. */}
                 <CardHeader title="Itens da Curva ABC">
-                    <div className="flex border-b border-[#3a3e45]">
+                    <div className="flex border-b border-default">
                         {(['Todos', 'A', 'B', 'C'] as ActiveTab[]).map(tab => (
-                            <button 
+                            <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab)}
-                                className={`px-4 py-2 text-sm font-medium transition-colors ${activeTab === tab ? 'border-b-2 border-[#0084ff] text-[#0084ff]' : 'text-[#a0a5b0] hover:text-white'}`}
+                                className={`px-4 py-2 text-sm font-medium transition-colors ${activeTab === tab ? 'border-b-2 border-[#0084ff] text-accent-500' : 'text-secondary hover:text-white'}`}
                             >
                                 Classe {tab}
                             </button>
@@ -63,7 +63,7 @@ const CurvaABC: React.FC = () => {
                     <Button variant="primary" onClick={() => alert('IA irá reprocessar a Curva ABC')}>🤖 Atualizar com IA</Button>
                 </CardHeader>
                 <div className="overflow-x-auto">
-                    <table className="w-full text-sm text-left text-[#a0a5b0]">
+                    <table className="w-full text-sm text-left text-secondary">
                         <thead className="text-xs text-[#e8eaed] uppercase bg-[#242830]">
                             <tr>
                                 <th className="px-4 py-3">Classe</th>
@@ -75,7 +75,7 @@ const CurvaABC: React.FC = () => {
                         </thead>
                         <tbody>
                             {filteredData.map(item => (
-                                <tr key={item.item} className="border-b border-[#3a3e45] hover:bg-[#24282f]">
+                                <tr key={item.item} className="border-b border-default hover:bg-[#24282f]">
                                     <td className="px-4 py-3">
                                         <span className={`font-bold ${item.class === 'A' ? 'text-red-400' : item.class === 'B' ? 'text-yellow-400' : 'text-blue-400'}`}>
                                             {item.class}

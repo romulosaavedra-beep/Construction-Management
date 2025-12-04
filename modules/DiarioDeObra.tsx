@@ -135,12 +135,12 @@ const DiarioDeObra: React.FC = () => {
     return (
         <div>
             <PageHeader title="📝 Diário de Obra" subtitle="Registros diários de atividades e ocorrências" />
-            <div className="border-b border-[#3a3e45] mb-6">
+            <div className="border-b border-default mb-6">
                 <nav className="flex space-x-4">
-                    <button onClick={() => setActiveTab('form')} className={`px-3 py-2 font-medium text-sm rounded-t-lg transition-colors whitespace-nowrap ${activeTab === 'form' ? 'text-[#0084ff] border-b-2 border-[#0084ff]' : 'text-[#a0a5b0] hover:text-white'}`}>
+                    <button onClick={() => setActiveTab('form')} className={`px-3 py-2 font-medium text-sm rounded-t-lg transition-colors whitespace-nowrap ${activeTab === 'form' ? 'text-accent-500 border-b-2 border-[#0084ff]' : 'text-secondary hover:text-white'}`}>
                         + Novo Registro
                     </button>
-                    <button onClick={() => setActiveTab('registros')} className={`px-3 py-2 font-medium text-sm rounded-t-lg transition-colors whitespace-nowrap ${activeTab === 'registros' ? 'text-[#0084ff] border-b-2 border-[#0084ff]' : 'text-[#a0a5b0] hover:text-white'}`}>
+                    <button onClick={() => setActiveTab('registros')} className={`px-3 py-2 font-medium text-sm rounded-t-lg transition-colors whitespace-nowrap ${activeTab === 'registros' ? 'text-accent-500 border-b-2 border-[#0084ff]' : 'text-secondary hover:text-white'}`}>
                         Registros
                     </button>
                 </nav>
@@ -153,11 +153,11 @@ const DiarioDeObra: React.FC = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-sm font-medium mb-1">Data *</label>
-                                <input type="date" name="data" value={formData.data} onChange={e => setFormData({ ...formData, data: e.target.value })} required className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none" />
+                                <input type="date" name="data" value={formData.data} onChange={e => setFormData({ ...formData, data: e.target.value })} required className="w-full bg-surface border border-default rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none" />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium mb-1">Responsável *</label>
-                                <select name="responsavel" value={formData.responsavel || ''} onChange={e => setFormData({ ...formData, responsavel: e.target.value })} required className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none">
+                                <select name="responsavel" value={formData.responsavel || ''} onChange={e => setFormData({ ...formData, responsavel: e.target.value })} required className="w-full bg-surface border border-default rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none">
                                     <option value="">Selecione...</option>
                                     {profissionaisData.map(p => <option key={p.nome} value={p.nome}>{p.nome}</option>)}
                                 </select>
@@ -165,36 +165,36 @@ const DiarioDeObra: React.FC = () => {
                         </div>
                         <div>
                             <label className="block text-sm font-medium mb-1">Etapa *</label>
-                            <select name="etapa" value={formData.etapa || ''} onChange={handleEtapaChange} required className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none">
+                            <select name="etapa" value={formData.etapa || ''} onChange={handleEtapaChange} required className="w-full bg-surface border border-default rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none">
                                 <option value="">Selecione a etapa...</option>
                                 {orcamentoEtapas.map(e => <option key={e.id} value={`${e.nivel} - ${e.discriminacao}`} disabled={e.isParent}>{e.nivel} - {e.discriminacao}</option>)}
                             </select>
                         </div>
 
                         {formData.etapa && (
-                            <div className="border border-[#3a3e45] rounded-lg p-4">
+                            <div className="border border-default rounded-lg p-4">
                                 <h4 className="font-semibold mb-2">Serviços Executados</h4>
                                 <div className="space-y-3">
                                     {servicos.map((servico, index) => (
                                         <div key={servico.id} className="grid grid-cols-12 gap-2 items-end p-2 bg-[#242830] rounded">
                                             <div className="col-span-12 sm:col-span-4">
                                                 <label className="text-xs">Serviço *</label>
-                                                <select value={servico.servico || ''} onChange={e => handleServicoChange(index, 'servico', e.target.value)} className="w-full bg-[#1e2329] border border-[#3a3e45] text-sm rounded p-1">
+                                                <select value={servico.servico || ''} onChange={e => handleServicoChange(index, 'servico', e.target.value)} className="w-full bg-surface border border-default text-sm rounded p-1">
                                                     <option value="">Selecione...</option>
                                                     {servicosDaEtapa.map(s => <option key={s.id} value={s.discriminacao}>{s.discriminacao}</option>)}
                                                 </select>
                                             </div>
                                             <div className="col-span-6 sm:col-span-2">
                                                 <label className="text-xs">Qtd. Exec. *</label>
-                                                <input type="number" step="any" value={servico.quantidadeExecutada || ''} onChange={e => handleServicoChange(index, 'quantidadeExecutada', parseFloat(e.target.value))} className="w-full bg-[#1e2329] border border-[#3a3e45] text-sm rounded p-1" />
+                                                <input type="number" step="any" value={servico.quantidadeExecutada || ''} onChange={e => handleServicoChange(index, 'quantidadeExecutada', parseFloat(e.target.value))} className="w-full bg-surface border border-default text-sm rounded p-1" />
                                             </div>
                                             <div className="col-span-6 sm:col-span-2">
                                                 <label className="text-xs">Qtd. Prev.</label>
-                                                <input type="text" readOnly value={`${servico.quantidadePrevista || '-'} ${servico.unidade || ''}`} className="w-full bg-[#3a3e45] border border-[#3a3e45] text-sm rounded p-1 cursor-not-allowed" />
+                                                <input type="text" readOnly value={`${servico.quantidadePrevista || '-'} ${servico.unidade || ''}`} className="w-full bg-[#3a3e45] border border-default text-sm rounded p-1 cursor-not-allowed" />
                                             </div>
                                             <div className="col-span-6 sm:col-span-2">
                                                 <label className="text-xs">Equipe (nº) *</label>
-                                                <input type="number" value={servico.equipe || ''} onChange={e => handleServicoChange(index, 'equipe', parseInt(e.target.value))} className="w-full bg-[#1e2329] border border-[#3a3e45] text-sm rounded p-1" />
+                                                <input type="number" value={servico.equipe || ''} onChange={e => handleServicoChange(index, 'equipe', parseInt(e.target.value))} className="w-full bg-surface border border-default text-sm rounded p-1" />
                                             </div>
                                             <div className="col-span-6 sm:col-span-2 flex justify-end">
                                                 <Button type="button" variant="danger" onClick={() => removeServico(index)}>Remover</Button>
@@ -208,7 +208,7 @@ const DiarioDeObra: React.FC = () => {
 
                         <div>
                             <label className="block text-sm font-medium mb-1">Observação *</label>
-                            <textarea name="observacoes" value={formData.observacoes || ''} onChange={e => setFormData({ ...formData, observacoes: e.target.value })} required rows={3} placeholder="Descreva as condições gerais do dia, ocorrências, etc." className="w-full bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none"></textarea>
+                            <textarea name="observacoes" value={formData.observacoes || ''} onChange={e => setFormData({ ...formData, observacoes: e.target.value })} required rows={3} placeholder="Descreva as condições gerais do dia, ocorrências, etc." className="w-full bg-surface border border-default rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none"></textarea>
                         </div>
                         <div className="flex justify-end gap-2">
                             <Button type="submit" variant="primary">Salvar Registro</Button>
@@ -223,17 +223,17 @@ const DiarioDeObra: React.FC = () => {
                         {/* Filtros aqui */}
                     </CardHeader>
                     <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4 p-3 bg-[#242830] rounded-lg">
-                        <input type="date" value={filters.dataInicio} onChange={e => setFilters({ ...filters, dataInicio: e.target.value })} className="bg-[#1e2329] border border-[#3a3e45] rounded p-2 text-sm" />
-                        <input type="date" value={filters.dataFim} onChange={e => setFilters({ ...filters, dataFim: e.target.value })} className="bg-[#1e2329] border border-[#3a3e45] rounded p-2 text-sm" />
-                        <select value={filters.responsavel} onChange={e => setFilters({ ...filters, responsavel: e.target.value })} className="bg-[#1e2329] border border-[#3a3e45] rounded p-2 text-sm">
+                        <input type="date" value={filters.dataInicio} onChange={e => setFilters({ ...filters, dataInicio: e.target.value })} className="bg-surface border border-default rounded p-2 text-sm" />
+                        <input type="date" value={filters.dataFim} onChange={e => setFilters({ ...filters, dataFim: e.target.value })} className="bg-surface border border-default rounded p-2 text-sm" />
+                        <select value={filters.responsavel} onChange={e => setFilters({ ...filters, responsavel: e.target.value })} className="bg-surface border border-default rounded p-2 text-sm">
                             <option value="">Todos Responsáveis</option>
                             {profissionaisData.map(p => <option key={p.nome} value={p.nome}>{p.nome}</option>)}
                         </select>
-                        <input type="text" placeholder="Filtrar por Etapa..." value={filters.etapa} onChange={e => setFilters({ ...filters, etapa: e.target.value })} className="bg-[#1e2329] border border-[#3a3e45] rounded p-2 text-sm" />
-                        <input type="text" placeholder="Filtrar por Serviço..." value={filters.servico} onChange={e => setFilters({ ...filters, servico: e.target.value })} className="bg-[#1e2329] border border-[#3a3e45] rounded p-2 text-sm" />
+                        <input type="text" placeholder="Filtrar por Etapa..." value={filters.etapa} onChange={e => setFilters({ ...filters, etapa: e.target.value })} className="bg-surface border border-default rounded p-2 text-sm" />
+                        <input type="text" placeholder="Filtrar por Serviço..." value={filters.servico} onChange={e => setFilters({ ...filters, servico: e.target.value })} className="bg-surface border border-default rounded p-2 text-sm" />
                     </div>
                     <div className="overflow-x-auto">
-                        <table className="w-full text-sm text-left text-[#a0a5b0]">
+                        <table className="w-full text-sm text-left text-secondary">
                             <thead className="text-xs text-[#e8eaed] uppercase bg-[#242830]">
                                 <tr>
                                     <th className="px-4 py-3 cursor-pointer" onClick={() => requestSort('data')}>Data {getSortIndicator('data')}</th>
@@ -246,7 +246,7 @@ const DiarioDeObra: React.FC = () => {
                             </thead>
                             <tbody>
                                 {sortedAndFilteredRegistros.map(r => (
-                                    <tr key={r.id} className="border-b border-[#3a3e45] hover:bg-[#24282f]">
+                                    <tr key={r.id} className="border-b border-default hover:bg-[#24282f]">
                                         <td className="px-4 py-3">{formatDate(r.data)}</td>
                                         <td className="px-4 py-3 font-medium text-white">{r.responsavel}</td>
                                         <td className="px-4 py-3">{r.etapa}</td>
@@ -262,7 +262,7 @@ const DiarioDeObra: React.FC = () => {
                                             <div className="relative inline-block">
                                                 <Button variant="secondary" onClick={() => setActionMenu(actionMenu === r.id ? null : r.id)}>⚙️</Button>
                                                 {actionMenu === r.id && (
-                                                    <div className="absolute right-0 mt-2 w-48 bg-[#242830] border border-[#3a3e45] rounded-md shadow-lg z-10 text-left">
+                                                    <div className="absolute right-0 mt-2 w-48 bg-[#242830] border border-default rounded-md shadow-lg z-10 text-left">
                                                         <a href="#" className="block px-4 py-2 text-sm text-[#e8eaed] hover:bg-[#3a3e45]">✏️ Editar</a>
                                                         <a href="#" className="block px-4 py-2 text-sm text-[#e8eaed] hover:bg-[#3a3e45]">🗑️ Apagar</a>
                                                         <a href="#" className="block px-4 py-2 text-sm text-[#e8eaed] hover:bg-[#3a3e45]">📋 Duplicar</a>

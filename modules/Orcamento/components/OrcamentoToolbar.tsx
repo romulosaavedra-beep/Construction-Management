@@ -61,17 +61,17 @@ export const OrcamentoToolbar: React.FC<OrcamentoToolbarProps> = ({
             {!hiddenColumns.has('mat_unit') && (
                 <>
                     <div className="text-right">
-                        <div className="text-xs text-[#a0a5b0]">TOTAL MATERIAIS</div>
+                        <div className="text-xs text-secondary">TOTAL MATERIAIS</div>
                         <div className="text-lg font-bold text-blue-400">{formatCurrency(grandTotalMaterial)}</div>
                     </div>
                     <div className="text-right">
-                        <div className="text-xs text-[#a0a5b0]">TOTAL MÃO DE OBRA</div>
+                        <div className="text-xs text-secondary">TOTAL MÃO DE OBRA</div>
                         <div className="text-lg font-bold text-yellow-400">{formatCurrency(grandTotalMaoDeObra)}</div>
                     </div>
                 </>
             )}
             <div className="text-right">
-                <div className="text-xs text-[#a0a5b0]">VALOR TOTAL DO ORÇAMENTO</div>
+                <div className="text-xs text-secondary">VALOR TOTAL DO ORÇAMENTO</div>
                 <div className="text-2xl font-bold text-green-400">{formatCurrency(grandTotalValue)}</div>
             </div>
             <div className="flex items-center gap-2">
@@ -81,7 +81,7 @@ export const OrcamentoToolbar: React.FC<OrcamentoToolbarProps> = ({
                             Reexibir ({hiddenColumns.size})
                         </Button>
                         {isRestoreMenuOpen && (
-                            <div ref={restoreMenuRef} className="absolute right-0 mt-2 w-56 bg-[#242830] border border-[#3a3e45] rounded-md shadow-lg z-[100]">
+                            <div ref={restoreMenuRef} className="absolute right-0 mt-2 w-56 bg-[#242830] border border-default rounded-md shadow-lg z-[100]">
                                 <ul className="py-1 text-sm text-[#e8eaed] max-h-60 overflow-y-auto">
                                     {columnsConfig.filter(c => hiddenColumns.has(c.id)).map(c => (
                                         <li key={c.id}>
@@ -90,7 +90,7 @@ export const OrcamentoToolbar: React.FC<OrcamentoToolbarProps> = ({
                                             </a>
                                         </li>
                                     ))}
-                                    <li className="border-t border-[#3a3e45] my-1"></li>
+                                    <li className="border-t border-default my-1"></li>
                                     <li>
                                         <a href="#" onClick={(e) => { e.preventDefault(); handleShowAllColumns(); }} className="block px-4 py-2 hover:bg-[#3a3e45] font-semibold">
                                             Reexibir Todas

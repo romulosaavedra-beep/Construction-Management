@@ -18,10 +18,10 @@ export const KpiCard: React.FC<KpiCardProps> = ({ label, value, description, chi
     };
 
     return (
-        <div className={`bg-[#1e2329] p-5 rounded-lg shadow-lg border-l-4 ${statusClasses[status]}`}>
-            <div className="text-xs text-[#a0a5b0] uppercase font-semibold mb-1">{label}</div>
+        <div className={`bg-surface p-5 rounded-lg shadow-lg border-l-4 ${statusClasses[status]}`}>
+            <div className="text-xs text-secondary uppercase font-semibold mb-1">{label}</div>
             <div className="text-3xl font-bold text-white mb-2">{value}</div>
-            {description && <div className="text-sm text-[#a0a5b0]">{description}</div>}
+            {description && <div className="text-sm text-secondary">{description}</div>}
             {children}
         </div>
     );

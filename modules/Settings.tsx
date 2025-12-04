@@ -26,7 +26,7 @@ const Settings: React.FC = () => {
     const renderContent = () => {
         if (loading) {
             return (
-                <div className="flex flex-col items-center justify-center h-64 text-[#a0a5b0] animate-pulse gap-3">
+                <div className="flex flex-col items-center justify-center h-64 text-secondary animate-pulse gap-3">
                     <div className="h-8 w-8 border-2 border-[#0084ff] border-t-transparent rounded-full animate-spin" />
                     <span className="text-sm">Carregando configurações...</span>
                 </div>
@@ -65,34 +65,34 @@ const Settings: React.FC = () => {
 
             {/* Tabs Navigation */}
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <TabsList className="w-full justify-start bg-[#1e2329] border-b border-[#3a3e45] rounded-t-lg rounded-b-none p-0 h-auto overflow-x-auto custom-scrollbar">
+                <TabsList className="w-full justify-start bg-surface border-b border-default rounded-t-lg rounded-b-none p-0 h-auto overflow-x-auto custom-scrollbar">
                     <TabsTrigger
                         value="geral"
-                        className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-[#0084ff] data-[state=active]:text-[#0084ff] text-[#a0a5b0] hover:text-white rounded-none px-6 py-3 h-auto border-b-2 border-transparent transition-all"
+                        className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-[#0084ff] data-[state=active]:text-accent-500 text-secondary hover:text-white rounded-none px-6 py-3 h-auto border-b-2 border-transparent transition-all"
                     >
                         <SettingsIcon className="w-4 h-4 mr-2" /> Geral
                     </TabsTrigger>
                     <TabsTrigger
                         value="calendar"
-                        className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-[#0084ff] data-[state=active]:text-[#0084ff] text-[#a0a5b0] hover:text-white rounded-none px-6 py-3 h-auto border-b-2 border-transparent transition-all"
+                        className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-[#0084ff] data-[state=active]:text-accent-500 text-secondary hover:text-white rounded-none px-6 py-3 h-auto border-b-2 border-transparent transition-all"
                     >
                         <Calendar className="w-4 h-4 mr-2" /> Calendário
                     </TabsTrigger>
                     <TabsTrigger
                         value="profissionais"
-                        className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-[#0084ff] data-[state=active]:text-[#0084ff] text-[#a0a5b0] hover:text-white rounded-none px-6 py-3 h-auto border-b-2 border-transparent transition-all"
+                        className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-[#0084ff] data-[state=active]:text-accent-500 text-secondary hover:text-white rounded-none px-6 py-3 h-auto border-b-2 border-transparent transition-all"
                     >
                         <Users className="w-4 h-4 mr-2" /> Profissionais
                     </TabsTrigger>
                     <TabsTrigger
                         value="fornecedores"
-                        className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-[#0084ff] data-[state=active]:text-[#0084ff] text-[#a0a5b0] hover:text-white rounded-none px-6 py-3 h-auto border-b-2 border-transparent transition-all"
+                        className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-[#0084ff] data-[state=active]:text-accent-500 text-secondary hover:text-white rounded-none px-6 py-3 h-auto border-b-2 border-transparent transition-all"
                     >
                         <Truck className="w-4 h-4 mr-2" /> Fornecedores
                     </TabsTrigger>
                     <TabsTrigger
                         value="unidades_recursos"
-                        className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-[#0084ff] data-[state=active]:text-[#0084ff] text-[#a0a5b0] hover:text-white rounded-none px-6 py-3 h-auto border-b-2 border-transparent transition-all"
+                        className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-[#0084ff] data-[state=active]:text-accent-500 text-secondary hover:text-white rounded-none px-6 py-3 h-auto border-b-2 border-transparent transition-all"
                     >
                         <Ruler className="w-4 h-4 mr-2" /> Unidades e Recursos
                     </TabsTrigger>

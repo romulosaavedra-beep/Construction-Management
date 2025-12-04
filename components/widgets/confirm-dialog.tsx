@@ -35,7 +35,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-70"
             onClick={handleBackdropClick}
         >
-            <div className="bg-[#1e2329] rounded-lg shadow-2xl max-w-md w-full mx-4 animate-fadeIn border border-gray-700">
+            <div className="bg-surface rounded-lg shadow-2xl max-w-md w-full mx-4 animate-fadeIn border border-gray-700">
                 {title && (
                     <div className="px-6 py-4 border-b border-gray-700">
                         <h3 className="text-lg font-semibold text-white">{title}</h3>

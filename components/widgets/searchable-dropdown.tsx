@@ -57,8 +57,8 @@ export const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
                     disabled={disabled}
                     className={cn(
                         // ESTILO IDÊNTICO AO INPUT DO SHADCN (h-10, cores, bordas)
-                        "flex h-10 w-full items-center justify-between rounded-md border bg-[#1e2329] px-3 py-2 text-sm ring-offset-background",
-                        "border-[#3a3e45]", 
+                        "flex h-10 w-full items-center justify-between rounded-md border bg-surface px-3 py-2 text-sm ring-offset-background",
+                        "border-default",
                         "placeholder:text-[#5f656f]",
                         "focus:outline-none focus:border-[#71767f]", // Foco cinza claro
                         "disabled:cursor-not-allowed disabled:opacity-50",
@@ -73,16 +73,16 @@ export const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
                 </button>
 
                 {isOpen && !disabled && (
-                    <div className="absolute z-50 w-full mt-1 bg-[#1e2329] border border-[#3a3e45] rounded-md shadow-xl max-h-60 overflow-hidden">
-                        <div className="p-2 border-b border-[#3a3e45] sticky top-0 bg-[#1e2329] z-10">
+                    <div className="absolute z-50 w-full mt-1 bg-surface border border-default rounded-md shadow-xl max-h-60 overflow-hidden">
+                        <div className="p-2 border-b border-default sticky top-0 bg-surface z-10">
                             <div className="relative">
-                                <Search className="absolute left-2 top-2.5 h-3.5 w-3.5 text-[#a0a5b0]" />
+                                <Search className="absolute left-2 top-2.5 h-3.5 w-3.5 text-secondary" />
                                 <input
                                     type="text"
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                     placeholder="Buscar..."
-                                    className="w-full bg-[#0f1419] border border-[#3a3e45] rounded-sm py-1.5 pl-8 pr-2 text-xs text-white focus:outline-none focus:border-[#71767f] placeholder:text-[#5f656f]"
+                                    className="w-full bg-base border border-default rounded-sm py-1.5 pl-8 pr-2 text-xs text-white focus:outline-none focus:border-[#71767f] placeholder:text-[#5f656f]"
                                     autoFocus
                                 />
                             </div>
@@ -96,14 +96,14 @@ export const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
                                         className={cn(
                                             "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors",
                                             "hover:bg-[#242830] hover:text-white",
-                                            option === value ? "text-[#0084ff] font-medium bg-[#0084ff]/10" : "text-[#e8eaed]"
+                                            option === value ? "text-accent-500 font-medium bg-[#0084ff]/10" : "text-[#e8eaed]"
                                         )}
                                     >
                                         {option}
                                     </div>
                                 ))
                             ) : (
-                                <div className="p-2 text-sm text-[#a0a5b0] text-center">
+                                <div className="p-2 text-sm text-secondary text-center">
                                     Nenhum resultado.
                                 </div>
                             )}

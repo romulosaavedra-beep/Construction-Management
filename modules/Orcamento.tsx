@@ -193,7 +193,7 @@ const EditableCell = ({ value, onCommit, isNumeric = false, className = "", onKe
             data-col-id={columnId}
             className={cn(
                 "w-full h-7 rounded px-1.5 text-xs transition-colors focus:outline-none",
-                disabled ? "cursor-not-allowed bg-transparent text-[#a0a5b0]" : "bg-[#1e2329] text-white border border-[#3a3e45] focus:border-[#71767f]",
+                disabled ? "cursor-not-allowed bg-transparent text-secondary" : "bg-surface text-white border border-default focus:border-[#71767f]",
                 isSelected && "bg-[#0084ff]/10 border-[#0084ff]",
                 className
             )}
@@ -299,20 +299,20 @@ const UnitAutocompleteCell = ({ value, onCommit, availableUnits, isSelected = fa
                 onKeyDown={handleKeyDown}
                 className={cn(
                     "w-full h-7 rounded px-1.5 text-xs text-center transition-colors focus:outline-none",
-                    "bg-[#1e2329] text-white border border-[#3a3e45] focus:border-[#71767f]",
+                    "bg-surface text-white border border-default focus:border-[#71767f]",
                     isSelected && "bg-[#0084ff]/10 border-[#0084ff]"
                 )}
                 placeholder="-"
             />
             {isOpen && filteredUnits.length > 0 && (
-                <div className="absolute top-full left-0 w-64 bg-[#242830] border border-[#3a3e45] rounded-md shadow-xl z-[100] max-h-60 overflow-y-auto mt-1 custom-scrollbar">
+                <div className="absolute top-full left-0 w-64 bg-[#242830] border border-default rounded-md shadow-xl z-[100] max-h-60 overflow-y-auto mt-1 custom-scrollbar">
                     {filteredUnits.map((unit, index) => (
                         <div
                             key={`${unit.category}-${unit.symbol}-${index}`}
                             onClick={() => handleSelect(unit)}
                             className={cn(
-                                "px-3 py-2 cursor-pointer flex justify-between items-center border-b border-[#3a3e45]/30 last:border-0 transition-colors",
-                                index === highlightedIndex ? "bg-[#0084ff]/20 text-white" : "text-[#a0a5b0] hover:bg-[#3a3e45]"
+                                "px-3 py-2 cursor-pointer flex justify-between items-center border-b border-default/30 last:border-0 transition-colors",
+                                index === highlightedIndex ? "bg-[#0084ff]/20 text-white" : "text-secondary hover:bg-[#3a3e45]"
                             )}
                         >
                             <span className="font-bold text-white w-10 text-center bg-[#3a3e45]/50 rounded px-1">{unit.symbol}</span>
@@ -1482,7 +1482,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
 
                     // 1. TOAST DE SUCESSO (Verde)
                     toast.custom((t) => (
-                        <div className="max-w-md w-full bg-[#242830] shadow-2xl rounded-lg pointer-events-auto border border-[#3a3e45] flex ring-1 ring-black ring-opacity-5">
+                        <div className="max-w-md w-full bg-[#242830] shadow-2xl rounded-lg pointer-events-auto border border-default flex ring-1 ring-black ring-opacity-5">
                             <div className="flex-1 w-0 p-4">
                                 <div className="flex items-start">
                                     <div className="flex-shrink-0 pt-0.5">
@@ -1492,16 +1492,16 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                         <p className="text-sm font-medium text-white">
                                             Importação Concluída
                                         </p>
-                                        <p className="mt-1 text-sm text-[#a0a5b0]">
+                                        <p className="mt-1 text-sm text-secondary">
                                             O orçamento foi processado e importado com sucesso.
                                         </p>
                                     </div>
                                 </div>
                             </div>
-                            <div className="flex border-l border-[#3a3e45]">
+                            <div className="flex border-l border-default">
                                 <button
                                     onClick={() => toast.dismiss(t)}
-                                    className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-[#a0a5b0] hover:text-white hover:bg-[#3a3e45] focus:outline-none transition-colors"
+                                    className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-secondary hover:text-white hover:bg-[#3a3e45] focus:outline-none transition-colors"
                                 >
                                     <X className="h-5 w-5" />
                                 </button>
@@ -1515,26 +1515,26 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                     if (genericHiddenCols.length > 0) {
                         setTimeout(() => {
                             toast.custom((t) => (
-                                <div className="max-w-md w-full bg-[#242830] shadow-2xl rounded-lg pointer-events-auto border border-[#3a3e45] flex ring-1 ring-black ring-opacity-5">
+                                <div className="max-w-md w-full bg-[#242830] shadow-2xl rounded-lg pointer-events-auto border border-default flex ring-1 ring-black ring-opacity-5">
                                     <div className="flex-1 w-0 p-4">
                                         <div className="flex items-start">
                                             <div className="flex-shrink-0 pt-0.5">
-                                                <Info className="h-10 w-10 text-[#0084ff]" />
+                                                <Info className="h-10 w-10 text-accent-500" />
                                             </div>
                                             <div className="ml-3 flex-1">
                                                 <p className="text-sm font-medium text-white">
                                                     Colunas Ocultadas
                                                 </p>
-                                                <p className="mt-1 text-sm text-[#a0a5b0]">
+                                                <p className="mt-1 text-sm text-secondary">
                                                     As colunas <span className="text-white font-medium">{genericHiddenCols.join("' e '")}</span> foram ocultadas automaticamente pois não continham dados.
                                                 </p>
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="flex border-l border-[#3a3e45]">
+                                    <div className="flex border-l border-default">
                                         <button
                                             onClick={() => toast.dismiss(t)}
-                                            className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-[#a0a5b0] hover:text-white hover:bg-[#3a3e45] focus:outline-none transition-colors"
+                                            className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-secondary hover:text-white hover:bg-[#3a3e45] focus:outline-none transition-colors"
                                         >
                                             <X className="h-5 w-5" />
                                         </button>
@@ -1548,26 +1548,26 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                     if (shouldHideSplitColumns) {
                         setTimeout(() => {
                             toast.custom((t) => (
-                                <div className="max-w-md w-full bg-[#242830] shadow-2xl rounded-lg pointer-events-auto border border-[#3a3e45] flex ring-1 ring-black ring-opacity-5">
+                                <div className="max-w-md w-full bg-[#242830] shadow-2xl rounded-lg pointer-events-auto border border-default flex ring-1 ring-black ring-opacity-5">
                                     <div className="flex-1 w-0 p-4">
                                         <div className="flex items-start">
                                             <div className="flex-shrink-0 pt-0.5">
-                                                <Info className="h-10 w-10 text-[#0084ff]" />
+                                                <Info className="h-10 w-10 text-accent-500" />
                                             </div>
                                             <div className="ml-3 flex-1">
                                                 <p className="text-sm font-medium text-white">
                                                     Formato de Custo Detectado
                                                 </p>
-                                                <p className="mt-1 text-sm text-[#a0a5b0]">
+                                                <p className="mt-1 text-sm text-secondary">
                                                     O orçamento usa valor unitário total. As colunas de separação (Material/M.O.) foram ocultadas para simplificar a visualização.
                                                 </p>
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="flex border-l border-[#3a3e45]">
+                                    <div className="flex border-l border-default">
                                         <button
                                             onClick={() => toast.dismiss(t)}
-                                            className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-[#a0a5b0] hover:text-white hover:bg-[#3a3e45] focus:outline-none transition-colors"
+                                            className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-secondary hover:text-white hover:bg-[#3a3e45] focus:outline-none transition-colors"
                                         >
                                             <X className="h-5 w-5" />
                                         </button>
@@ -1648,7 +1648,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                     onDragStart={e => handleDragStart(e, item.id)}
                     onDragOver={e => e.preventDefault()}
                     onDrop={e => handleDrop(e, item.id)}
-                    className={`border-b border-[#3a3e45] hover:bg-[#24282f] text-xs ${isEditing ? 'cursor-move' : ''} ${isDragged ? 'opacity-50' : ''} ${rowBgClass}`}
+                    className={`border-b border-default hover:bg-[#24282f] text-xs ${isEditing ? 'cursor-move' : ''} ${isDragged ? 'opacity-50' : ''} ${rowBgClass}`}
                 >
                     {visibleColumns.map(({ col }, visibleIndex) => {
                         const isPinned = pinnedColumns.has(col.id) && !isEditing;
@@ -1661,10 +1661,10 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                         } : {};
 
                         const stickyCellBgClass = isService
-                            ? `bg-[#1e2329] hover:bg-[#24282f]`
+                            ? `bg-surface hover:bg-[#24282f]`
                             : `bg-[rgba(42,50,60,0.3)] hover:bg-[#24282f]`;
 
-                        const finalBgClass = isPinned ? 'bg-[#1e2329] group-hover:bg-[#24282f]' : stickyCellBgClass;
+                        const finalBgClass = isPinned ? 'bg-surface group-hover:bg-[#24282f]' : stickyCellBgClass;
                         const isColSelected = selectedColumn === col.id;
                         const cellSelectionClass = isColSelected ? 'bg-[#0084ff]/10' : '';
 
@@ -1676,7 +1676,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                             type="checkbox"
                                             checked={selectedIds.has(item.id)}
                                             onChange={() => handleSelectRow(item.id)}
-                                            className="w-4 h-4 bg-[#1e2329] border-[#3a3e45] rounded focus:ring-[#0084ff] accent-[#0084ff]"
+                                            className="w-4 h-4 bg-surface border-default rounded focus:ring-[#0084ff] accent-[#0084ff]"
                                         />
                                     </td>
                                 );
@@ -1688,7 +1688,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                                 <button
                                                     onClick={() => toggleExpand(item.id)}
                                                     title={item.expandido ? "Recolher" : "Expandir"}
-                                                    className="text-[#0084ff] text-base w-5 h-5 flex items-center justify-center"
+                                                    className="text-accent-500 text-base w-5 h-5 flex items-center justify-center"
                                                 >
                                                     {item.expandido ? '◢' : '◥'}
                                                 </button>
@@ -1786,25 +1786,25 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
         <div className="w-full p-6 space-y-6">
             {isImportModalOpen && (
                 <Dialog open={isImportModalOpen} onOpenChange={setImportModalOpen}>
-                    <DialogContent className="bg-[#1e2329] border-[#3a3e45] text-white sm:max-w-[700px]">
+                    <DialogContent className="bg-surface border-default text-white sm:max-w-[700px]">
                         <DialogHeader>
                             <DialogTitle className="flex items-center gap-2">
-                                <Bot className="w-5 h-5 text-[#0084ff]" />
+                                <Bot className="w-5 h-5 text-accent-500" />
                                 Importar Orçamento com IA - Etapa {importStep}/2
                             </DialogTitle>
-                            <DialogDescription className="text-[#a0a5b0]">
+                            <DialogDescription className="text-secondary">
                                 {importStep === 1 ? "Envie seu arquivo para análise." : "Configure o mapeamento das colunas."}
                             </DialogDescription>
                         </DialogHeader>
 
                         {isAiProcessing && (
-                            <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-[#1e2329]/95 rounded-lg transition-opacity duration-300">
+                            <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-surface/95 rounded-lg transition-opacity duration-300">
                                 <div className="relative w-16 h-16 mb-4">
-                                    <div className="absolute inset-0 border-4 border-[#3a3e45] rounded-full"></div>
+                                    <div className="absolute inset-0 border-4 border-default rounded-full"></div>
                                     <div className="absolute inset-0 border-4 border-[#0084ff] border-t-transparent rounded-full animate-spin"></div>
                                 </div>
                                 <h4 className="text-lg font-semibold text-white mb-1">Processando com IA</h4>
-                                <p className="text-sm text-[#a0a5b0] mb-4">Analisando estrutura e padronizando dados...</p>
+                                <p className="text-sm text-secondary mb-4">Analisando estrutura e padronizando dados...</p>
                                 <Button variant="destructive" size="sm" onClick={handleStopAi}>
                                     Interromper
                                 </Button>
@@ -1813,10 +1813,10 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
 
                         {importStep === 1 && (
                             <div className="text-center py-8">
-                                <div className="border-2 border-dashed border-[#3a3e45] p-10 rounded-lg hover:border-[#0084ff]/50 transition-colors bg-[#0f1419]/50">
-                                    <UploadCloud className="w-12 h-12 text-[#0084ff] mx-auto mb-4" />
+                                <div className="border-2 border-dashed border-default p-10 rounded-lg hover:border-[#0084ff]/50 transition-colors bg-base/50">
+                                    <UploadCloud className="w-12 h-12 text-accent-500 mx-auto mb-4" />
                                     <p className="text-[#e8eaed] font-medium mb-2">Arraste e solte seu arquivo aqui</p>
-                                    <p className="text-sm text-[#a0a5b0] mb-6">Suporta .csv, .txt, .xlsx, .xls</p>
+                                    <p className="text-sm text-secondary mb-6">Suporta .csv, .txt, .xlsx, .xls</p>
                                     <input type="file" id="file-upload" className="hidden" onChange={handleFileChange} accept=".csv,.txt,.xlsx,.xls" />
                                     <label htmlFor="file-upload">
                                         <Button variant="default" className="bg-[#0084ff] hover:bg-[#0073e6] text-white cursor-pointer" asChild>
@@ -1829,31 +1829,31 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
 
                         {importStep === 2 && (
                             <div className="space-y-6">
-                                <div className="bg-[#242830] p-4 rounded-lg border border-[#3a3e45] flex items-start gap-3">
+                                <div className="bg-[#242830] p-4 rounded-lg border border-default flex items-start gap-3">
                                     <input
                                         type="checkbox"
                                         id="auto-ai"
                                         checked={isAutoAiMapping}
                                         onChange={e => setIsAutoAiMapping(e.target.checked)}
-                                        className="mt-1 h-4 w-4 rounded border-[#3a3e45] bg-[#0f1419] text-[#0084ff] focus:ring-0 focus:ring-offset-0"
+                                        className="mt-1 h-4 w-4 rounded border-default bg-base text-accent-500 focus:ring-0 focus:ring-offset-0"
                                     />
                                     <div>
                                         <label htmlFor="auto-ai" className="font-medium text-white cursor-pointer block mb-1">Ajuste automático com IA (Recomendado)</label>
-                                        <p className="text-xs text-[#a0a5b0]">A IA identificará automaticamente as colunas e a estrutura do arquivo, ignorando cabeçalhos irrelevantes.</p>
+                                        <p className="text-xs text-secondary">A IA identificará automaticamente as colunas e a estrutura do arquivo, ignorando cabeçalhos irrelevantes.</p>
                                     </div>
                                 </div>
 
                                 <div className={`space-y-4 transition-opacity duration-300 ${isAutoAiMapping ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
-                                    <p className="text-sm text-[#a0a5b0]">Mapeamento manual das colunas (opcional):</p>
+                                    <p className="text-sm text-secondary">Mapeamento manual das colunas (opcional):</p>
                                     <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
                                         {(Object.entries(columnMapping) as [string, { enabled: boolean; name: string }][]).map(([key, { enabled, name }]) => (
-                                            <div key={key} className="flex items-center gap-3 p-2 bg-[#0f1419] rounded border border-[#3a3e45]">
+                                            <div key={key} className="flex items-center gap-3 p-2 bg-base rounded border border-default">
                                                 <input
                                                     type="checkbox"
                                                     id={`check-${key}`}
                                                     checked={enabled}
                                                     onChange={(e) => handleMappingChange(key, 'enabled', e.target.checked)}
-                                                    className="h-4 w-4 rounded border-[#3a3e45] bg-[#1e2329] text-[#0084ff] focus:ring-0"
+                                                    className="h-4 w-4 rounded border-default bg-surface text-accent-500 focus:ring-0"
                                                 />
                                                 <label htmlFor={`check-${key}`} className="w-40 text-sm text-[#e8eaed]">{columnMappingLabels[key]}</label>
                                                 <Input
@@ -1861,7 +1861,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                                     onChange={(e) => handleMappingChange(key, 'name', e.target.value)}
                                                     disabled={!enabled}
                                                     placeholder={`Nome da coluna no arquivo`}
-                                                    className="flex-1 h-8 bg-[#1e2329] border-[#3a3e45] text-xs"
+                                                    className="flex-1 h-8 bg-surface border-default text-xs"
                                                 />
                                             </div>
                                         ))}
@@ -1872,7 +1872,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
 
                         <DialogFooter>
                             {importStep === 2 && (
-                                <Button variant="ghost" onClick={() => setImportStep(1)} className="text-[#a0a5b0] hover:text-white hover:bg-[#3a3e45]">Voltar</Button>
+                                <Button variant="ghost" onClick={() => setImportStep(1)} className="text-secondary hover:text-white hover:bg-[#3a3e45]">Voltar</Button>
                             )}
                             {importStep === 2 && (
                                 <Button onClick={handleAiImport} disabled={isAiProcessing} className="bg-[#0084ff] hover:bg-[#0073e6] text-white">
@@ -1893,12 +1893,12 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                 showBudgetSelector={true}
             />
 
-            <Card className="bg-[#1e2329] border-[#3a3e45] shadow-sm">
-                <CardHeader className="border-b border-[#3a3e45] pb-4">
+            <Card className="bg-surface border-default shadow-sm">
+                <CardHeader className="border-b border-default pb-4">
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                         <div className="flex items-center gap-4 flex-1">
                             <CardTitle className="text-lg font-semibold text-white flex items-center gap-2 shrink-0">
-                                <FileText className="w-5 h-5 text-[#0084ff]" />
+                                <FileText className="w-5 h-5 text-accent-500" />
                                 Planilha Orçamentária
                             </CardTitle>
 
@@ -1909,11 +1909,11 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                         <Input
                                             value={activeBudget.name}
                                             onChange={(e) => setActiveBudget({ ...activeBudget, name: e.target.value })}
-                                            className="h-8 bg-[#0f1419] border-[#3a3e45] text-white focus-visible:ring-0 focus-visible:border-[#0084ff] max-w-md"
+                                            className="h-8 bg-base border-default text-white focus-visible:ring-0 focus-visible:border-[#0084ff] max-w-md"
                                             placeholder="Nome do Orçamento"
                                         />
                                     ) : (
-                                        <span className="text-sm text-[#a0a5b0] font-normal">
+                                        <span className="text-sm text-secondary font-normal">
                                             {activeBudget.name}
                                         </span>
                                     )
@@ -1928,19 +1928,19 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                         <div className="flex flex-wrap items-center gap-2">
                             {/* Totals - Visible only when not editing and has budget */}
                             {!isEditing && activeBudget && !hiddenColumns.has('mat_unit') && (
-                                <div className="flex gap-4 mr-4 bg-[#0f1419] px-3 py-1.5 rounded-lg border border-[#3a3e45]">
+                                <div className="flex gap-4 mr-4 bg-base px-3 py-1.5 rounded-lg border border-default">
                                     <div className="text-right">
-                                        <div className="text-[10px] text-[#a0a5b0] uppercase font-bold">Materiais</div>
+                                        <div className="text-[10px] text-secondary uppercase font-bold">Materiais</div>
                                         <div className="text-sm font-bold text-blue-400">{formatCurrency(grandTotalMaterial)}</div>
                                     </div>
                                     <div className="w-px bg-[#3a3e45]"></div>
                                     <div className="text-right">
-                                        <div className="text-[10px] text-[#a0a5b0] uppercase font-bold">Mão de Obra</div>
+                                        <div className="text-[10px] text-secondary uppercase font-bold">Mão de Obra</div>
                                         <div className="text-sm font-bold text-yellow-400">{formatCurrency(grandTotalMaoDeObra)}</div>
                                     </div>
                                     <div className="w-px bg-[#3a3e45]"></div>
                                     <div className="text-right">
-                                        <div className="text-[10px] text-[#a0a5b0] uppercase font-bold">Total Geral</div>
+                                        <div className="text-[10px] text-secondary uppercase font-bold">Total Geral</div>
                                         <div className="text-sm font-bold text-green-400">{formatCurrency(grandTotalValue)}</div>
                                     </div>
                                 </div>
@@ -1957,10 +1957,10 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                             </Button>
                                         )}
 
-                                        <div className="flex items-center gap-1 mr-2 bg-[#0f1419] p-1 rounded-lg border border-[#3a3e45]">
+                                        <div className="flex items-center gap-1 mr-2 bg-base p-1 rounded-lg border border-default">
                                             <Tooltip>
                                                 <TooltipTrigger asChild>
-                                                    <Button size="icon" variant="ghost" onClick={handleUndo} disabled={!canUndo} className="h-7 w-7 text-[#a0a5b0] hover:text-white hover:bg-[#3a3e45]">
+                                                    <Button size="icon" variant="ghost" onClick={handleUndo} disabled={!canUndo} className="h-7 w-7 text-secondary hover:text-white hover:bg-[#3a3e45]">
                                                         <Undo2 className="h-4 w-4" />
                                                     </Button>
                                                 </TooltipTrigger>
@@ -1968,7 +1968,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                             </Tooltip>
                                             <Tooltip>
                                                 <TooltipTrigger asChild>
-                                                    <Button size="icon" variant="ghost" onClick={handleRedo} disabled={!canRedo} className="h-7 w-7 text-[#a0a5b0] hover:text-white hover:bg-[#3a3e45]">
+                                                    <Button size="icon" variant="ghost" onClick={handleRedo} disabled={!canRedo} className="h-7 w-7 text-secondary hover:text-white hover:bg-[#3a3e45]">
                                                         <Redo2 className="h-4 w-4" />
                                                     </Button>
                                                 </TooltipTrigger>
@@ -1976,7 +1976,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                             </Tooltip>
                                         </div>
 
-                                        <Button variant="ghost" onClick={handleExit} className="text-[#a0a5b0] hover:text-white hover:bg-[#3a3e45]">
+                                        <Button variant="ghost" onClick={handleExit} className="text-secondary hover:text-white hover:bg-[#3a3e45]">
                                             <X className="w-4 h-4 mr-2" /> Cancelar
                                         </Button>
                                         <Button onClick={handleSave} className="bg-[#0084ff] hover:bg-[#0073e6] text-white shadow-lg shadow-blue-900/20">
@@ -1988,21 +1988,21 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                         {/* Dropdown Menu for Export/Columns */}
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
-                                                <Button variant="outline" size="icon" className="bg-[#1e2329] border-[#3a3e45] text-[#a0a5b0] hover:text-white hover:bg-[#242830]">
+                                                <Button variant="outline" size="icon" className="bg-surface border-default text-secondary hover:text-white hover:bg-[#242830]">
                                                     <MoreHorizontal className="w-4 h-4" />
                                                 </Button>
                                             </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end" className="bg-[#242830] border-[#3a3e45] text-[#e8eaed] w-56">
+                                            <DropdownMenuContent align="end" className="bg-[#242830] border-default text-[#e8eaed] w-56">
                                                 <DropdownMenuLabel>Opções</DropdownMenuLabel>
                                                 <DropdownMenuSeparator className="bg-[#3a3e45]" />
 
                                                 {/* Export Options */}
                                                 <DropdownMenuItem onClick={handleExportCsv} className="cursor-pointer hover:bg-[#3a3e45]">
-                                                    <FileText className="w-4 h-4 mr-2 text-[#0084ff]" />
+                                                    <FileText className="w-4 h-4 mr-2 text-accent-500" />
                                                     Exportar CSV
                                                 </DropdownMenuItem>
                                                 <DropdownMenuItem onClick={handleExportExcel} className="cursor-pointer hover:bg-[#3a3e45]">
-                                                    <ArrowDownToLine className="w-4 h-4 mr-2 text-[#0084ff]" />
+                                                    <ArrowDownToLine className="w-4 h-4 mr-2 text-accent-500" />
                                                     Exportar Excel
                                                 </DropdownMenuItem>
 
@@ -2014,12 +2014,12 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                                         <DropdownMenuLabel className="text-xs">Colunas Ocultas</DropdownMenuLabel>
                                                         {columnsConfig.filter(c => hiddenColumns.has(c.id)).map(c => (
                                                             <DropdownMenuItem key={c.id} onClick={() => handleShowColumn(c.id)} className="cursor-pointer hover:bg-[#3a3e45] text-sm">
-                                                                <Eye className="w-4 h-4 mr-2 text-[#0084ff]" />
+                                                                <Eye className="w-4 h-4 mr-2 text-accent-500" />
                                                                 {c.label}
                                                             </DropdownMenuItem>
                                                         ))}
                                                         <DropdownMenuSeparator className="bg-[#3a3e45]" />
-                                                        <DropdownMenuItem onClick={handleShowAllColumns} className="cursor-pointer hover:bg-[#3a3e45] font-semibold text-[#0084ff]">
+                                                        <DropdownMenuItem onClick={handleShowAllColumns} className="cursor-pointer hover:bg-[#3a3e45] font-semibold text-accent-500">
                                                             Mostrar Todas
                                                         </DropdownMenuItem>
                                                     </>
@@ -2030,18 +2030,18 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                         {/* Import IA Button - Following Settings UI pattern */}
                                         <Button
                                             onClick={() => setImportModalOpen(true)}
-                                            className="bg-[#242830] border border-[#3a3e45] hover:bg-[#2f343d] text-white"
+                                            className="bg-[#242830] border border-default hover:bg-[#2f343d] text-white"
                                         >
-                                            <Bot className="w-4 h-4 mr-2 text-[#0084ff]" />
+                                            <Bot className="w-4 h-4 mr-2 text-accent-500" />
                                             Importar IA
                                         </Button>
 
                                         {/* Edit Button - Following Settings UI pattern */}
                                         <Button
                                             onClick={handleEdit}
-                                            className="bg-[#242830] border border-[#3a3e45] hover:bg-[#2f343d] text-white"
+                                            className="bg-[#242830] border border-default hover:bg-[#2f343d] text-white"
                                         >
-                                            <Pencil className="w-4 h-4 mr-2 text-[#0084ff]" />
+                                            <Pencil className="w-4 h-4 mr-2 text-accent-500" />
                                             Editar
                                         </Button>
                                     </div>
@@ -2054,7 +2054,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                 <CardContent className="p-0">
                     {activeBudget ? (
                         <div className="overflow-x-auto">
-                            <table className="w-full text-left text-[#a0a5b0] table-fixed border-collapse">
+                            <table className="w-full text-left text-secondary table-fixed border-collapse">
                                 <colgroup>
                                     {visibleColumns.map(({ col, index }) => (
                                         <col key={col.id} style={{ width: `${columnWidths[index]}px` }} />
@@ -2084,14 +2084,14 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                                 <th
                                                     key={col.id}
                                                     style={stickyStyle}
-                                                    className={`group px-2 py-3 relative text-left border-b border-[#3a3e45] ${visibleIndex < visibleColumns.length - 1 ? 'border-r border-[#3a3e45]' : ''} ${stickyHeaderClasses} ${isColSelected ? 'bg-[#0084ff]/10' : ''} ${isPinned ? 'shadow-[2px_0_5px_rgba(0,0,0,0.3)]' : ''}`}
+                                                    className={`group px-2 py-3 relative text-left border-b border-default ${visibleIndex < visibleColumns.length - 1 ? 'border-r border-default' : ''} ${stickyHeaderClasses} ${isColSelected ? 'bg-[#0084ff]/10' : ''} ${isPinned ? 'shadow-[2px_0_5px_rgba(0,0,0,0.3)]' : ''}`}
                                                 >
                                                     {/* Pin Control */}
                                                     {!isEditing && (
                                                         <div className="absolute right-1 top-0 bottom-0 flex flex-col justify-center opacity-0 group-hover:opacity-100 transition-opacity z-50">
                                                             <button
                                                                 onClick={() => handleTogglePin(col.id)}
-                                                                className="w-5 h-5 rounded bg-[#3a3e45] text-[#a0a5b0] hover:text-white items-center justify-center flex hover:bg-[#0084ff] transition-colors"
+                                                                className="w-5 h-5 rounded bg-[#3a3e45] text-secondary hover:text-white items-center justify-center flex hover:bg-[#0084ff] transition-colors"
                                                                 title={isPinned ? "Desafixar" : "Fixar"}
                                                             >
                                                                 {isPinned ? <PinOff className="w-3 h-3" /> : <Pin className="w-3 h-3" />}
@@ -2114,7 +2114,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
 
                                                             <button
                                                                 onClick={() => handleHideColumn(col.id)}
-                                                                className="w-4 h-4 rounded bg-[#3a3e45] text-[#a0a5b0] hover:text-white text-xs items-center justify-center flex hover:bg-red-500/80 transition-colors"
+                                                                className="w-4 h-4 rounded bg-[#3a3e45] text-secondary hover:text-white text-xs items-center justify-center flex hover:bg-red-500/80 transition-colors"
                                                                 title="Ocultar coluna"
                                                             >
                                                                 <EyeOff className="w-3 h-3" />
@@ -2128,7 +2128,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                                                 type="checkbox"
                                                                 ref={headerCheckboxRef}
                                                                 onChange={handleSelectAll}
-                                                                className="w-3.5 h-3.5 bg-[#1e2329] border-[#3a3e45] rounded focus:ring-0 accent-[#0084ff] cursor-pointer"
+                                                                className="w-3.5 h-3.5 bg-surface border-default rounded focus:ring-0 accent-[#0084ff] cursor-pointer"
                                                             />
                                                         </div>
                                                     )}
@@ -2138,7 +2138,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                                             <button
                                                                 title={areAllExpanded ? "Recolher Tudo" : "Expandir Tudo"}
                                                                 onClick={handleToggleExpandAll}
-                                                                className="hover:bg-[#3a3e45] p-0.5 rounded text-[#0084ff] mr-1 transition-colors"
+                                                                className="hover:bg-[#3a3e45] p-0.5 rounded text-accent-500 mr-1 transition-colors"
                                                             >
                                                                 {areAllExpanded ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
                                                             </button>
@@ -2168,7 +2168,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                     ) : (
                         <div className="flex flex-col items-center justify-center py-20 text-center">
                             <FileSpreadsheet className="w-16 h-16 text-[#3a3e45] mb-4" />
-                            <h3 className="text-lg font-semibold text-[#a0a5b0] mb-2">Nenhum orçamento selecionado</h3>
+                            <h3 className="text-lg font-semibold text-secondary mb-2">Nenhum orçamento selecionado</h3>
                             <p className="text-sm text-[#71767f] mb-4">Selecione um orçamento existente ou crie um novo para começar</p>
                         </div>
                     )}
@@ -2177,18 +2177,18 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
 
             {/* Diálogo de Confirmação Centralizado */}
             <Dialog open={dialogState.isOpen} onOpenChange={(open) => !open && handleCancel()}>
-                <DialogContent className="sm:max-w-[400px] bg-[#242830] border-[#3a3e45] text-[#e8eaed] shadow-2xl">
+                <DialogContent className="sm:max-w-[400px] bg-[#242830] border-default text-[#e8eaed] shadow-2xl">
                     <DialogHeader>
                         <DialogTitle className="text-white flex items-center gap-2">
                             <AlertTriangle className="w-5 h-5 text-yellow-500" />
                             {dialogState.title}
                         </DialogTitle>
-                        <DialogDescription className="text-[#a0a5b0] pt-2">
+                        <DialogDescription className="text-secondary pt-2">
                             {dialogState.message}
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter className="gap-2 sm:gap-0 mt-4">
-                        <Button variant="ghost" onClick={handleCancel} className="text-[#a0a5b0] hover:text-white hover:bg-[#3a3e45]">{dialogState.cancelText || 'Cancelar'}</Button>
+                        <Button variant="ghost" onClick={handleCancel} className="text-secondary hover:text-white hover:bg-[#3a3e45]">{dialogState.cancelText || 'Cancelar'}</Button>
                         <Button variant="destructive" onClick={handleConfirm} className="bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-900/20">{dialogState.confirmText || 'Confirmar'}</Button>
                     </DialogFooter>
                 </DialogContent>

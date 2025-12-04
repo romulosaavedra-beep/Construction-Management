@@ -77,7 +77,7 @@ export const ResizableTh: React.FC<ResizableThProps> = ({
     return (
         <th
             ref={thRef}
-            className={`px-4 py-3 relative bg-[#242830] border-r border-[#3a3e45] last:border-r-0 select-none ${className}`}
+            className={`px-4 py-3 relative bg-[#242830] border-r border-default last:border-r-0 select-none ${className}`}
             style={{ width: currentWidth, minWidth: currentWidth }}
         >
             <div className="flex items-center justify-between h-full">

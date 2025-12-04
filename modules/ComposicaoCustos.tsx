@@ -21,9 +21,9 @@ const ComposicaoCustos: React.FC = () => {
             item.id === id ? { ...item, [field]: value } : item
         ));
     };
-    
+
     const totalCost = composition.reduce((acc, item) => acc + (item.coef * item.preco), 0);
-    
+
     return (
         <div>
             <PageHeader title="🧱 Composição de Custos" subtitle="Detalhamento de custos unitários por serviço" />
@@ -31,17 +31,17 @@ const ComposicaoCustos: React.FC = () => {
             <Card>
                 <CardHeader title="Ações e Filtros">
                     <div className="flex flex-wrap gap-2 items-center">
-                        <input 
-                          type="text" 
-                          placeholder="Pesquisar por nome ou código..." 
-                          className="w-full sm:w-64 bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none text-sm" 
+                        <input
+                            type="text"
+                            placeholder="Pesquisar por nome ou código..."
+                            className="w-full sm:w-64 bg-surface border border-default rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none text-sm"
                         />
-                         <select className="bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none text-sm">
+                        <select className="bg-surface border border-default rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none text-sm">
                             <option value="">Filtrar por unidade</option>
                             <option value="m2">m²</option>
                             <option value="m3">m³</option>
                             <option value="un">un</option>
-                         </select>
+                        </select>
                         <Button variant="secondary" onClick={() => alert("Funcionalidade em desenvolvimento")}>+ Nova Composição</Button>
                         <Button variant="primary" onClick={() => alert("🤖 IA irá gerar composições com base no orçamento.")}>🤖 Gerar com IA</Button>
                     </div>
@@ -53,15 +53,15 @@ const ComposicaoCustos: React.FC = () => {
                     <CardHeader title="COMP-001: Alvenaria de vedação 1/2 tijolo">
                         <div className="flex gap-2">
                             <Button onClick={() => setIsEditing(!isEditing)} variant={isEditing ? 'danger' : 'secondary'}>{isEditing ? '🔒 Bloquear' : '✏️ Editar'}</Button>
-                            {isEditing && <Button variant="primary" onClick={() => {setIsEditing(false); alert('Composição salva!')}}>💾 Salvar</Button>}
+                            {isEditing && <Button variant="primary" onClick={() => { setIsEditing(false); alert('Composição salva!') }}>💾 Salvar</Button>}
                         </div>
                     </CardHeader>
-                    <div className="text-xs mb-4 text-[#a0a5b0]">
-                        <span className="font-semibold">Unidade:</span> m² | 
+                    <div className="text-xs mb-4 text-secondary">
+                        <span className="font-semibold">Unidade:</span> m² |
                         <span className="font-semibold"> Produtividade:</span> 0,125 Hh/m²
                     </div>
-                     <div className="overflow-x-auto">
-                        <table className="w-full text-sm text-left text-[#a0a5b0]">
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm text-left text-secondary">
                             <thead className="text-xs text-[#e8eaed] uppercase bg-[#242830]">
                                 <tr>
                                     <th className="px-4 py-3">Insumo</th>
@@ -73,7 +73,7 @@ const ComposicaoCustos: React.FC = () => {
                             </thead>
                             <tbody>
                                 {composition.map(item => (
-                                    <tr key={item.id} className="border-b border-[#3a3e45]">
+                                    <tr key={item.id} className="border-b border-default">
                                         <td className="px-4 py-3 font-medium text-white">
                                             {isEditing ? <input type="text" value={item.insumo} onChange={e => handleInputChange(item.id, 'insumo', e.target.value)} className="w-full bg-[#242830] p-1 rounded" /> : item.insumo}
                                         </td>
@@ -91,17 +91,17 @@ const ComposicaoCustos: React.FC = () => {
                                 ))}
                             </tbody>
                             <tfoot>
-                               <tr className="font-semibold text-white bg-[#242830]">
+                                <tr className="font-semibold text-white bg-[#242830]">
                                     <td colSpan={4} className="px-4 py-3 text-right">CUSTO TOTAL POR M²</td>
                                     <td className="px-4 py-3">{formatCurrency(totalCost)}</td>
-                               </tr>
+                                </tr>
                             </tfoot>
                         </table>
                     </div>
                 </Card>
-                 <Card>
+                <Card>
                     <CardHeader title="COMP-002: Concreto usinado 30MPa" />
-                    <p className="text-center text-sm text-[#a0a5b0] py-10">Selecione ou busque uma composição para ver os detalhes.</p>
+                    <p className="text-center text-sm text-secondary py-10">Selecione ou busque uma composição para ver os detalhes.</p>
                 </Card>
             </div>
         </div>

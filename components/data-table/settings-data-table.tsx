@@ -58,23 +58,23 @@ export function SettingsDataTable<TData>({
         <div className="space-y-4">
             {/* Search */}
             <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#a0a5b0] w-4 h-4" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-secondary w-4 h-4" />
                 <Input
                     placeholder={searchPlaceholder}
                     value={globalFilter}
                     onChange={(e) => setGlobalFilter(e.target.value)}
-                    className="pl-10 bg-[#1e2329] border-[#3a3e45] text-white"
+                    className="pl-10 bg-surface border-default text-white"
                 />
             </div>
 
             {/* Table */}
-            <div className="rounded-lg border border-[#3a3e45] overflow-hidden">
+            <div className="rounded-lg border border-default overflow-hidden">
                 <Table>
                     <TableHeader>
                         {table.getHeaderGroups().map((headerGroup) => (
-                            <TableRow key={headerGroup.id} className="border-[#3a3e45]">
+                            <TableRow key={headerGroup.id} className="border-default">
                                 {headerGroup.headers.map((header) => (
-                                    <TableHead key={header.id} className="text-[#a0a5b0]">
+                                    <TableHead key={header.id} className="text-secondary">
                                         {header.isPlaceholder
                                             ? null
                                             : flexRender(header.column.columnDef.header, header.getContext())}
@@ -88,7 +88,7 @@ export function SettingsDataTable<TData>({
                             table.getRowModel().rows.map((row) => (
                                 <TableRow
                                     key={row.id}
-                                    className="border-[#3a3e45] hover:bg-[#2a2e35] transition-colors"
+                                    className="border-default hover:bg-[#2a2e35] transition-colors"
                                 >
                                     {row.getVisibleCells().map((cell) => (
                                         <TableCell key={cell.id} className="text-white">
@@ -99,7 +99,7 @@ export function SettingsDataTable<TData>({
                             ))
                         ) : (
                             <TableRow>
-                                <TableCell colSpan={columns.length} className="h-24 text-center text-[#a0a5b0]">
+                                <TableCell colSpan={columns.length} className="h-24 text-center text-secondary">
                                     Nenhum resultado encontrado.
                                 </TableCell>
                             </TableRow>
@@ -110,7 +110,7 @@ export function SettingsDataTable<TData>({
 
             {/* Pagination */}
             <div className="flex items-center justify-between">
-                <div className="text-sm text-[#a0a5b0]">
+                <div className="text-sm text-secondary">
                     {table.getFilteredRowModel().rows.length} registro(s)
                 </div>
                 <div className="flex items-center gap-2">

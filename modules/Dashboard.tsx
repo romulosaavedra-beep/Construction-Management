@@ -44,7 +44,7 @@ const Dashboard: React.FC = () => {
                 <Card>
                     <CardHeader title="Progresso por Etapa" />
                     <div className="overflow-x-auto">
-                        <table className="w-full text-sm text-left text-[#a0a5b0]">
+                        <table className="w-full text-sm text-left text-secondary">
                             <thead className="text-xs text-[#e8eaed] uppercase bg-[#242830]">
                                 <tr>
                                     <th scope="col" className="px-4 py-3">Etapa</th>
@@ -56,7 +56,7 @@ const Dashboard: React.FC = () => {
                             </thead>
                             <tbody>
                                 {etapasData.map((etapa) => (
-                                    <tr key={etapa.nome} className="border-b border-[#3a3e45] hover:bg-[#24282f]">
+                                    <tr key={etapa.nome} className="border-b border-default hover:bg-[#24282f]">
                                         <td className="px-4 py-3 font-medium text-white">{etapa.nome}</td>
                                         <td className="px-4 py-3">{formatCurrency(etapa.previsto)}</td>
                                         <td className="px-4 py-3">{formatCurrency(etapa.realizado)}</td>
@@ -79,7 +79,7 @@ const Dashboard: React.FC = () => {
                 <Card>
                     <CardHeader title="Últimos Registros do Diário" />
                     <div className="overflow-x-auto">
-                        <table className="w-full text-sm text-left text-[#a0a5b0]">
+                        <table className="w-full text-sm text-left text-secondary">
                             <thead className="text-xs text-[#e8eaed] uppercase bg-[#242830]">
                                 <tr>
                                     <th scope="col" className="px-4 py-3">Data</th>
@@ -89,12 +89,12 @@ const Dashboard: React.FC = () => {
                             </thead>
                             <tbody>
                                 {diarioRegistrosData.slice(0, 3).map((log) => (
-                                    <tr key={log.id} className="border-b border-[#3a3e45] hover:bg-[#24282f]">
+                                    <tr key={log.id} className="border-b border-default hover:bg-[#24282f]">
                                         <td className="px-4 py-3">{formatDate(log.data)}</td>
                                         <td className="px-4 py-3">{log.etapa}</td>
                                         <td className="px-4 py-3 font-medium text-white">
                                             {log.observacoes}
-                                            <ul className="list-disc list-inside text-xs text-[#a0a5b0] mt-1">
+                                            <ul className="list-disc list-inside text-xs text-secondary mt-1">
                                                 {log.servicos.map(s => <li key={s.id}>{s.servico}</li>)}
                                             </ul>
                                         </td>

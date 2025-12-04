@@ -14,10 +14,10 @@ type Tab = 'controle' | 'progresso';
 const orcamentoComMedicao: MedicaoItem[] = initialOrcamentoData.map(item => ({
     ...item,
     quantMedida: 0,
-    medicaoAcumAnterior: 
+    medicaoAcumAnterior:
         item.id === 3 ? 1500 :
-        item.id === 4 ? 600 :
-        item.id === 7 ? 100 : 0,
+            item.id === 4 ? 600 :
+                item.id === 7 ? 100 : 0,
 }));
 
 const Medicao: React.FC = () => {
@@ -35,7 +35,7 @@ const Medicao: React.FC = () => {
         const calculateTotals = (itemId: number | string) => {
             const item = itemsMap.get(itemId);
             if (!item) return { totalMat: 0, totalMo: 0, medidoAcumulado: 0 };
-            
+
             let childrenTotalMat = 0;
             let childrenTotalMo = 0;
             let childrenMedidoAcum = 0;
@@ -47,21 +47,21 @@ const Medicao: React.FC = () => {
                 childrenTotalMo += childTotals.totalMo;
                 childrenMedidoAcum += childTotals.medidoAcumulado;
             });
-            
+
             item.totalMat = (item.quantidade * item.mat_unit) + childrenTotalMat;
             item.totalMo = (item.quantidade * item.mo_unit) + childrenTotalMo;
             item.totalGeral = item.totalMat + item.totalMo;
             item.medidoAcumulado = item.medicaoAcumAnterior + item.quantMedida + childrenMedidoAcum;
-            
+
             return { totalMat: item.totalMat, totalMo: item.totalMo, medidoAcumulado: item.medidoAcumulado };
         };
-        
+
         items.filter(item => item.pai === null).forEach(root => calculateTotals(Number(root.id)));
         return Array.from(itemsMap.values());
     };
 
     const dadosProcessados = useMemo(() => processarHierarquia(medicaoItens), [medicaoItens]);
-    
+
     const toggleExpand = (id: number) => {
         setMedicaoItens(medicaoItens.map(item => item.id === id ? { ...item, expandido: !item.expandido } : item));
     };
@@ -81,10 +81,10 @@ const Medicao: React.FC = () => {
             const totalMedMo = item.quantMedida * moUnit;
 
             const rowContent = isProgressoVisual ? (
-                 <tr key={item.id} className="border-b border-[#3a3e45] hover:bg-[#24282f]">
+                <tr key={item.id} className="border-b border-default hover:bg-[#24282f]">
                     <td style={{ paddingLeft: `${level * 20 + 8}px` }} className="py-3 whitespace-nowrap">
                         <div className="flex items-center gap-2">
-                            {hasChildren ? (<button onClick={() => toggleExpand(item.id)} className="text-[#0084ff] text-lg w-5"> {item.expandido ? '▼' : '▶'}</button>) : <div className="w-5"></div>}
+                            {hasChildren ? (<button onClick={() => toggleExpand(item.id)} className="text-accent-500 text-lg w-5"> {item.expandido ? '▼' : '▶'}</button>) : <div className="w-5"></div>}
                             <span className="font-medium text-white">{item.nivel}</span>
                         </div>
                     </td>
@@ -97,10 +97,10 @@ const Medicao: React.FC = () => {
                     </td>
                 </tr>
             ) : (
-                <tr key={item.id} className="border-b border-[#3a3e45] hover:bg-[#24282f] text-xs">
+                <tr key={item.id} className="border-b border-default hover:bg-[#24282f] text-xs">
                     <td style={{ paddingLeft: `${level * 20 + 8}px` }} className="py-2 whitespace-nowrap">
                         <div className="flex items-center gap-2">
-                            {hasChildren ? (<button onClick={() => toggleExpand(item.id)} className="text-[#0084ff] text-lg w-5">{item.expandido ? '▼' : '▶'}</button>) : <div className="w-5"></div>}
+                            {hasChildren ? (<button onClick={() => toggleExpand(item.id)} className="text-accent-500 text-lg w-5">{item.expandido ? '▼' : '▶'}</button>) : <div className="w-5"></div>}
                             <span className="font-medium text-white">{item.nivel}</span>
                         </div>
                     </td>
@@ -111,7 +111,7 @@ const Medicao: React.FC = () => {
                     <td className="px-2 py-2 text-right">{isService ? formatCurrency(item.quantidade * item.mo_unit) : '-'}</td>
                     <td className="px-2 py-2 text-right">{isService ? formatCurrency((item.quantidade * item.mat_unit) + (item.quantidade * item.mo_unit)) : '-'}</td>
                     <td className="px-2 py-2 text-right bg-[#0084ff]/10">
-                        {isService ? <input type="number" value={item.quantMedida} onChange={e => handleQuantMedidaChange(item.id, parseFloat(e.target.value) || 0)} className="w-20 bg-transparent text-right outline-none focus:ring-1 focus:ring-[#0084ff] rounded"/> : '-'}
+                        {isService ? <input type="number" value={item.quantMedida} onChange={e => handleQuantMedidaChange(item.id, parseFloat(e.target.value) || 0)} className="w-20 bg-transparent text-right outline-none focus:ring-1 focus:ring-[#0084ff] rounded" /> : '-'}
                     </td>
                     <td className="px-2 py-2 text-right">{isService ? medicaoAcum.toFixed(2) : '-'}</td>
                     <td className="px-2 py-2">
@@ -122,7 +122,7 @@ const Medicao: React.FC = () => {
                     <td className="px-2 py-2 text-right font-semibold">{isService ? formatCurrency(totalMedMat + totalMedMo) : '-'}</td>
                 </tr>
             );
-            
+
             return item.expandido ? [rowContent, ...renderRows(processedData, item.id, level + 1, isProgressoVisual)] : [rowContent];
         });
     };
@@ -130,34 +130,34 @@ const Medicao: React.FC = () => {
     return (
         <div>
             <PageHeader title="📏 Medição de Obra" subtitle="Acompanhamento de progressão física e financeira por etapa" />
-            
-             <div className="border-b border-[#3a3e45] mb-6">
+
+            <div className="border-b border-default mb-6">
                 <nav className="flex space-x-4">
-                    <button onClick={() => setActiveTab('controle')} className={`px-3 py-2 font-medium text-sm rounded-t-lg transition-colors whitespace-nowrap ${activeTab === 'controle' ? 'text-[#0084ff] border-b-2 border-[#0084ff]' : 'text-[#a0a5b0] hover:text-white'}`}>
+                    <button onClick={() => setActiveTab('controle')} className={`px-3 py-2 font-medium text-sm rounded-t-lg transition-colors whitespace-nowrap ${activeTab === 'controle' ? 'text-accent-500 border-b-2 border-[#0084ff]' : 'text-secondary hover:text-white'}`}>
                         Controle de Medições
                     </button>
-                    <button onClick={() => setActiveTab('progresso')} className={`px-3 py-2 font-medium text-sm rounded-t-lg transition-colors whitespace-nowrap ${activeTab === 'progresso' ? 'text-[#0084ff] border-b-2 border-[#0084ff]' : 'text-[#a0a5b0] hover:text-white'}`}>
+                    <button onClick={() => setActiveTab('progresso')} className={`px-3 py-2 font-medium text-sm rounded-t-lg transition-colors whitespace-nowrap ${activeTab === 'progresso' ? 'text-accent-500 border-b-2 border-[#0084ff]' : 'text-secondary hover:text-white'}`}>
                         Progresso Visual por Etapa
                     </button>
                 </nav>
             </div>
-            
+
             {activeTab === 'controle' && (
                 <Card>
                     <CardHeader title="Controles da Medição">
                         <div className="flex flex-wrap items-center gap-4">
                             <div className="flex items-center gap-2 text-sm">
                                 <label>Período de:</label>
-                                <input type="date" value={periodo.inicio} onChange={e => setPeriodo(p => ({...p, inicio: e.target.value}))} className="bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none"/>
+                                <input type="date" value={periodo.inicio} onChange={e => setPeriodo(p => ({ ...p, inicio: e.target.value }))} className="bg-surface border border-default rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none" />
                                 <label>até:</label>
-                                <input type="date" value={periodo.fim} onChange={e => setPeriodo(p => ({...p, fim: e.target.value}))} className="bg-[#1e2329] border border-[#3a3e45] rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none"/>
+                                <input type="date" value={periodo.fim} onChange={e => setPeriodo(p => ({ ...p, fim: e.target.value }))} className="bg-surface border border-default rounded-md p-2 focus:ring-2 focus:ring-[#0084ff] outline-none" />
                             </div>
                             <Button variant="primary" onClick={() => alert('IA irá preencher medição com base no Diário de Obras...')}>🤖 Preencher com IA</Button>
-                             <Button variant="secondary">💾 Salvar Medição</Button>
+                            <Button variant="secondary">💾 Salvar Medição</Button>
                         </div>
                     </CardHeader>
-                     <div className="overflow-x-auto">
-                        <table className="w-full text-left text-[#a0a5b0] min-w-[1800px]">
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left text-secondary min-w-[1800px]">
                             <thead className="text-xs text-[#e8eaed] uppercase bg-[#242830]">
                                 <tr>
                                     <th className="px-4 py-3 min-w-[150px]">Nível</th>
@@ -182,12 +182,12 @@ const Medicao: React.FC = () => {
                     </div>
                 </Card>
             )}
-            
+
             {activeTab === 'progresso' && (
                 <Card>
                     <CardHeader title="Progresso Visual por Etapa (Acumulado)" />
                     <div className="overflow-x-auto">
-                        <table className="w-full text-left text-[#a0a5b0]">
+                        <table className="w-full text-left text-secondary">
                             <thead className="text-xs text-[#e8eaed] uppercase bg-[#242830]">
                                 <tr>
                                     <th className="px-4 py-3 w-1/4">Nível</th>

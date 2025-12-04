@@ -36,7 +36,7 @@ const Compras: React.FC = () => {
                     <Button variant="primary">+ Nova Solicitação</Button>
                 </CardHeader>
                 <div className="overflow-x-auto">
-                    <table className="w-full text-sm text-left text-[#a0a5b0]">
+                    <table className="w-full text-sm text-left text-secondary">
                         <thead className="text-xs text-[#e8eaed] uppercase bg-[#242830]">
                             <tr>
                                 <th className="px-4 py-3">ID</th>
@@ -49,7 +49,7 @@ const Compras: React.FC = () => {
                         </thead>
                         <tbody>
                             {compras.map(compra => (
-                                <tr key={compra.id} className="border-b border-[#3a3e45] hover:bg-[#24282f]">
+                                <tr key={compra.id} className="border-b border-default hover:bg-[#24282f]">
                                     <td className="px-4 py-3 font-mono text-xs">{compra.id}</td>
                                     <td className="px-4 py-3 font-medium text-white">{compra.item}</td>
                                     <td className="px-4 py-3">{compra.quantidade} {compra.unidade}</td>
@@ -66,7 +66,7 @@ const Compras: React.FC = () => {
             <Card>
                 <CardHeader title="Histórico de Fornecedores" />
                 <div className="overflow-x-auto">
-                    <table className="w-full text-sm text-left text-[#a0a5b0]">
+                    <table className="w-full text-sm text-left text-secondary">
                         <thead className="text-xs text-[#e8eaed] uppercase bg-[#242830]">
                             <tr>
                                 <th className="px-4 py-3">Fornecedor</th>
@@ -78,7 +78,7 @@ const Compras: React.FC = () => {
                         </thead>
                         <tbody>
                             {fornecedores.map(f => (
-                                <tr key={f.cnpj} className="border-b border-[#3a3e45] hover:bg-[#24282f]">
+                                <tr key={f.cnpj} className="border-b border-default hover:bg-[#24282f]">
                                     <td className="px-4 py-3 font-medium text-white">{f.nome}</td>
                                     <td className="px-4 py-3">{f.cnpj}</td>
                                     <td className="px-4 py-3">{f.vendedor}</td>

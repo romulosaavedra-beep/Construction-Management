@@ -52,7 +52,7 @@ const Clima: React.FC = () => {
                             <p className="font-semibold text-sm">{dia.dia}</p>
                             <p className="text-4xl my-2">{dia.icone}</p>
                             <p className="font-bold text-xl">{dia.max}°</p>
-                            <p className="text-sm text-[#a0a5b0]">Min {dia.min}°</p>
+                            <p className="text-sm text-secondary">Min {dia.min}°</p>
                             <p className="text-xs text-blue-400 mt-1">{dia.chuva}% 💧</p>
                         </div>
                     ))}
