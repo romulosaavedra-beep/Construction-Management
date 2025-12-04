@@ -88,7 +88,7 @@ export function SettingsDataTable<TData>({
                             table.getRowModel().rows.map((row) => (
                                 <TableRow
                                     key={row.id}
-                                    className="border-default hover:bg-[#2a2e35] transition-colors"
+                                    className="border-default hover:bg-surface transition-colors"
                                 >
                                     {row.getVisibleCells().map((cell) => (
                                         <TableCell key={cell.id} className="text-white">

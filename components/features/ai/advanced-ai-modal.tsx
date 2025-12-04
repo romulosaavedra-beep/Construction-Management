@@ -297,8 +297,8 @@ export const AdvancedAIModal: React.FC<AdvancedAIModalProps> = ({
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id as Tab)}
                             className={`px-4 py-3 text-sm font-medium transition-colors flex items-center gap-2 ${activeTab === tab.id
-                                ? 'bg-surface text-accent-500 border-t-2 border-[#0084ff]'
-                                : 'text-secondary hover:text-white hover:bg-[#3a3e45]'
+                                ? 'bg-surface text-accent-500 border-t-2 border-accent-500'
+                                : 'text-secondary hover:text-white hover:bg-elevated'
                                 }`}
                         >
                             <span>{tab.icon}</span>
@@ -313,7 +313,7 @@ export const AdvancedAIModal: React.FC<AdvancedAIModalProps> = ({
                     {/* Loading Overlay */}
                     {loading && (
                         <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center z-50">
-                            <div className="w-12 h-12 border-4 border-[#0084ff] border-t-transparent rounded-full animate-spin mb-2"></div>
+                            <div className="w-12 h-12 border-4 border-accent-500 border-t-transparent rounded-full animate-spin mb-2"></div>
                             <div className="text-white font-bold">Processando com Gemini AI...</div>
                         </div>
                     )}

@@ -82,17 +82,17 @@ export const OrcamentoToolbar: React.FC<OrcamentoToolbarProps> = ({
                         </Button>
                         {isRestoreMenuOpen && (
                             <div ref={restoreMenuRef} className="absolute right-0 mt-2 w-56 bg-[#242830] border border-default rounded-md shadow-lg z-[100]">
-                                <ul className="py-1 text-sm text-[#e8eaed] max-h-60 overflow-y-auto">
+                                <ul className="py-1 text-sm text-primary max-h-60 overflow-y-auto">
                                     {columnsConfig.filter(c => hiddenColumns.has(c.id)).map(c => (
                                         <li key={c.id}>
-                                            <a href="#" onClick={(e) => { e.preventDefault(); handleShowColumn(c.id); }} className="block px-4 py-2 hover:bg-[#3a3e45]">
+                                            <a href="#" onClick={(e) => { e.preventDefault(); handleShowColumn(c.id); }} className="block px-4 py-2 hover:bg-elevated">
                                                 {c.label}
                                             </a>
                                         </li>
                                     ))}
                                     <li className="border-t border-default my-1"></li>
                                     <li>
-                                        <a href="#" onClick={(e) => { e.preventDefault(); handleShowAllColumns(); }} className="block px-4 py-2 hover:bg-[#3a3e45] font-semibold">
+                                        <a href="#" onClick={(e) => { e.preventDefault(); handleShowAllColumns(); }} className="block px-4 py-2 hover:bg-elevated font-semibold">
                                             Reexibir Todas
                                         </a>
                                     </li>

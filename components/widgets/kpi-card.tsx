@@ -11,10 +11,10 @@ interface KpiCardProps {
 
 export const KpiCard: React.FC<KpiCardProps> = ({ label, value, description, children, status = 'info' }) => {
     const statusClasses = {
-        success: 'border-l-[#00cc44]',
+        success: 'border-l-success',
         warning: 'border-l-[#ffaa00]',
-        danger: 'border-l-[#ff4444]',
-        info: 'border-l-[#0084ff]',
+        danger: 'border-l-error',
+        info: 'border-l-accent-500',
     };
 
     return (

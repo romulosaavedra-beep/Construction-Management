@@ -37,7 +37,7 @@ const Compras: React.FC = () => {
                 </CardHeader>
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm text-left text-secondary">
-                        <thead className="text-xs text-[#e8eaed] uppercase bg-[#242830]">
+                        <thead className="text-xs text-primary uppercase bg-[#242830]">
                             <tr>
                                 <th className="px-4 py-3">ID</th>
                                 <th className="px-4 py-3">Item</th>
@@ -67,7 +67,7 @@ const Compras: React.FC = () => {
                 <CardHeader title="Histórico de Fornecedores" />
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm text-left text-secondary">
-                        <thead className="text-xs text-[#e8eaed] uppercase bg-[#242830]">
+                        <thead className="text-xs text-primary uppercase bg-[#242830]">
                             <tr>
                                 <th className="px-4 py-3">Fornecedor</th>
                                 <th className="px-4 py-3">CNPJ</th>

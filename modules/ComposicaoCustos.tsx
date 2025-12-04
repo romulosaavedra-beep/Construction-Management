@@ -62,7 +62,7 @@ const ComposicaoCustos: React.FC = () => {
                     </div>
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm text-left text-secondary">
-                            <thead className="text-xs text-[#e8eaed] uppercase bg-[#242830]">
+                            <thead className="text-xs text-primary uppercase bg-[#242830]">
                                 <tr>
                                     <th className="px-4 py-3">Insumo</th>
                                     <th className="px-4 py-3">Coef.</th>

@@ -54,7 +54,7 @@ const CurvaABC: React.FC = () => {
                             <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab)}
-                                className={`px-4 py-2 text-sm font-medium transition-colors ${activeTab === tab ? 'border-b-2 border-[#0084ff] text-accent-500' : 'text-secondary hover:text-white'}`}
+                                className={`px-4 py-2 text-sm font-medium transition-colors ${activeTab === tab ? 'border-b-2 border-accent-500 text-accent-500' : 'text-secondary hover:text-white'}`}
                             >
                                 Classe {tab}
                             </button>
@@ -64,7 +64,7 @@ const CurvaABC: React.FC = () => {
                 </CardHeader>
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm text-left text-secondary">
-                        <thead className="text-xs text-[#e8eaed] uppercase bg-[#242830]">
+                        <thead className="text-xs text-primary uppercase bg-[#242830]">
                             <tr>
                                 <th className="px-4 py-3">Classe</th>
                                 <th className="px-4 py-3">Item</th>

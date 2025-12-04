@@ -133,10 +133,10 @@ const Medicao: React.FC = () => {
 
             <div className="border-b border-default mb-6">
                 <nav className="flex space-x-4">
-                    <button onClick={() => setActiveTab('controle')} className={`px-3 py-2 font-medium text-sm rounded-t-lg transition-colors whitespace-nowrap ${activeTab === 'controle' ? 'text-accent-500 border-b-2 border-[#0084ff]' : 'text-secondary hover:text-white'}`}>
+                    <button onClick={() => setActiveTab('controle')} className={`px-3 py-2 font-medium text-sm rounded-t-lg transition-colors whitespace-nowrap ${activeTab === 'controle' ? 'text-accent-500 border-b-2 border-accent-500' : 'text-secondary hover:text-white'}`}>
                         Controle de Medições
                     </button>
-                    <button onClick={() => setActiveTab('progresso')} className={`px-3 py-2 font-medium text-sm rounded-t-lg transition-colors whitespace-nowrap ${activeTab === 'progresso' ? 'text-accent-500 border-b-2 border-[#0084ff]' : 'text-secondary hover:text-white'}`}>
+                    <button onClick={() => setActiveTab('progresso')} className={`px-3 py-2 font-medium text-sm rounded-t-lg transition-colors whitespace-nowrap ${activeTab === 'progresso' ? 'text-accent-500 border-b-2 border-accent-500' : 'text-secondary hover:text-white'}`}>
                         Progresso Visual por Etapa
                     </button>
                 </nav>
@@ -158,7 +158,7 @@ const Medicao: React.FC = () => {
                     </CardHeader>
                     <div className="overflow-x-auto">
                         <table className="w-full text-left text-secondary min-w-[1800px]">
-                            <thead className="text-xs text-[#e8eaed] uppercase bg-[#242830]">
+                            <thead className="text-xs text-primary uppercase bg-[#242830]">
                                 <tr>
                                     <th className="px-4 py-3 min-w-[150px]">Nível</th>
                                     <th className="px-2 py-3 min-w-[250px]">Discriminação</th>
@@ -188,7 +188,7 @@ const Medicao: React.FC = () => {
                     <CardHeader title="Progresso Visual por Etapa (Acumulado)" />
                     <div className="overflow-x-auto">
                         <table className="w-full text-left text-secondary">
-                            <thead className="text-xs text-[#e8eaed] uppercase bg-[#242830]">
+                            <thead className="text-xs text-primary uppercase bg-[#242830]">
                                 <tr>
                                     <th className="px-4 py-3 w-1/4">Nível</th>
                                     <th className="px-4 py-3 w-1/2">Discriminação</th>

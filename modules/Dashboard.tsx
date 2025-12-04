@@ -45,7 +45,7 @@ const Dashboard: React.FC = () => {
                     <CardHeader title="Progresso por Etapa" />
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm text-left text-secondary">
-                            <thead className="text-xs text-[#e8eaed] uppercase bg-[#242830]">
+                            <thead className="text-xs text-primary uppercase bg-[#242830]">
                                 <tr>
                                     <th scope="col" className="px-4 py-3">Etapa</th>
                                     <th scope="col" className="px-4 py-3">Previsto</th>
@@ -80,7 +80,7 @@ const Dashboard: React.FC = () => {
                     <CardHeader title="Últimos Registros do Diário" />
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm text-left text-secondary">
-                            <thead className="text-xs text-[#e8eaed] uppercase bg-[#242830]">
+                            <thead className="text-xs text-primary uppercase bg-[#242830]">
                                 <tr>
                                     <th scope="col" className="px-4 py-3">Data</th>
                                     <th scope="col" className="px-4 py-3">Etapa</th>

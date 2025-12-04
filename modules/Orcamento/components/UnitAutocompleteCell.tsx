@@ -115,7 +115,7 @@ export const UnitAutocompleteCell: React.FC<UnitAutocompleteCellProps> = ({
                 onFocus={handleFocus}
                 onKeyDown={handleKeyDown}
                 className={`w-full border rounded-md p-1 text-xs text-center
-                    ${isSelected ? 'bg-[#0084ff]/20 border-[#0084ff] text-white' : 'bg-[#242830] border-default'}
+                    ${isSelected ? 'bg-[#0084ff]/20 border-accent-500 text-white' : 'bg-[#242830] border-default'}
                     focus:ring-1 focus:ring-[#0084ff] outline-none
                 `}
                 placeholder="-"
@@ -127,10 +127,10 @@ export const UnitAutocompleteCell: React.FC<UnitAutocompleteCellProps> = ({
                             key={`${unit.category}-${unit.symbol}-${index}`}
                             onClick={() => handleSelect(unit)}
                             className={`px-3 py-2 cursor-pointer flex justify-between items-center border-b border-default/30 last:border-0
-                                ${index === highlightedIndex ? 'bg-[#0084ff]/20 text-white' : 'text-secondary hover:bg-[#3a3e45]'}
+                                ${index === highlightedIndex ? 'bg-[#0084ff]/20 text-white' : 'text-secondary hover:bg-elevated'}
                             `}
                         >
-                            <span className="font-bold text-white w-10 text-center bg-[#3a3e45]/50 rounded px-1">{unit.symbol}</span>
+                            <span className="font-bold text-white w-10 text-center bg-elevated/50 rounded px-1">{unit.symbol}</span>
                             <span className="text-xs truncate flex-1 text-right pl-2">{unit.name}</span>
                         </div>
                     ))}

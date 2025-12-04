@@ -137,10 +137,10 @@ const DiarioDeObra: React.FC = () => {
             <PageHeader title="📝 Diário de Obra" subtitle="Registros diários de atividades e ocorrências" />
             <div className="border-b border-default mb-6">
                 <nav className="flex space-x-4">
-                    <button onClick={() => setActiveTab('form')} className={`px-3 py-2 font-medium text-sm rounded-t-lg transition-colors whitespace-nowrap ${activeTab === 'form' ? 'text-accent-500 border-b-2 border-[#0084ff]' : 'text-secondary hover:text-white'}`}>
+                    <button onClick={() => setActiveTab('form')} className={`px-3 py-2 font-medium text-sm rounded-t-lg transition-colors whitespace-nowrap ${activeTab === 'form' ? 'text-accent-500 border-b-2 border-accent-500' : 'text-secondary hover:text-white'}`}>
                         + Novo Registro
                     </button>
-                    <button onClick={() => setActiveTab('registros')} className={`px-3 py-2 font-medium text-sm rounded-t-lg transition-colors whitespace-nowrap ${activeTab === 'registros' ? 'text-accent-500 border-b-2 border-[#0084ff]' : 'text-secondary hover:text-white'}`}>
+                    <button onClick={() => setActiveTab('registros')} className={`px-3 py-2 font-medium text-sm rounded-t-lg transition-colors whitespace-nowrap ${activeTab === 'registros' ? 'text-accent-500 border-b-2 border-accent-500' : 'text-secondary hover:text-white'}`}>
                         Registros
                     </button>
                 </nav>
@@ -190,7 +190,7 @@ const DiarioDeObra: React.FC = () => {
                                             </div>
                                             <div className="col-span-6 sm:col-span-2">
                                                 <label className="text-xs">Qtd. Prev.</label>
-                                                <input type="text" readOnly value={`${servico.quantidadePrevista || '-'} ${servico.unidade || ''}`} className="w-full bg-[#3a3e45] border border-default text-sm rounded p-1 cursor-not-allowed" />
+                                                <input type="text" readOnly value={`${servico.quantidadePrevista || '-'} ${servico.unidade || ''}`} className="w-full bg-elevated border border-default text-sm rounded p-1 cursor-not-allowed" />
                                             </div>
                                             <div className="col-span-6 sm:col-span-2">
                                                 <label className="text-xs">Equipe (nº) *</label>
@@ -234,7 +234,7 @@ const DiarioDeObra: React.FC = () => {
                     </div>
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm text-left text-secondary">
-                            <thead className="text-xs text-[#e8eaed] uppercase bg-[#242830]">
+                            <thead className="text-xs text-primary uppercase bg-[#242830]">
                                 <tr>
                                     <th className="px-4 py-3 cursor-pointer" onClick={() => requestSort('data')}>Data {getSortIndicator('data')}</th>
                                     <th className="px-4 py-3 cursor-pointer" onClick={() => requestSort('responsavel')}>Responsável {getSortIndicator('responsavel')}</th>
@@ -263,10 +263,10 @@ const DiarioDeObra: React.FC = () => {
                                                 <Button variant="secondary" onClick={() => setActionMenu(actionMenu === r.id ? null : r.id)}>⚙️</Button>
                                                 {actionMenu === r.id && (
                                                     <div className="absolute right-0 mt-2 w-48 bg-[#242830] border border-default rounded-md shadow-lg z-10 text-left">
-                                                        <a href="#" className="block px-4 py-2 text-sm text-[#e8eaed] hover:bg-[#3a3e45]">✏️ Editar</a>
-                                                        <a href="#" className="block px-4 py-2 text-sm text-[#e8eaed] hover:bg-[#3a3e45]">🗑️ Apagar</a>
-                                                        <a href="#" className="block px-4 py-2 text-sm text-[#e8eaed] hover:bg-[#3a3e45]">📋 Duplicar</a>
-                                                        <a href="#" className="block px-4 py-2 text-sm text-[#e8eaed] hover:bg-[#3a3e45]">🖨️ Imprimir</a>
+                                                        <a href="#" className="block px-4 py-2 text-sm text-primary hover:bg-elevated">✏️ Editar</a>
+                                                        <a href="#" className="block px-4 py-2 text-sm text-primary hover:bg-elevated">🗑️ Apagar</a>
+                                                        <a href="#" className="block px-4 py-2 text-sm text-primary hover:bg-elevated">📋 Duplicar</a>
+                                                        <a href="#" className="block px-4 py-2 text-sm text-primary hover:bg-elevated">🖨️ Imprimir</a>
                                                     </div>
                                                 )}
                                             </div>

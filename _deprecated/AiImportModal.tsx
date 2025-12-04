@@ -49,14 +49,14 @@ export const AiImportModal: React.FC<AiImportModalProps> = ({ isOpen, onClose, o
                 <div className="p-6 overflow-y-auto custom-scrollbar">
                     {isProcessing ? (
                         <div className="text-center py-10">
-                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0084ff] mx-auto mb-4"></div>
+                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent-500 mx-auto mb-4"></div>
                             <h4 className="text-lg font-medium text-white">Analisando seu orçamento...</h4>
                             <p className="text-secondary mt-2">A IA está identificando colunas, convertendo unidades e estruturando a hierarquia.</p>
                         </div>
                     ) : (
                         <>
                             <div className="mb-6 bg-[#242830] p-4 rounded-md border border-default">
-                                <h4 className="font-semibold text-[#e8eaed] mb-2">💡 Como funciona?</h4>
+                                <h4 className="font-semibold text-primary mb-2">💡 Como funciona?</h4>
                                 <ul className="list-disc list-inside text-sm text-secondary space-y-1">
                                     <li>A IA detecta automaticamente colunas como <strong>Discriminação</strong>, <strong>Unidade</strong>, <strong>Quantidade</strong> e <strong>Valores</strong>.</li>
                                     <li>Colunas <strong>Fonte</strong> e <strong>Código</strong> são opcionais e serão ocultadas se não encontradas.</li>
@@ -66,13 +66,13 @@ export const AiImportModal: React.FC<AiImportModalProps> = ({ isOpen, onClose, o
 
                             <div className="flex space-x-4 mb-4 border-b border-default">
                                 <button
-                                    className={`pb-2 px-4 font-medium transition-colors ${activeTab === 'paste' ? 'text-accent-500 border-b-2 border-[#0084ff]' : 'text-secondary hover:text-white'}`}
+                                    className={`pb-2 px-4 font-medium transition-colors ${activeTab === 'paste' ? 'text-accent-500 border-b-2 border-accent-500' : 'text-secondary hover:text-white'}`}
                                     onClick={() => setActiveTab('paste')}
                                 >
                                     📋 Colar (Excel/Texto)
                                 </button>
                                 <button
-                                    className={`pb-2 px-4 font-medium transition-colors ${activeTab === 'file' ? 'text-accent-500 border-b-2 border-[#0084ff]' : 'text-secondary hover:text-white'}`}
+                                    className={`pb-2 px-4 font-medium transition-colors ${activeTab === 'file' ? 'text-accent-500 border-b-2 border-accent-500' : 'text-secondary hover:text-white'}`}
                                     onClick={() => setActiveTab('file')}
                                 >
                                     📁 Upload Arquivo
@@ -82,7 +82,7 @@ export const AiImportModal: React.FC<AiImportModalProps> = ({ isOpen, onClose, o
                             {activeTab === 'paste' && (
                                 <div className="space-y-4">
                                     <textarea
-                                        className="w-full h-64 bg-base border border-default rounded-md p-3 text-sm text-[#e8eaed] font-mono focus:ring-1 focus:ring-[#0084ff] outline-none resize-none"
+                                        className="w-full h-64 bg-base border border-default rounded-md p-3 text-sm text-primary font-mono focus:ring-1 focus:ring-[#0084ff] outline-none resize-none"
                                         placeholder="Cole aqui as células do Excel ou o texto do seu orçamento..."
                                         value={pasteContent}
                                         onChange={(e) => setPasteContent(e.target.value)}
