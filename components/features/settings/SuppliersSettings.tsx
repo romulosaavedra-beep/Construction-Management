@@ -1,9 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import { createColumnHelper } from '@tanstack/react-table';
-import { useSuppliers } from '../../hooks/useSuppliers';
-import { useConfirm } from '../../utils/useConfirm';
-import { maskMobilePhone, maskCNPJCPF } from '../../utils/formatters';
-import type { Fornecedor } from '../../types';
+import { useSuppliers } from '@/hooks/useSuppliers';
+import { useConfirm } from '@/utils/useConfirm';
+import { maskMobilePhone, maskCNPJCPF } from '@/utils/formatters';
+import type { Fornecedor } from '@/types';
 import { DataTable } from '@/components/data-table/DataTable';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

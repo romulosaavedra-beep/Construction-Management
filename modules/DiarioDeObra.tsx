@@ -4,7 +4,7 @@ import type { DiarioRegistro, ServicoExecutado } from '../types';
 import { PageHeader } from '../components/layout/page-header';
 import { Card, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { StatusBadge } from '@/components/ui/status-badge';
+import { StatusBadge } from '@/components/widgets/status-badge';
 import { diarioRegistrosData, profissionaisData, initialOrcamentoData } from '../data/mockData';
 import { formatDate, getTodayDateString } from '../utils/formatters';
 

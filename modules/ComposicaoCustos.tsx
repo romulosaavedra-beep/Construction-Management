@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { PageHeader } from '../components/layout/page-header';
 import { Card, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { formatCurrency } from '../utils/formatters';
+import { formatCurrency } from '@/utils/formatters';
 
 const initialComposition = [
     { id: 1, insumo: 'Tijolo cerâmico 6 furos', coef: 30.00, un: 'un', preco: 0.80 },

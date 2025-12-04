@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { GeneralSettingsData } from '../../hooks/useSettings';
+import { GeneralSettingsData } from '@/hooks/useSettings';
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { useCalendar } from '../../hooks/useCalendar';
-import { CustomHoliday, WorkSchedule } from '../../types/calendar';
-import { useConfirm } from '../../utils/useConfirm';
+import { useCalendar } from '@/hooks/useCalendar';
+import { CustomHoliday, WorkSchedule } from '@/types/calendar';
+import { useConfirm } from '@/utils/useConfirm';
 import {
     Card,
     CardContent,

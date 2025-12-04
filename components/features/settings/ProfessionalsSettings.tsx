@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { supabase } from '../../services/supabase';
+import { supabase } from '@/services/supabase';
 import { Card, CardHeader } from '@/components/ui/card';
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -14,11 +14,11 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog"
 import { DataTable } from '@/components/data-table/DataTable';
-import { SearchableDropdown } from '@/components/ui/searchable-dropdown';
-import { useProfessionals } from '../../hooks/useProfessionals';
-import { useConfirm } from '../../utils/useConfirm';
-import { maskMobilePhone } from '../../utils/formatters';
-import type { Profissional } from '../../types';
+import { SearchableDropdown } from '@/components/widgets/searchable-dropdown';
+import { useProfessionals } from '@/hooks/useProfessionals';
+import { useConfirm } from '@/utils/useConfirm';
+import { maskMobilePhone } from '@/utils/formatters';
+import type { Profissional } from '@/types';
 import toast from 'react-hot-toast';
 import { createColumnHelper } from '@tanstack/react-table';
 import {

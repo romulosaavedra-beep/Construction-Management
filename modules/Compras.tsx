@@ -3,9 +3,9 @@ import type { Compra, Fornecedor } from '../types';
 import { PageHeader } from '../components/layout/page-header';
 import { Card, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { StatusBadge } from '@/components/ui/status-badge';
-import { comprasData, fornecedoresData } from '../data/mockData';
-import { formatDate } from '../utils/formatters';
+import { StatusBadge } from '@/components/widgets/status-badge';
+import { comprasData, fornecedoresData } from '@/data/mockData';
+import { formatDate } from '@/utils/formatters';
 
 const Compras: React.FC = () => {
     const [compras, setCompras] = useState<Compra[]>(comprasData);

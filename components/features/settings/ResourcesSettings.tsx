@@ -1,8 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { createColumnHelper } from '@tanstack/react-table';
-import { useResources, ResourceItem } from '../../hooks/useResources';
-import { useConfirm } from '../../utils/useConfirm';
-import { SearchableDropdown } from '@/components/ui/searchable-dropdown';
+import { useResources, ResourceItem } from '@/hooks/useResources';
+import { useConfirm } from '@/utils/useConfirm';
+import { SearchableDropdown } from '@/components/widgets/searchable-dropdown';
 import { DataTable } from '@/components/data-table/DataTable';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

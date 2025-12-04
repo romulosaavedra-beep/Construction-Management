@@ -1,8 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { createColumnHelper } from '@tanstack/react-table';
-import { useUnits } from '../../hooks/useUnits';
-import { useConfirm } from '../../utils/useConfirm';
-import type { UnitItem } from '../../types';
+import { useUnits } from '@/hooks/useUnits';
+import { useConfirm } from '@/utils/useConfirm';
+import type { UnitItem } from '@/types';
 import { DataTable } from '@/components/data-table/DataTable';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

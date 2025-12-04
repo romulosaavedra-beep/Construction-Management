@@ -1,5 +1,4 @@
 // modules/Planejamento.tsx
-// modules/Planejamento.tsx
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../services/supabase';
 import { toast } from 'react-hot-toast';
@@ -39,9 +38,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CPMCalculator, type Activity as CPMActivity, type CPMResult } from '../utils/planning/cpmCalculator';
 import { EVMCalculator, type EvmMetrics } from '../utils/planning/evmCalculator';
 import { geminiService } from '../services/geminiPlanning';
-import { CurvaSChart } from '../components/planning/CurvaSChart';
-import { EvmKpiCards } from '../components/planning/EvmKpiCards';
-import { CriticalActivitiesTable } from '../components/planning/CriticalActivitiesTable';
+import { CurvaSChart } from '../components/features/planning/CurvaSChart';
+import { EvmKpiCards } from '../components/features/planning/EvmKpiCards';
+import { CriticalActivitiesTable } from '../components/features/planning/CriticalActivitiesTable';
 
 // Tipos
 interface Atividade {
