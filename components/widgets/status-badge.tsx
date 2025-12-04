@@ -1,31 +1,57 @@
-
 import React from 'react';
+import { Badge } from '@/components/ui/badge';
 
 interface StatusBadgeProps {
   status: string;
+  className?: string;
 }
 
-const getStatusClasses = (status: string) => {
+/**
+ * Mapeia palavras-chave de status (português) para variants do Badge
+ * Usado principalmente em contextos de planejamento/cronograma
+ */
+const getStatusVariant = (status: string): "success" | "error" | "warning" | "info" | "default" => {
   const lowerStatus = status.toLowerCase();
-  if (['finalizado', 'no prazo', 'adiantado', 'recebido', 'aprovado'].includes(lowerStatus)) {
-    return 'bg-green-500/10 text-green-400';
+
+  // VERDE: Sucesso / Concluído / Positivo
+  if (['finalizado', 'no prazo', 'adiantado', 'recebido', 'aprovado', 'concluído'].includes(lowerStatus)) {
+    return 'success';
   }
-  if (['em andamento', 'cotado'].includes(lowerStatus)) {
-    return 'bg-blue-500/10 text-blue-400';
+
+  // AZUL: Em Progresso / Informação
+  if (['em andamento', 'cotado', 'em análise', 'processando'].includes(lowerStatus)) {
+    return 'info';
   }
-  if (['não iniciado', 'atenção'].includes(lowerStatus)) {
-    return 'bg-yellow-500/10 text-yellow-400';
+
+  // AMARELO: Atenção / Pendente / Aguardando
+  if (['não iniciado', 'atenção', 'aguardando', 'pendente início'].includes(lowerStatus)) {
+    return 'warning';
   }
-  if (['atrasado', 'pendente', 'crítico'].includes(lowerStatus)) {
-    return 'bg-red-500/10 text-red-400';
+
+  // VERMELHO: Atrasado / Crítico / Erro
+  if (['atrasado', 'pendente', 'crítico', 'bloqueado', 'cancelado'].includes(lowerStatus)) {
+    return 'error';
   }
-  return 'bg-gray-500/10 text-gray-400';
+
+  // CINZA: Padrão
+  return 'default';
 };
 
-export const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
+/**
+ * StatusBadge - Componente especializado para exibir status de tarefas/atividades
+ * Usa Badge (ui) como base, adicionando lógica de mapeamento automático
+ * 
+ * @example
+ * <StatusBadge status="Finalizado" />
+ * <StatusBadge status="Em andamento" />
+ * <StatusBadge status="Atrasado" />
+ */
+export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, className }) => {
+  const variant = getStatusVariant(status);
+
   return (
-    <span className={`inline-block px-3 py-1 text-xs font-medium rounded-full ${getStatusClasses(status)}`}>
+    <Badge variant={variant} className={className}>
       {status}
-    </span>
+    </Badge>
   );
 };

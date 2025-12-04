@@ -7,7 +7,7 @@ import { DataTable } from '@/components/data-table/DataTable';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Pencil, Trash2, CirclePlus } from "lucide-react"; // CirclePlus importado
+import { Pencil, Trash2, CirclePlus, Ruler } from "lucide-react";
 import {
     Dialog,
     DialogContent,
@@ -20,9 +20,9 @@ import {
     Tooltip,
     TooltipContent,
     TooltipTrigger,
+    TooltipProvider
 } from "@/components/ui/tooltip";
-import toast from 'react-hot-toast';
-import { Ruler } from "lucide-react";
+import { toast } from 'sonner'; // ✅ MUDANÇA: sonner
 
 interface UnitsSettingsProps {
     projectId?: string;
@@ -116,7 +116,7 @@ export const UnitsSettings: React.FC<UnitsSettingsProps> = ({ projectId }) => {
                     <div className="flex justify-center">
                         <input
                             type="checkbox"
-                            className="rounded border-[#3a3e45] bg-[#0f1419] text-[#0084ff] focus:ring-[#0084ff] focus:ring-offset-0 focus:ring-offset-[#242830] w-3.5 h-3.5 cursor-pointer"
+                            className="rounded border-[var(--ds-border-subtle)] bg-[var(--ds-bg-surface)] text-[var(--ds-primary-500)] focus:ring-[var(--ds-primary-500)] focus:ring-offset-0 w-3.5 h-3.5 cursor-pointer transition-colors"
                             checked={allUserRowsSelected}
                             ref={input => {
                                 if (input) input.indeterminate = someUserRowsSelected && !allUserRowsSelected;
@@ -135,7 +135,7 @@ export const UnitsSettings: React.FC<UnitsSettingsProps> = ({ projectId }) => {
                     <div className="flex justify-center">
                         <input
                             type="checkbox"
-                            className="rounded border-[#3a3e45] bg-[#0f1419] text-[#0084ff] focus:ring-[#0084ff] focus:ring-offset-0 focus:ring-offset-[#242830] w-3.5 h-3.5 cursor-pointer"
+                            className="rounded border-[var(--ds-border-subtle)] bg-[var(--ds-bg-surface)] text-[var(--ds-primary-500)] focus:ring-[var(--ds-primary-500)] focus:ring-offset-0 w-3.5 h-3.5 cursor-pointer transition-colors"
                             checked={row.getIsSelected()}
                             disabled={!row.getCanSelect()}
                             onChange={row.getToggleSelectedHandler()}
@@ -153,7 +153,7 @@ export const UnitsSettings: React.FC<UnitsSettingsProps> = ({ projectId }) => {
             size: 250,
             minSize: 200,
             cell: info => (
-                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[#242830] text-[#a0a5b0] border border-[#3a3e45]">
+                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[var(--ds-bg-elevated)] text-[var(--ds-text-secondary)] border border-[var(--ds-border-default)]">
                     {info.getValue()}
                 </span>
             )
@@ -165,7 +165,7 @@ export const UnitsSettings: React.FC<UnitsSettingsProps> = ({ projectId }) => {
             minSize: 200,
             meta: { isFluid: true },
             cell: info => (
-                <span className="font-medium text-white pl-1">{info.getValue()}</span>
+                <span className="font-medium text-[var(--ds-text-primary)] pl-1">{info.getValue()}</span>
             )
         }),
         // 4. Symbol Column (Fixed Width)
@@ -174,7 +174,11 @@ export const UnitsSettings: React.FC<UnitsSettingsProps> = ({ projectId }) => {
             size: 100,
             minSize: 80,
             enableResizing: false,
-            cell: info => <span className="font-mono text-xs text-[#0084ff] bg-[#0084ff]/10 px-2 py-1 rounded">{info.getValue()}</span>
+            cell: info => (
+                <span className="font-mono text-xs text-[var(--ds-primary-500)] bg-[var(--ds-primary-bg)] px-2 py-1 rounded">
+                    {info.getValue()}
+                </span>
+            )
         }),
         // 5. Actions Column (Fixed Right)
         {
@@ -192,7 +196,7 @@ export const UnitsSettings: React.FC<UnitsSettingsProps> = ({ projectId }) => {
                                     variant="ghost"
                                     size="icon"
                                     onClick={() => handleEdit(row.original)}
-                                    className="h-8 w-8 text-[#a0a5b0] hover:text-white hover:bg-[#3a3e45]"
+                                    className="h-8 w-8"
                                 >
                                     <Pencil className="h-3.5 w-3.5" />
                                 </Button>
@@ -208,7 +212,7 @@ export const UnitsSettings: React.FC<UnitsSettingsProps> = ({ projectId }) => {
                                     variant="ghost"
                                     size="icon"
                                     onClick={() => handleDelete([row.original.id])}
-                                    className="h-8 w-8 text-red-400 hover:text-red-300 hover:bg-red-400/10"
+                                    className="h-8 w-8 text-[var(--ds-error)] hover:text-[var(--ds-error-hover)] hover:bg-[var(--ds-error-bg)]"
                                 >
                                     <Trash2 className="h-3.5 w-3.5" />
                                 </Button>
@@ -220,7 +224,7 @@ export const UnitsSettings: React.FC<UnitsSettingsProps> = ({ projectId }) => {
                     </div>
                 ) : (
                     <div className="flex justify-center">
-                        <span className="text-[#4a4e55] text-[10px] uppercase font-bold tracking-wider">Padrão</span>
+                        <span className="text-[var(--ds-text-disabled)] text-[10px] uppercase font-bold tracking-wider">Padrão</span>
                     </div>
                 )
             )
@@ -228,11 +232,11 @@ export const UnitsSettings: React.FC<UnitsSettingsProps> = ({ projectId }) => {
     ], [deleteUnit, deleteUnits, confirm]);
 
     return (
-        <>
+        <TooltipProvider>
             <DataTable
                 title={
                     <div className="flex items-center gap-2">
-                        <Ruler className="w-5 h-5 text-[#0084ff]" />
+                        <Ruler className="w-5 h-5 text-[var(--ds-primary-500)]" />
                         Unidades de Medida
                     </div>
                 }
@@ -244,45 +248,56 @@ export const UnitsSettings: React.FC<UnitsSettingsProps> = ({ projectId }) => {
                 searchPlaceholder="Buscar unidades..."
             />
 
-            {/* Modal */}
+            {/* Modal Criar/Editar */}
             <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-                <DialogContent className="sm:max-w-[425px] bg-[#242830] border-[#3a3e45] text-[#e8eaed] shadow-2xl">
+                <DialogContent className="sm:max-w-[425px] bg-[var(--ds-bg-elevated)] border-[var(--ds-border-default)] text-[var(--ds-text-primary)] shadow-[var(--ds-shadow-2xl)]">
                     <DialogHeader>
-                        <DialogTitle className="text-white flex items-center gap-2">
-                            {currentUnit.id ? <Pencil className="w-4 h-4 text-[#0084ff]" /> : <CirclePlus className="w-4 h-4 text-[#0084ff]" />}
+                        <DialogTitle className="flex items-center gap-2">
+                            {currentUnit.id ? (
+                                <Pencil className="w-4 h-4 text-[var(--ds-primary-500)]" />
+                            ) : (
+                                <CirclePlus className="w-4 h-4 text-[var(--ds-primary-500)]" />
+                            )}
                             {currentUnit.id ? 'Editar Unidade' : 'Nova Unidade'}
                         </DialogTitle>
-                        <DialogDescription className="text-[#a0a5b0]">
+                        <DialogDescription className="text-[var(--ds-text-secondary)]">
                             Defina o nome e o símbolo da unidade de medida para uso nos orçamentos.
                         </DialogDescription>
                     </DialogHeader>
                     <form onSubmit={handleSave} className="space-y-5 py-4">
+                        {/* Nome da Unidade */}
                         <div className="space-y-2">
-                            <Label htmlFor="name" className="text-sm font-medium text-[#e8eaed]">Nome da Unidade <span className="text-red-500">*</span></Label>
+                            <Label required>Nome da Unidade</Label>
                             <Input
-                                id="name"
                                 value={currentUnit.name || ''}
                                 onChange={e => setCurrentUnit({ ...currentUnit, name: e.target.value })}
-                                className="bg-[#1e2329] border-[#3a3e45] text-white focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-[#71767f] placeholder:text-[#5f656f]"
                                 required
                                 placeholder="Ex: Metro Quadrado"
                                 autoFocus
+                                fullWidth
                             />
                         </div>
+
+                        {/* Símbolo */}
                         <div className="space-y-2">
-                            <Label htmlFor="symbol" className="text-sm font-medium text-[#e8eaed]">Símbolo / Abreviação <span className="text-red-500">*</span></Label>
+                            <Label required>Símbolo / Abreviação</Label>
                             <Input
-                                id="symbol"
                                 value={currentUnit.symbol || ''}
                                 onChange={e => setCurrentUnit({ ...currentUnit, symbol: e.target.value })}
-                                className="bg-[#1e2329] border-[#3a3e45] text-white focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-[#71767f] placeholder:text-[#5f656f] font-mono"
+                                className="font-mono"
                                 required
                                 placeholder="Ex: m²"
+                                fullWidth
                             />
                         </div>
+
                         <DialogFooter className="gap-2 sm:gap-0">
-                            <Button variant="ghost" onClick={() => setIsModalOpen(false)} type="button" className="text-[#a0a5b0] hover:text-white hover:bg-[#3a3e45]">Cancelar</Button>
-                            <Button type="submit" className="bg-[#0084ff] hover:bg-[#0073e6] text-white shadow-lg shadow-blue-900/20">Salvar Alterações</Button>
+                            <Button variant="ghost" onClick={() => setIsModalOpen(false)} type="button">
+                                Cancelar
+                            </Button>
+                            <Button type="submit" variant="primary">
+                                Salvar Alterações
+                            </Button>
                         </DialogFooter>
                     </form>
                 </DialogContent>
@@ -290,22 +305,26 @@ export const UnitsSettings: React.FC<UnitsSettingsProps> = ({ projectId }) => {
 
             {/* Confirm Dialog */}
             <Dialog open={dialogState.isOpen} onOpenChange={(open) => !open && handleCancel()}>
-                <DialogContent className="sm:max-w-[400px] bg-[#242830] border-[#3a3e45] text-[#e8eaed] shadow-2xl">
+                <DialogContent className="sm:max-w-[400px] bg-[var(--ds-bg-elevated)] border-[var(--ds-border-default)] shadow-[var(--ds-shadow-2xl)]">
                     <DialogHeader>
-                        <DialogTitle className="text-white flex items-center gap-2">
-                            <Trash2 className="w-5 h-5 text-red-400" />
+                        <DialogTitle className="flex items-center gap-2">
+                            <Trash2 className="w-5 h-5 text-[var(--ds-error)]" />
                             {dialogState.title}
                         </DialogTitle>
-                        <DialogDescription className="text-[#a0a5b0] pt-2">
+                        <DialogDescription className="text-[var(--ds-text-secondary)] pt-2">
                             {dialogState.message}
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter className="gap-2 sm:gap-0 mt-4">
-                        <Button variant="ghost" onClick={handleCancel} className="text-[#a0a5b0] hover:text-white hover:bg-[#3a3e45]">{dialogState.cancelText || 'Cancelar'}</Button>
-                        <Button variant="destructive" onClick={handleConfirm} className="bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-900/20">{dialogState.confirmText || 'Confirmar'}</Button>
+                        <Button variant="ghost" onClick={handleCancel}>
+                            {dialogState.cancelText || 'Cancelar'}
+                        </Button>
+                        <Button variant="destructive" onClick={handleConfirm}>
+                            {dialogState.confirmText || 'Confirmar'}
+                        </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
-        </>
+        </TooltipProvider>
     );
 };

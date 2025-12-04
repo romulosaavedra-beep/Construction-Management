@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { PageHeader } from '../components/layout/page-header';
+import { PageHeader } from '@/components/layout';
 import { Card, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { formatCurrency } from '@/utils/formatters';

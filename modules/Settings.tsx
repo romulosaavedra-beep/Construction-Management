@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import { ModuleHeader } from '../components/layout/module-header';
-import { GeneralSettings } from '../components/features/settings/GeneralSettings';
-import { ProfessionalsSettings } from '../components/features/settings/ProfessionalsSettings';
-import { SuppliersSettings } from '../components/features/settings/SuppliersSettings';
-import { UnitsSettings } from '../components/features/settings/UnitsSettings';
-import { ResourcesSettings } from '../components/features/settings/ResourcesSettings';
-import { CalendarSettings } from '../components/features/settings/CalendarSettings';
-import { useSettings } from '../hooks/useSettings';
-import type { GeneralSettingsData } from '../hooks/useSettings';
+import { ModuleHeader } from '@/components/layout';
+import { GeneralSettings } from '@/components/features/settings/GeneralSettings';
+import { ProfessionalsSettings } from '@/components/features/settings/ProfessionalsSettings';
+import { SuppliersSettings } from '@/components/features/settings/SuppliersSettings';
+import { UnitsSettings } from '@/components/features/settings/UnitsSettings';
+import { ResourcesSettings } from '@/components/features/settings/ResourcesSettings';
+import { CalendarSettings } from '@/components/features/settings/CalendarSettings';
+import { useSettings } from '@/hooks/useSettings';
+import type { GeneralSettingsData } from '@/hooks/useSettings';
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
     Settings as SettingsIcon,
@@ -35,9 +35,9 @@ const Settings: React.FC = () => {
 
         switch (activeTab) {
             case 'geral':
-                return <GeneralSettings settings={settings} onUpdate={setSettings} onSave={async (s) => { setSettings(s); await saveSettings(s); }} />;
+                return <GeneralSettings projectId={settings.id} />;
             case 'calendar':
-                return <CalendarSettings settings={settings} onUpdate={setSettings} onSave={async (s) => { setSettings(s); await saveSettings(s); }} />;
+                return <CalendarSettings projectId={settings.id} />;
             case 'profissionais':
                 return <ProfessionalsSettings projectId={settings.id} />;
             case 'fornecedores':

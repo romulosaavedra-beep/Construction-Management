@@ -8,17 +8,18 @@ import { DataTable } from '@/components/data-table/DataTable';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { FormMessage } from "@/components/ui/form-message";
 import {
     Pencil,
     Trash2,
-    Plus,
     CirclePlus,
     ExternalLink,
     Building2,
     User,
     Mail,
     Phone,
-    MapPin
+    MapPin,
+    Truck
 } from "lucide-react";
 import {
     Dialog,
@@ -34,8 +35,7 @@ import {
     TooltipTrigger,
     TooltipProvider
 } from "@/components/ui/tooltip";
-import toast from 'react-hot-toast';
-import { Truck } from "lucide-react";
+import { toast } from 'sonner';
 
 interface SuppliersSettingsProps {
     projectId?: string;
@@ -135,7 +135,7 @@ export const SuppliersSettings: React.FC<SuppliersSettingsProps> = ({ projectId 
                 <div className="flex justify-center">
                     <input
                         type="checkbox"
-                        className="rounded border-[#3a3e45] bg-[#0f1419] text-[#0084ff] focus:ring-[#0084ff] focus:ring-offset-0 focus:ring-offset-[#242830] w-3.5 h-3.5 cursor-pointer"
+                        className="rounded border-[var(--ds-border-subtle)] bg-[var(--ds-bg-surface)] text-[var(--ds-primary-500)] focus:ring-[var(--ds-primary-500)] focus:ring-offset-0 w-3.5 h-3.5 cursor-pointer transition-colors"
                         checked={table.getIsAllPageRowsSelected()}
                         ref={input => {
                             if (input) input.indeterminate = table.getIsSomePageRowsSelected();
@@ -148,7 +148,7 @@ export const SuppliersSettings: React.FC<SuppliersSettingsProps> = ({ projectId 
                 <div className="flex justify-center">
                     <input
                         type="checkbox"
-                        className="rounded border-[#3a3e45] bg-[#0f1419] text-[#0084ff] focus:ring-[#0084ff] focus:ring-offset-0 focus:ring-offset-[#242830] w-3.5 h-3.5 cursor-pointer"
+                        className="rounded border-[var(--ds-border-subtle)] bg-[var(--ds-bg-surface)] text-[var(--ds-primary-500)] focus:ring-[var(--ds-primary-500)] focus:ring-offset-0 w-3.5 h-3.5 cursor-pointer transition-colors"
                         checked={row.getIsSelected()}
                         disabled={!row.getCanSelect()}
                         onChange={row.getToggleSelectedHandler()}
@@ -159,15 +159,15 @@ export const SuppliersSettings: React.FC<SuppliersSettingsProps> = ({ projectId 
             minSize: 48,
             enableResizing: false,
         },
-        // 2. Razão Social (Fluid)
+        // 2. Razão Social
         columnHelper.accessor('nome', {
             header: 'Razão Social',
             size: 350,
             minSize: 200,
             cell: info => (
                 <div className="flex items-center gap-2">
-                    <Building2 className="w-3.5 h-3.5 text-[#a0a5b0]" />
-                    <span className="font-medium text-white">{info.getValue()}</span>
+                    <Building2 className="w-3.5 h-3.5 text-[var(--ds-text-secondary)]" />
+                    <span className="font-medium text-[var(--ds-text-primary)]">{info.getValue()}</span>
                 </div>
             )
         }),
@@ -177,11 +177,11 @@ export const SuppliersSettings: React.FC<SuppliersSettingsProps> = ({ projectId 
             size: 250,
             minSize: 150,
             cell: info => info.getValue() ? (
-                <div className="flex items-center gap-2 text-[#a0a5b0]">
+                <div className="flex items-center gap-2 text-[var(--ds-text-secondary)]">
                     <User className="w-3.5 h-3.5" />
                     <span>{info.getValue()}</span>
                 </div>
-            ) : '-'
+            ) : <span className="text-[var(--ds-text-tertiary)]">-</span>
         }),
         // 4. Email
         columnHelper.accessor('email', {
@@ -189,11 +189,11 @@ export const SuppliersSettings: React.FC<SuppliersSettingsProps> = ({ projectId 
             size: 250,
             minSize: 150,
             cell: info => info.getValue() ? (
-                <div className="flex items-center gap-2 text-[#a0a5b0]">
+                <div className="flex items-center gap-2 text-[var(--ds-text-secondary)]">
                     <Mail className="w-3.5 h-3.5" />
                     <span className="truncate">{info.getValue()}</span>
                 </div>
-            ) : '-'
+            ) : <span className="text-[var(--ds-text-tertiary)]">-</span>
         }),
         // 5. Telefone
         columnHelper.accessor('telefone', {
@@ -201,18 +201,22 @@ export const SuppliersSettings: React.FC<SuppliersSettingsProps> = ({ projectId 
             size: 160,
             minSize: 120,
             cell: info => info.getValue() ? (
-                <div className="flex items-center gap-2 text-[#a0a5b0]">
+                <div className="flex items-center gap-2 text-[var(--ds-text-secondary)]">
                     <Phone className="w-3.5 h-3.5" />
                     <span className="font-mono text-xs">{info.getValue()}</span>
                 </div>
-            ) : '-'
+            ) : <span className="text-[var(--ds-text-tertiary)]">-</span>
         }),
         // 6. CNPJ
         columnHelper.accessor('cnpj', {
             header: 'CNPJ/CPF',
             size: 160,
             minSize: 140,
-            cell: info => <span className="font-mono text-xs text-[#a0a5b0] bg-[#242830] px-2 py-1 rounded border border-[#3a3e45]">{info.getValue() || '-'}</span>
+            cell: info => (
+                <span className="font-mono text-xs text-[var(--ds-text-secondary)] bg-[var(--ds-bg-surface)] px-2 py-1 rounded-[var(--ds-radius-sm)] border border-[var(--ds-border-default)]">
+                    {info.getValue() || '-'}
+                </span>
+            )
         }),
         // 7. Endereço (Fluid)
         columnHelper.accessor('endereco', {
@@ -221,11 +225,11 @@ export const SuppliersSettings: React.FC<SuppliersSettingsProps> = ({ projectId 
             minSize: 200,
             meta: { isFluid: true },
             cell: info => info.getValue() ? (
-                <div className="flex items-center gap-2 text-[#a0a5b0]" title={info.getValue()}>
+                <div className="flex items-center gap-2 text-[var(--ds-text-secondary)]" title={info.getValue()}>
                     <MapPin className="w-3.5 h-3.5 shrink-0" />
                     <span className="truncate">{info.getValue()}</span>
                 </div>
-            ) : '-'
+            ) : <span className="text-[var(--ds-text-tertiary)]">-</span>
         }),
         // 8. Link (Fixed)
         columnHelper.accessor('link', {
@@ -241,7 +245,7 @@ export const SuppliersSettings: React.FC<SuppliersSettingsProps> = ({ projectId 
                                 href={info.getValue()}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-[#0084ff] hover:text-[#339dff] p-1 rounded hover:bg-[#0084ff]/10 transition-colors"
+                                className="text-[var(--ds-primary-500)] hover:text-[var(--ds-primary-600)] p-1 rounded-[var(--ds-radius-sm)] hover:bg-[var(--ds-primary-500)]/10 transition-colors"
                             >
                                 <ExternalLink className="w-3.5 h-3.5" />
                             </a>
@@ -249,7 +253,7 @@ export const SuppliersSettings: React.FC<SuppliersSettingsProps> = ({ projectId 
                         <TooltipContent side="left">Abrir Link</TooltipContent>
                     </Tooltip>
                 </div>
-            ) : <div className="text-center">-</div>
+            ) : <div className="text-center text-[var(--ds-text-tertiary)]">-</div>
         }),
         // 9. Actions (Fixed Right)
         {
@@ -266,14 +270,12 @@ export const SuppliersSettings: React.FC<SuppliersSettingsProps> = ({ projectId 
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => handleEdit(row.original)}
-                                className="h-8 w-8 text-[#a0a5b0] hover:text-white hover:bg-[#3a3e45]"
+                                className="h-8 w-8"
                             >
                                 <Pencil className="h-3.5 w-3.5" />
                             </Button>
                         </TooltipTrigger>
-                        <TooltipContent side="bottom" align="end">
-                            <p>Editar</p>
-                        </TooltipContent>
+                        <TooltipContent side="bottom" align="end">Editar</TooltipContent>
                     </Tooltip>
 
                     <Tooltip>
@@ -282,14 +284,12 @@ export const SuppliersSettings: React.FC<SuppliersSettingsProps> = ({ projectId 
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => handleDelete([row.original.id])}
-                                className="h-8 w-8 text-red-400 hover:text-red-300 hover:bg-red-400/10"
+                                className="h-8 w-8 text-[var(--ds-error)] hover:text-[var(--ds-error-hover)] hover:bg-[var(--ds-error-bg)]"
                             >
                                 <Trash2 className="h-3.5 w-3.5" />
                             </Button>
                         </TooltipTrigger>
-                        <TooltipContent side="bottom" align="end">
-                            <p>Excluir</p>
-                        </TooltipContent>
+                        <TooltipContent side="bottom" align="end">Excluir</TooltipContent>
                     </Tooltip>
                 </div>
             )
@@ -301,7 +301,7 @@ export const SuppliersSettings: React.FC<SuppliersSettingsProps> = ({ projectId 
             <DataTable
                 title={
                     <div className="flex items-center gap-2">
-                        <Truck className="w-5 h-5 text-[#0084ff]" />
+                        <Truck className="w-5 h-5 text-[var(--ds-primary-500)]" />
                         Fornecedores
                     </div>
                 }
@@ -314,108 +314,112 @@ export const SuppliersSettings: React.FC<SuppliersSettingsProps> = ({ projectId 
                 initialSorting={[{ id: 'nome', desc: false }]}
             />
 
-
-            {/* Modal */}
+            {/* Modal Criar/Editar */}
             <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-                <DialogContent className="sm:max-w-[600px] bg-[#242830] border-[#3a3e45] text-[#e8eaed] shadow-2xl">
+                <DialogContent className="sm:max-w-[600px] bg-[var(--ds-bg-elevated)] border-[var(--ds-border-default)] text-[var(--ds-text-primary)] shadow-[var(--ds-shadow-2xl)]">
                     <DialogHeader>
-                        <DialogTitle className="text-white flex items-center gap-2">
-                            {currentSupplier.id ? <Pencil className="w-4 h-4 text-[#0084ff]" /> : <CirclePlus className="w-4 h-4 text-[#0084ff]" />}
+                        <DialogTitle className="flex items-center gap-2">
+                            {currentSupplier.id ? (
+                                <Pencil className="w-4 h-4 text-[var(--ds-primary-500)]" />
+                            ) : (
+                                <CirclePlus className="w-4 h-4 text-[var(--ds-primary-500)]" />
+                            )}
                             {currentSupplier.id ? 'Editar Fornecedor' : 'Novo Fornecedor'}
                         </DialogTitle>
-                        <DialogDescription className="text-[#a0a5b0]">
+                        <DialogDescription className="text-[var(--ds-text-secondary)]">
                             Preencha os dados do fornecedor abaixo.
                         </DialogDescription>
                     </DialogHeader>
                     <form onSubmit={handleSave} className="space-y-4 py-4">
+                        {/* Razão Social */}
                         <div className="space-y-2">
-                            <Label htmlFor="nome" className="text-sm font-medium text-[#e8eaed]">Razão Social <span className="text-red-500">*</span></Label>
+                            <Label required>Razão Social</Label>
                             <Input
-                                id="nome"
                                 value={currentSupplier.nome || ''}
                                 onChange={e => setCurrentSupplier({ ...currentSupplier, nome: e.target.value })}
-                                className="bg-[#1e2329] border-[#3a3e45] text-white focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-[#71767f] placeholder:text-[#5f656f]"
                                 placeholder="Ex: Construtora ABC Ltda"
                                 required
                                 autoFocus
+                                fullWidth
                             />
                         </div>
+
+                        {/* Vendedor e CNPJ */}
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label htmlFor="contato" className="text-sm font-medium text-[#e8eaed]">Nome do Vendedor</Label>
+                                <Label>Nome do Vendedor</Label>
                                 <Input
-                                    id="contato"
                                     value={currentSupplier.contato || ''}
                                     onChange={e => setCurrentSupplier({ ...currentSupplier, contato: e.target.value })}
-                                    className="bg-[#1e2329] border-[#3a3e45] text-white focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-[#71767f] placeholder:text-[#5f656f]"
                                     placeholder="Ex: Carlos Souza"
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="cnpj" className="text-sm font-medium text-[#e8eaed]">CNPJ/CPF</Label>
+                                <Label>CNPJ/CPF</Label>
                                 <Input
-                                    id="cnpj"
                                     value={currentSupplier.cnpj || ''}
                                     onChange={e => setCurrentSupplier({ ...currentSupplier, cnpj: maskCNPJCPF(e.target.value) })}
-                                    className="bg-[#1e2329] border-[#3a3e45] text-white focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-[#71767f] placeholder:text-[#5f656f] font-mono"
+                                    className="font-mono"
                                     maxLength={18}
                                     placeholder="12.345.678/0001-99"
                                 />
                             </div>
                         </div>
+
+                        {/* Email e Telefone */}
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label htmlFor="email" className="text-sm font-medium text-[#e8eaed]">Email</Label>
+                                <Label>Email</Label>
                                 <Input
-                                    id="email"
                                     type="email"
                                     value={currentSupplier.email || ''}
                                     onChange={e => setCurrentSupplier({ ...currentSupplier, email: e.target.value })}
-                                    className="bg-[#1e2329] border-[#3a3e45] text-white focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-[#71767f] placeholder:text-[#5f656f]"
                                     placeholder="vendas@fornecedor.com.br"
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="telefone" className="text-sm font-medium text-[#e8eaed]">Telefone</Label>
+                                <Label>Telefone</Label>
                                 <Input
-                                    id="telefone"
                                     value={currentSupplier.telefone || ''}
                                     onChange={e => {
                                         const masked = maskMobilePhone(e.target.value);
                                         setCurrentSupplier({ ...currentSupplier, telefone: masked });
                                         setPhoneError("");
                                     }}
-                                    className={`bg-[#1e2329] border ${phoneError ? 'border-red-500' : 'border-[#3a3e45]'} text-white focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-[#71767f] placeholder:text-[#5f656f]`}
                                     maxLength={15}
                                     placeholder="(11) 98765-4321"
+                                    error={!!phoneError}
                                 />
-                                {phoneError && <p className="text-xs text-red-500 mt-1">{phoneError}</p>}
+                                {phoneError && <FormMessage type="error">{phoneError}</FormMessage>}
                             </div>
                         </div>
+
+                        {/* Endereço */}
                         <div className="space-y-2">
-                            <Label htmlFor="endereco" className="text-sm font-medium text-[#e8eaed]">Endereço Completo</Label>
+                            <Label>Endereço Completo</Label>
                             <Input
-                                id="endereco"
                                 value={currentSupplier.endereco || ''}
                                 onChange={e => setCurrentSupplier({ ...currentSupplier, endereco: e.target.value })}
-                                className="bg-[#1e2329] border-[#3a3e45] text-white focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-[#71767f] placeholder:text-[#5f656f]"
                                 placeholder="Rua das Flores, 123, Centro - São Paulo - SP"
+                                fullWidth
                             />
                         </div>
+
+                        {/* Link */}
                         <div className="space-y-2">
-                            <Label htmlFor="link" className="text-sm font-medium text-[#e8eaed]">Link (Site/Catálogo)</Label>
+                            <Label>Link (Site/Catálogo)</Label>
                             <Input
-                                id="link"
                                 type="url"
                                 value={currentSupplier.link || ''}
                                 onChange={e => setCurrentSupplier({ ...currentSupplier, link: e.target.value })}
-                                className="bg-[#1e2329] border-[#3a3e45] text-white focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-[#71767f] placeholder:text-[#5f656f]"
                                 placeholder="https://www.fornecedor.com.br"
+                                fullWidth
                             />
                         </div>
+
                         <DialogFooter className="gap-2 sm:gap-0">
-                            <Button variant="ghost" onClick={() => setIsModalOpen(false)} type="button" className="text-[#a0a5b0] hover:text-white hover:bg-[#3a3e45]">Cancelar</Button>
-                            <Button type="submit" className="bg-[#0084ff] hover:bg-[#0073e6] text-white shadow-lg shadow-blue-900/20">Salvar Alterações</Button>
+                            <Button variant="ghost" onClick={() => setIsModalOpen(false)} type="button">Cancelar</Button>
+                            <Button type="submit" variant="primary">Salvar Alterações</Button>
                         </DialogFooter>
                     </form>
                 </DialogContent>
@@ -423,19 +427,19 @@ export const SuppliersSettings: React.FC<SuppliersSettingsProps> = ({ projectId 
 
             {/* Confirm Dialog */}
             <Dialog open={dialogState.isOpen} onOpenChange={(open) => !open && handleCancel()}>
-                <DialogContent className="sm:max-w-[400px] bg-[#242830] border-[#3a3e45] text-[#e8eaed] shadow-2xl">
+                <DialogContent className="sm:max-w-[400px] bg-[var(--ds-bg-elevated)] border-[var(--ds-border-default)] shadow-[var(--ds-shadow-2xl)]">
                     <DialogHeader>
-                        <DialogTitle className="text-white flex items-center gap-2">
-                            <Trash2 className="w-5 h-5 text-red-400" />
+                        <DialogTitle className="flex items-center gap-2">
+                            <Trash2 className="w-5 h-5 text-[var(--ds-error)]" />
                             {dialogState.title}
                         </DialogTitle>
-                        <DialogDescription className="text-[#a0a5b0] pt-2">
+                        <DialogDescription className="text-[var(--ds-text-secondary)] pt-2">
                             {dialogState.message}
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter className="gap-2 sm:gap-0 mt-4">
-                        <Button variant="ghost" onClick={handleCancel} className="text-[#a0a5b0] hover:text-white hover:bg-[#3a3e45]">{dialogState.cancelText || 'Cancelar'}</Button>
-                        <Button variant="destructive" onClick={handleConfirm} className="bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-900/20">{dialogState.confirmText || 'Confirmar'}</Button>
+                        <Button variant="ghost" onClick={handleCancel}>{dialogState.cancelText || 'Cancelar'}</Button>
+                        <Button variant="destructive" onClick={handleConfirm}>{dialogState.confirmText || 'Confirmar'}</Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>

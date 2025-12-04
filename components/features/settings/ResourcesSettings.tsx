@@ -13,7 +13,8 @@ import {
     Plus,
     CirclePlus,
     X,
-    Check
+    Check,
+    Package
 } from "lucide-react";
 import {
     Dialog,
@@ -29,8 +30,7 @@ import {
     TooltipTrigger,
     TooltipProvider
 } from "@/components/ui/tooltip";
-import toast from 'react-hot-toast';
-import { Package } from "lucide-react";
+import { toast } from 'sonner'; // ✅ MUDANÇA: sonner
 
 interface ResourcesSettingsProps {
     projectId?: string;
@@ -152,7 +152,7 @@ export const ResourcesSettings: React.FC<ResourcesSettingsProps> = ({ projectId 
                     <div className="flex justify-center">
                         <input
                             type="checkbox"
-                            className="rounded border-[#3a3e45] bg-[#0f1419] text-[#0084ff] focus:ring-[#0084ff] focus:ring-offset-0 focus:ring-offset-[#242830] w-3.5 h-3.5 cursor-pointer"
+                            className="rounded border-[var(--ds-border-subtle)] bg-[var(--ds-bg-surface)] text-[var(--ds-primary-500)] focus:ring-[var(--ds-primary-500)] focus:ring-offset-0 w-3.5 h-3.5 cursor-pointer transition-colors"
                             checked={allUserRowsSelected}
                             ref={input => {
                                 if (input) input.indeterminate = someUserRowsSelected && !allUserRowsSelected;
@@ -171,7 +171,7 @@ export const ResourcesSettings: React.FC<ResourcesSettingsProps> = ({ projectId 
                     <div className="flex justify-center">
                         <input
                             type="checkbox"
-                            className="rounded border-[#3a3e45] bg-[#0f1419] text-[#0084ff] focus:ring-[#0084ff] focus:ring-offset-0 focus:ring-offset-[#242830] w-3.5 h-3.5 cursor-pointer"
+                            className="rounded border-[var(--ds-border-subtle)] bg-[var(--ds-bg-surface)] text-[var(--ds-primary-500)] focus:ring-[var(--ds-primary-500)] focus:ring-offset-0 w-3.5 h-3.5 cursor-pointer transition-colors"
                             checked={row.getIsSelected()}
                             disabled={!row.getCanSelect()}
                             onChange={row.getToggleSelectedHandler()}
@@ -188,7 +188,7 @@ export const ResourcesSettings: React.FC<ResourcesSettingsProps> = ({ projectId 
             size: 300,
             minSize: 250,
             cell: info => (
-                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[#242830] text-[#a0a5b0] border border-[#3a3e45]">
+                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[var(--ds-bg-elevated)] text-[var(--ds-text-secondary)] border border-[var(--ds-border-default)]">
                     {info.getValue()}
                 </span>
             )
@@ -199,7 +199,7 @@ export const ResourcesSettings: React.FC<ResourcesSettingsProps> = ({ projectId 
             minSize: 250,
             meta: { isFluid: true },
             cell: info => (
-                <span className="font-medium text-white pl-1">{info.getValue()}</span>
+                <span className="font-medium text-[var(--ds-text-primary)] pl-1">{info.getValue()}</span>
             )
         }),
         {
@@ -217,7 +217,7 @@ export const ResourcesSettings: React.FC<ResourcesSettingsProps> = ({ projectId 
                                     variant="ghost"
                                     size="icon"
                                     onClick={() => handleEdit(row.original)}
-                                    className="h-8 w-8 text-[#a0a5b0] hover:text-white hover:bg-[#3a3e45]"
+                                    className="h-8 w-8"
                                 >
                                     <Pencil className="h-3.5 w-3.5" />
                                 </Button>
@@ -233,7 +233,7 @@ export const ResourcesSettings: React.FC<ResourcesSettingsProps> = ({ projectId 
                                     variant="ghost"
                                     size="icon"
                                     onClick={() => handleDelete([row.original.id])}
-                                    className="h-8 w-8 text-red-400 hover:text-red-300 hover:bg-red-400/10"
+                                    className="h-8 w-8 text-[var(--ds-error)] hover:text-[var(--ds-error-hover)] hover:bg-[var(--ds-error-bg)]"
                                 >
                                     <Trash2 className="h-3.5 w-3.5" />
                                 </Button>
@@ -245,7 +245,7 @@ export const ResourcesSettings: React.FC<ResourcesSettingsProps> = ({ projectId 
                     </div>
                 ) : (
                     <div className="flex justify-center">
-                        <span className="text-[#4a4e55] text-[10px] uppercase font-bold tracking-wider">Padrão</span>
+                        <span className="text-[var(--ds-text-disabled)] text-[10px] uppercase font-bold tracking-wider">Padrão</span>
                     </div>
                 )
             )
@@ -257,7 +257,7 @@ export const ResourcesSettings: React.FC<ResourcesSettingsProps> = ({ projectId 
             <DataTable
                 title={
                     <div className="flex items-center gap-2">
-                        <Package className="w-5 h-5 text-[#0084ff]" />
+                        <Package className="w-5 h-5 text-[var(--ds-primary-500)]" />
                         Recursos
                     </div>
                 }
@@ -270,37 +270,47 @@ export const ResourcesSettings: React.FC<ResourcesSettingsProps> = ({ projectId 
                 initialSorting={[{ id: 'category', desc: false }]}
             />
 
-
+            {/* Modal Criar/Editar */}
             <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-                <DialogContent className="sm:max-w-[450px] bg-[#242830] border-[#3a3e45] text-[#e8eaed] shadow-2xl">
+                <DialogContent className="sm:max-w-[450px] bg-[var(--ds-bg-elevated)] border-[var(--ds-border-default)] text-[var(--ds-text-primary)] shadow-[var(--ds-shadow-2xl)]">
                     <DialogHeader>
-                        <DialogTitle className="text-white flex items-center gap-2">
-                            {currentResource.id ? <Pencil className="w-4 h-4 text-[#0084ff]" /> : <CirclePlus className="w-4 h-4 text-[#0084ff]" />}
+                        <DialogTitle className="flex items-center gap-2">
+                            {currentResource.id ? (
+                                <Pencil className="w-4 h-4 text-[var(--ds-primary-500)]" />
+                            ) : (
+                                <CirclePlus className="w-4 h-4 text-[var(--ds-primary-500)]" />
+                            )}
                             {currentResource.id ? 'Editar Recurso' : 'Novo Recurso'}
                         </DialogTitle>
-                        <DialogDescription className="text-[#a0a5b0]">
+                        <DialogDescription className="text-[var(--ds-text-secondary)]">
                             Gerencie os recursos (equipamentos, ferramentas) disponíveis para a obra.
                         </DialogDescription>
                     </DialogHeader>
                     <form onSubmit={handleSave} className="space-y-5 py-4">
+                        {/* Categoria com Seleção Avançada */}
                         <div className="space-y-2">
-                            <Label htmlFor="category" className="text-sm font-medium text-[#e8eaed]">Categoria <span className="text-red-500">*</span></Label>
+                            <Label required>Categoria</Label>
 
-                            <div className="flex items-center gap-2 bg-[#1e2329] p-1 rounded-lg border border-[#3a3e45]">
+                            <div className="flex items-center gap-2 bg-[var(--ds-bg-surface)] p-1 rounded-lg border border-[var(--ds-border-default)]">
                                 {isCreatingCategory ? (
                                     <div className="flex items-center w-full animate-in fade-in slide-in-from-left-2">
                                         <Input
                                             value={newCategory}
                                             onChange={e => setNewCategory(e.target.value)}
                                             placeholder="Nova categoria..."
-                                            // CORREÇÃO: Sem borda, sem ring, pois o container já tem borda
-                                            className="flex-1 bg-transparent border-none text-white focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-[#5f656f] h-8"
+                                            className="flex-1 bg-transparent border-none h-8"
                                             autoFocus
                                         />
-                                        <div className="w-px h-4 bg-[#3a3e45] mx-1" />
+                                        <div className="w-px h-4 bg-[var(--ds-border-default)] mx-1" />
                                         <Tooltip>
                                             <TooltipTrigger asChild>
-                                                <Button size="icon" variant="ghost" onClick={handleAddCategory} type="button" className="h-8 w-8 text-[#0084ff] hover:bg-[#0084ff]/10 hover:text-[#0084ff]">
+                                                <Button
+                                                    size="icon"
+                                                    variant="ghost"
+                                                    onClick={handleAddCategory}
+                                                    type="button"
+                                                    className="h-8 w-8 text-[var(--ds-primary-500)] hover:bg-[var(--ds-primary-bg)]"
+                                                >
                                                     <Check className="h-4 w-4" />
                                                 </Button>
                                             </TooltipTrigger>
@@ -308,7 +318,13 @@ export const ResourcesSettings: React.FC<ResourcesSettingsProps> = ({ projectId 
                                         </Tooltip>
                                         <Tooltip>
                                             <TooltipTrigger asChild>
-                                                <Button size="icon" variant="ghost" onClick={() => { setIsCreatingCategory(false); setNewCategory(''); }} type="button" className="h-8 w-8 text-[#a0a5b0] hover:text-white hover:bg-[#3a3e45]">
+                                                <Button
+                                                    size="icon"
+                                                    variant="ghost"
+                                                    onClick={() => { setIsCreatingCategory(false); setNewCategory(''); }}
+                                                    type="button"
+                                                    className="h-8 w-8"
+                                                >
                                                     <X className="h-4 w-4" />
                                                 </Button>
                                             </TooltipTrigger>
@@ -324,11 +340,11 @@ export const ResourcesSettings: React.FC<ResourcesSettingsProps> = ({ projectId 
                                                 onChange={(val) => setCurrentResource({ ...currentResource, category: val })}
                                                 placeholder="Selecione..."
                                                 required
-                                                className="w-full border-none bg-transparent focus:ring-0"
+                                                className="w-full border-none bg-transparent"
                                             />
                                         </div>
 
-                                        <div className="w-px h-4 bg-[#3a3e45] mx-1" />
+                                        <div className="w-px h-4 bg-[var(--ds-border-default)] mx-1" />
 
                                         <Tooltip>
                                             <TooltipTrigger asChild>
@@ -337,7 +353,7 @@ export const ResourcesSettings: React.FC<ResourcesSettingsProps> = ({ projectId 
                                                     size="icon"
                                                     onClick={() => setIsCreatingCategory(true)}
                                                     type="button"
-                                                    className="h-8 w-8 text-[#0084ff] hover:bg-[#0084ff]/10 hover:text-[#0084ff]"
+                                                    className="h-8 w-8 text-[var(--ds-primary-500)] hover:bg-[var(--ds-primary-bg)]"
                                                 >
                                                     <Plus className="h-4 w-4" />
                                                 </Button>
@@ -356,7 +372,7 @@ export const ResourcesSettings: React.FC<ResourcesSettingsProps> = ({ projectId 
                                                             setCustomCategories(prev => prev.filter(c => c !== currentResource.category));
                                                             setCurrentResource({ ...currentResource, category: categories[0] || '' });
                                                         }}
-                                                        className="h-8 w-8 text-red-400 hover:text-red-500 hover:bg-red-400/10"
+                                                        className="h-8 w-8 text-[var(--ds-error)] hover:bg-[var(--ds-error-bg)]"
                                                     >
                                                         <Trash2 className="h-4 w-4" />
                                                     </Button>
@@ -369,40 +385,49 @@ export const ResourcesSettings: React.FC<ResourcesSettingsProps> = ({ projectId 
                             </div>
                         </div>
 
+                        {/* Nome do Recurso */}
                         <div className="space-y-2">
-                            <Label htmlFor="name" className="text-sm font-medium text-[#e8eaed]">Nome do Recurso <span className="text-red-500">*</span></Label>
+                            <Label required>Nome do Recurso</Label>
                             <Input
-                                id="name"
                                 value={currentResource.name || ''}
                                 onChange={e => setCurrentResource({ ...currentResource, name: e.target.value })}
-                                // CORREÇÃO: Sem ring, apenas troca a cor da borda
-                                className="bg-[#1e2329] border-[#3a3e45] text-white focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-[#71767f] placeholder:text-[#5f656f]"
                                 required
                                 placeholder="Ex: Escavadeira Hidráulica"
+                                fullWidth
                             />
                         </div>
+
                         <DialogFooter className="gap-2 sm:gap-0">
-                            <Button variant="ghost" onClick={() => setIsModalOpen(false)} type="button" className="text-[#a0a5b0] hover:text-white hover:bg-[#3a3e45]">Cancelar</Button>
-                            <Button type="submit" className="bg-[#0084ff] hover:bg-[#0073e6] text-white shadow-lg shadow-blue-900/20">Salvar Alterações</Button>
+                            <Button variant="ghost" onClick={() => setIsModalOpen(false)} type="button">
+                                Cancelar
+                            </Button>
+                            <Button type="submit" variant="primary">
+                                Salvar Alterações
+                            </Button>
                         </DialogFooter>
                     </form>
                 </DialogContent>
             </Dialog>
 
+            {/* Confirm Dialog */}
             <Dialog open={dialogState.isOpen} onOpenChange={(open) => !open && handleCancel()}>
-                <DialogContent className="sm:max-w-[400px] bg-[#242830] border-[#3a3e45] text-[#e8eaed] shadow-2xl">
+                <DialogContent className="sm:max-w-[400px] bg-[var(--ds-bg-elevated)] border-[var(--ds-border-default)] shadow-[var(--ds-shadow-2xl)]">
                     <DialogHeader>
-                        <DialogTitle className="text-white flex items-center gap-2">
-                            <Trash2 className="w-5 h-5 text-red-400" />
+                        <DialogTitle className="flex items-center gap-2">
+                            <Trash2 className="w-5 h-5 text-[var(--ds-error)]" />
                             {dialogState.title}
                         </DialogTitle>
-                        <DialogDescription className="text-[#a0a5b0] pt-2">
+                        <DialogDescription className="text-[var(--ds-text-secondary)] pt-2">
                             {dialogState.message}
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter className="gap-2 sm:gap-0 mt-4">
-                        <Button variant="ghost" onClick={handleCancel} className="text-[#a0a5b0] hover:text-white hover:bg-[#3a3e45]">{dialogState.cancelText || 'Cancelar'}</Button>
-                        <Button variant="destructive" onClick={handleConfirm} className="bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-900/20">{dialogState.confirmText || 'Confirmar'}</Button>
+                        <Button variant="ghost" onClick={handleCancel}>
+                            {dialogState.cancelText || 'Cancelar'}
+                        </Button>
+                        <Button variant="destructive" onClick={handleConfirm}>
+                            {dialogState.confirmText || 'Confirmar'}
+                        </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>

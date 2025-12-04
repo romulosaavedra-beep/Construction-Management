@@ -1,12 +1,12 @@
-/* Import Design System */
+/* Import Design System FIRST */
 @import './design-system.css';
 
-/* Tailwind Directives (se estiver usando) */
+/* Tailwind Directives */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Global Resets */
+/* Global Resets (se necessário) */
 @layer base {
   * {
     @apply border-border;

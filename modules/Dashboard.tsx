@@ -1,11 +1,11 @@
 
 import React from 'react';
-import { PageHeader } from '../components/layout/page-header';
+import { PageHeader } from '@/components/layout';
 import { Card, CardHeader } from '@/components/ui/card'
 import { KpiCard } from '@/components/widgets/kpi-card';
 import { ProgressBar } from '@/components/widgets/progress-bar';
 import { StatusBadge } from '@/components/widgets/status-badge';
-import { obraInfo, kpiData, etapasData, diarioRegistrosData } from '../data/mockData';
+import { obraInfo, kpiData, etapasData, diarioRegistrosData } from '@/data/mockData';
 import { formatCurrency, formatDate } from '@/utils/formatters';
 
 const Dashboard: React.FC = () => {

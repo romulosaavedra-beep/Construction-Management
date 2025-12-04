@@ -1,6 +1,6 @@
 ﻿import { useBudgets } from '../hooks/useBudgets';
-import { ModuleHeader } from '../components/layout/module-header';
-import { useProjectContext } from '../contexts/project-context';
+import { ModuleHeader } from '@/components/layout';
+import { useProjectContext } from '@/contexts/project-context';
 import {
     Select,
     SelectContent,
@@ -10,9 +10,9 @@ import {
 } from "@/components/ui/select";
 
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
-import toast from 'react-hot-toast';
-import type { OrcamentoItem } from '../types';
-import { PageHeader } from '../components/layout/page-header';
+import { toast } from 'sonner';
+import type { OrcamentoItem } from '@/types';
+import { PageHeader } from '@/components/layout';
 import {
     Card,
     CardContent,
@@ -1482,7 +1482,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
 
                     // 1. TOAST DE SUCESSO (Verde)
                     toast.custom((t) => (
-                        <div className={`${t.visible ? 'animate-enter' : 'animate-leave'} max-w-md w-full bg-[#242830] shadow-2xl rounded-lg pointer-events-auto border border-[#3a3e45] flex ring-1 ring-black ring-opacity-5`}>
+                        <div className="max-w-md w-full bg-[#242830] shadow-2xl rounded-lg pointer-events-auto border border-[#3a3e45] flex ring-1 ring-black ring-opacity-5">
                             <div className="flex-1 w-0 p-4">
                                 <div className="flex items-start">
                                     <div className="flex-shrink-0 pt-0.5">
@@ -1500,7 +1500,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                             </div>
                             <div className="flex border-l border-[#3a3e45]">
                                 <button
-                                    onClick={() => toast.dismiss(t.id)}
+                                    onClick={() => toast.dismiss(t)}
                                     className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-[#a0a5b0] hover:text-white hover:bg-[#3a3e45] focus:outline-none transition-colors"
                                 >
                                     <X className="h-5 w-5" />
@@ -1515,7 +1515,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                     if (genericHiddenCols.length > 0) {
                         setTimeout(() => {
                             toast.custom((t) => (
-                                <div className={`${t.visible ? 'animate-enter' : 'animate-leave'} max-w-md w-full bg-[#242830] shadow-2xl rounded-lg pointer-events-auto border border-[#3a3e45] flex ring-1 ring-black ring-opacity-5`}>
+                                <div className="max-w-md w-full bg-[#242830] shadow-2xl rounded-lg pointer-events-auto border border-[#3a3e45] flex ring-1 ring-black ring-opacity-5">
                                     <div className="flex-1 w-0 p-4">
                                         <div className="flex items-start">
                                             <div className="flex-shrink-0 pt-0.5">
@@ -1533,7 +1533,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                     </div>
                                     <div className="flex border-l border-[#3a3e45]">
                                         <button
-                                            onClick={() => toast.dismiss(t.id)}
+                                            onClick={() => toast.dismiss(t)}
                                             className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-[#a0a5b0] hover:text-white hover:bg-[#3a3e45] focus:outline-none transition-colors"
                                         >
                                             <X className="h-5 w-5" />
@@ -1548,7 +1548,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                     if (shouldHideSplitColumns) {
                         setTimeout(() => {
                             toast.custom((t) => (
-                                <div className={`${t.visible ? 'animate-enter' : 'animate-leave'} max-w-md w-full bg-[#242830] shadow-2xl rounded-lg pointer-events-auto border border-[#3a3e45] flex ring-1 ring-black ring-opacity-5`}>
+                                <div className="max-w-md w-full bg-[#242830] shadow-2xl rounded-lg pointer-events-auto border border-[#3a3e45] flex ring-1 ring-black ring-opacity-5">
                                     <div className="flex-1 w-0 p-4">
                                         <div className="flex items-start">
                                             <div className="flex-shrink-0 pt-0.5">
@@ -1566,7 +1566,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                     </div>
                                     <div className="flex border-l border-[#3a3e45]">
                                         <button
-                                            onClick={() => toast.dismiss(t.id)}
+                                            onClick={() => toast.dismiss(t)}
                                             className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-[#a0a5b0] hover:text-white hover:bg-[#3a3e45] focus:outline-none transition-colors"
                                         >
                                             <X className="h-5 w-5" />

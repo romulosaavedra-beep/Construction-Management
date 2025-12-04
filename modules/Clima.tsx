@@ -1,18 +1,14 @@
-
 import React, { useState, useEffect } from 'react';
-import { PageHeader } from '../components/layout/page-header';
+import { useNavigate } from 'react-router-dom';
+import { PageHeader } from '@/components/layout';
 import { Card, CardHeader } from '@/components/ui/card';
 import { clima15DiasData, climaIntraDiarioData } from '../data/mockData';
 import { Button } from '@/components/ui/button';
-import type { Module } from '../types';
-
-interface ClimaProps {
-  setActiveModule: (module: Module) => void;
-}
 
 const LOCAL_STORAGE_KEY_GENERAL = 'vobi-settings-general';
 
-const Clima: React.FC<ClimaProps> = ({ setActiveModule }) => {
+const Clima: React.FC = () => {
+    const navigate = useNavigate();
     const [localizacao, setLocalizacao] = useState("São Paulo, SP - Brasil");
 
     useEffect(() => {
@@ -24,7 +20,7 @@ const Clima: React.FC<ClimaProps> = ({ setActiveModule }) => {
                 if (config.cidade) parts.push(config.cidade);
                 if (config.estado) parts.push(config.estado);
                 if (config.pais) parts.push(config.pais);
-                
+
                 if (parts.length > 0) {
                     setLocalizacao(parts.join(", "));
                 }
@@ -43,10 +39,10 @@ const Clima: React.FC<ClimaProps> = ({ setActiveModule }) => {
     return (
         <div>
             <PageHeader title="🌤️ Clima e Tempo" subtitle={`📍 ${localizacao}`} />
-            
+
             <Card>
                 <CardHeader title="📅 PREVISÃO PRÓXIMOS 7 DIAS">
-                    <Button variant="secondary" onClick={() => setActiveModule('settings')}>
+                    <Button variant="secondary" onClick={() => navigate('/settings')}>
                         ⚙️ Configurações
                     </Button>
                 </CardHeader>
@@ -65,7 +61,7 @@ const Clima: React.FC<ClimaProps> = ({ setActiveModule }) => {
 
             <Card>
                 <CardHeader title="⏰ INTRADIÁRIO (Próximas Horas)" />
-                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
                     {climaIntraDiarioData.map((hora, index) => (
                         <div key={index} className="bg-[#242830] p-3 rounded-lg text-center">
                             <p className="font-semibold text-sm">{hora.hora}</p>
@@ -77,14 +73,14 @@ const Clima: React.FC<ClimaProps> = ({ setActiveModule }) => {
                 </div>
             </Card>
 
-             <Card>
+            <Card>
                 <CardHeader title="🚨 Alertas Climáticos" />
                 <div className="space-y-3">
                     <div className="bg-yellow-500/10 border-l-4 border-yellow-400 p-4 rounded-md">
                         <strong>⚠️ Atenção:</strong> Previsão de chuva intensa para Quarta (13/Nov) - 80% de probabilidade.
                     </div>
                     <div className="bg-green-500/10 border-l-4 border-green-400 p-4 rounded-md">
-                         <strong>✅ Bom para trabalho:</strong> Dias 11, 12 e 15 apresentam condições favoráveis.
+                        <strong>✅ Bom para trabalho:</strong> Dias 11, 12 e 15 apresentam condições favoráveis.
                     </div>
                 </div>
             </Card>

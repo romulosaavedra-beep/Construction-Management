@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { supabase } from '../services/supabase';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import type { OrcamentoItem } from '../types';
 import { useProjectContext } from './project-context';
 

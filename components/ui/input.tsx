@@ -1,54 +1,52 @@
-// src/components/ui/Input.tsx
-import React from 'react';
-import { constructionProTheme } from '@/lib/theme/colors';
+import * as React from "react";
+import { cn } from "@/lib/utils";
 
-interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-    label?: string;
-    error?: string;
+export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+    error?: boolean;
     helperText?: string;
     icon?: React.ReactNode;
     fullWidth?: boolean;
 }
 
-export const Input: React.FC<InputProps> = ({
-    label,
-    error,
-    helperText,
-    icon,
-    fullWidth = false,
-    className = '',
-    ...props
-}) => {
-    const baseStyles = `px-4 py-2 border rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 text-[${constructionProTheme.text.primary}]`;
-    const errorStyles = error
-        ? `border-[${constructionProTheme.status.critical.main}] focus:ring-[${constructionProTheme.status.critical.main}]`
-        : `border-[${constructionProTheme.border.medium}] focus:ring-[${constructionProTheme.primary.main}] focus:border-[${constructionProTheme.primary.main}]`;
-    const widthStyle = fullWidth ? 'w-full' : '';
-
-    return (
-        <div className={`${widthStyle} ${className}`}>
-            {label && (
-                <label className={`block text-sm font-medium text-[${constructionProTheme.text.primary}] mb-1.5`}>
-                    {label}
-                </label>
-            )}
-            <div className="relative">
+const Input = React.forwardRef<HTMLInputElement, InputProps>(
+    ({ className, type, error, helperText, icon, fullWidth, ...props }, ref) => {
+        return (
+            <div className={cn(fullWidth && "w-full", "relative")}>
                 {icon && (
-                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[${constructionProTheme.text.tertiary}]">
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--ds-text-tertiary)]">
                         {icon}
                     </div>
                 )}
                 <input
-                    className={`${baseStyles} ${errorStyles} ${icon ? 'pl-10' : ''} ${widthStyle}`}
+                    type={type}
+                    className={cn(
+                        "flex h-10 w-full rounded-[var(--ds-radius-md)] px-3 py-2",
+                        "bg-[var(--ds-bg-surface)] border border-[var(--ds-border-default)]",
+                        "text-[var(--ds-text-primary)] text-sm",
+                        "placeholder:text-[var(--ds-text-tertiary)]",
+                        "transition-all duration-200",
+                        "hover:border-[var(--ds-border-subtle)] hover:bg-[var(--ds-bg-hover)]",
+                        "focus-visible:outline-none focus-visible:border-[var(--ds-primary-500)]",
+                        "focus-visible:shadow-[var(--ds-focus-ring)]",
+                        "disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-[var(--ds-bg-muted)]",
+                        error && [
+                            "border-[var(--ds-error)]",
+                            "focus-visible:border-[var(--ds-error)]",
+                            "focus-visible:shadow-[var(--ds-focus-ring-error)]"
+                        ],
+                        icon && "pl-10",
+                        className
+                    )}
+                    ref={ref}
                     {...props}
                 />
+                {helperText && !error && (
+                    <p className="mt-1.5 text-xs text-[var(--ds-text-secondary)]">{helperText}</p>
+                )}
             </div>
-            {error && (
-                <p className={`mt-1 text-sm text-[${constructionProTheme.status.critical.main}]`}>{error}</p>
-            )}
-            {helperText && !error && (
-                <p className={`mt-1 text-sm text-[${constructionProTheme.text.secondary}]`}>{helperText}</p>
-            )}
-        </div>
-    );
-};
+        );
+    }
+);
+Input.displayName = "Input";
+
+export { Input };

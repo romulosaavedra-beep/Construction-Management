@@ -1,10 +1,10 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { supabase } from '@/services/supabase';
-import { Card, CardHeader } from '@/components/ui/card';
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { FormMessage } from "@/components/ui/form-message";
+import { Textarea } from "@/components/ui/textarea";
 import {
     Dialog,
     DialogContent,
@@ -12,14 +12,14 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
 import { DataTable } from '@/components/data-table/DataTable';
 import { SearchableDropdown } from '@/components/widgets/searchable-dropdown';
 import { useProfessionals } from '@/hooks/useProfessionals';
 import { useConfirm } from '@/utils/useConfirm';
 import { maskMobilePhone } from '@/utils/formatters';
 import type { Profissional } from '@/types';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import { createColumnHelper } from '@tanstack/react-table';
 import {
     Pencil,
@@ -32,7 +32,8 @@ import {
     Briefcase,
     FileText,
     Check,
-    X
+    X,
+    Users
 } from "lucide-react";
 import {
     Tooltip,
@@ -40,7 +41,6 @@ import {
     TooltipTrigger,
     TooltipProvider
 } from "@/components/ui/tooltip";
-import { Users } from "lucide-react";
 
 interface ProfessionalsSettingsProps {
     projectId?: string;
@@ -93,7 +93,6 @@ export const ProfessionalsSettings: React.FC<ProfessionalsSettingsProps> = ({ pr
     }, [projectId]);
 
     // Derived state for roles
-    // CORREÇÃO: Adicionado .filter(Boolean) para evitar nulos que quebram a lista
     const roles = useMemo(() => {
         const existingRoles = professionals.map(p => p.cargo).filter(Boolean);
         return Array.from(new Set([...defaultRoles, ...projectRoles, ...existingRoles])).sort();
@@ -105,7 +104,6 @@ export const ProfessionalsSettings: React.FC<ProfessionalsSettingsProps> = ({ pr
             return;
         }
 
-        // LÓGICA SOLICITADA: Preenche com o primeiro cargo da lista
         setCurrentProfissional({
             cargo: roles[0] || '',
             nome: '',
@@ -268,7 +266,7 @@ export const ProfessionalsSettings: React.FC<ProfessionalsSettingsProps> = ({ pr
                 <div className="flex justify-center">
                     <input
                         type="checkbox"
-                        className="rounded border-[#3a3e45] bg-[#0f1419] text-[#0084ff] focus:ring-[#0084ff] focus:ring-offset-0 focus:ring-offset-[#242830] w-3.5 h-3.5 cursor-pointer"
+                        className="rounded border-[var(--ds-border-subtle)] bg-[var(--ds-bg-surface)] text-[var(--ds-primary-500)] focus:ring-[var(--ds-primary-500)] focus:ring-offset-0 w-3.5 h-3.5 cursor-pointer transition-colors"
                         checked={table.getIsAllPageRowsSelected()}
                         ref={input => {
                             if (input) input.indeterminate = table.getIsSomePageRowsSelected();
@@ -281,7 +279,7 @@ export const ProfessionalsSettings: React.FC<ProfessionalsSettingsProps> = ({ pr
                 <div className="flex justify-center">
                     <input
                         type="checkbox"
-                        className="rounded border-[#3a3e45] bg-[#0f1419] text-[#0084ff] focus:ring-[#0084ff] focus:ring-offset-0 focus:ring-offset-[#242830] w-3.5 h-3.5 cursor-pointer"
+                        className="rounded border-[var(--ds-border-subtle)] bg-[var(--ds-bg-surface)] text-[var(--ds-primary-500)] focus:ring-[var(--ds-primary-500)] focus:ring-offset-0 w-3.5 h-3.5 cursor-pointer transition-colors"
                         checked={row.getIsSelected()}
                         disabled={!row.getCanSelect()}
                         onChange={row.getToggleSelectedHandler()}
@@ -299,8 +297,8 @@ export const ProfessionalsSettings: React.FC<ProfessionalsSettingsProps> = ({ pr
             minSize: 200,
             cell: info => (
                 <div className="flex items-center gap-2">
-                    <Briefcase className="w-3.5 h-3.5 text-[#a0a5b0]" />
-                    <span className="text-[#e8eaed]">{info.getValue()}</span>
+                    <Briefcase className="w-3.5 h-3.5 text-[var(--ds-text-secondary)]" />
+                    <span className="text-[var(--ds-text-primary)]">{info.getValue()}</span>
                 </div>
             )
         }),
@@ -311,8 +309,8 @@ export const ProfessionalsSettings: React.FC<ProfessionalsSettingsProps> = ({ pr
             minSize: 150,
             cell: info => (
                 <div className="flex items-center gap-2">
-                    <User className="w-3.5 h-3.5 text-[#a0a5b0]" />
-                    <span className="font-medium text-white">{info.getValue()}</span>
+                    <User className="w-3.5 h-3.5 text-[var(--ds-text-secondary)]" />
+                    <span className="font-medium text-[var(--ds-text-primary)]">{info.getValue()}</span>
                 </div>
             )
         }),
@@ -322,11 +320,11 @@ export const ProfessionalsSettings: React.FC<ProfessionalsSettingsProps> = ({ pr
             size: 250,
             minSize: 150,
             cell: info => info.getValue() ? (
-                <div className="flex items-center gap-2 text-[#a0a5b0]">
+                <div className="flex items-center gap-2 text-[var(--ds-text-secondary)]">
                     <Mail className="w-3.5 h-3.5" />
                     <span className="truncate">{info.getValue()}</span>
                 </div>
-            ) : '-'
+            ) : <span className="text-[var(--ds-text-tertiary)]">-</span>
         }),
         // 5. Telefone
         columnHelper.accessor('telefone', {
@@ -334,11 +332,11 @@ export const ProfessionalsSettings: React.FC<ProfessionalsSettingsProps> = ({ pr
             size: 160,
             minSize: 120,
             cell: info => info.getValue() ? (
-                <div className="flex items-center gap-2 text-[#a0a5b0]">
+                <div className="flex items-center gap-2 text-[var(--ds-text-secondary)]">
                     <Phone className="w-3.5 h-3.5" />
                     <span className="font-mono text-xs">{info.getValue()}</span>
                 </div>
-            ) : '-'
+            ) : <span className="text-[var(--ds-text-tertiary)]">-</span>
         }),
         // 6. Atividades (Fluid)
         columnHelper.accessor('atividades', {
@@ -347,7 +345,7 @@ export const ProfessionalsSettings: React.FC<ProfessionalsSettingsProps> = ({ pr
             minSize: 250,
             meta: { isFluid: true },
             cell: info => (
-                <div className="flex items-center gap-2 text-[#a0a5b0]" title={info.getValue()}>
+                <div className="flex items-center gap-2 text-[var(--ds-text-secondary)]" title={info.getValue()}>
                     <FileText className="w-3.5 h-3.5 shrink-0" />
                     <span className="truncate">{info.getValue() || '-'}</span>
                 </div>
@@ -368,14 +366,12 @@ export const ProfessionalsSettings: React.FC<ProfessionalsSettingsProps> = ({ pr
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => handleEdit(row.original)}
-                                className="h-8 w-8 text-[#a0a5b0] hover:text-white hover:bg-[#3a3e45]"
+                                className="h-8 w-8"
                             >
                                 <Pencil className="h-3.5 w-3.5" />
                             </Button>
                         </TooltipTrigger>
-                        <TooltipContent side="bottom" align="end">
-                            <p>Editar</p>
-                        </TooltipContent>
+                        <TooltipContent side="bottom" align="end">Editar</TooltipContent>
                     </Tooltip>
 
                     <Tooltip>
@@ -384,14 +380,12 @@ export const ProfessionalsSettings: React.FC<ProfessionalsSettingsProps> = ({ pr
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => handleDelete([row.original.id])}
-                                className="h-8 w-8 text-red-400 hover:text-red-300 hover:bg-red-400/10"
+                                className="h-8 w-8 text-[var(--ds-error)] hover:text-[var(--ds-error-hover)] hover:bg-[var(--ds-error-bg)]"
                             >
                                 <Trash2 className="h-3.5 w-3.5" />
                             </Button>
                         </TooltipTrigger>
-                        <TooltipContent side="bottom" align="end">
-                            <p>Excluir</p>
-                        </TooltipContent>
+                        <TooltipContent side="bottom" align="end">Excluir</TooltipContent>
                     </Tooltip>
                 </div>
             )
@@ -403,7 +397,7 @@ export const ProfessionalsSettings: React.FC<ProfessionalsSettingsProps> = ({ pr
             <DataTable
                 title={
                     <div className="flex items-center gap-2">
-                        <Users className="w-5 h-5 text-[#0084ff]" />
+                        <Users className="w-5 h-5 text-[var(--ds-primary-500)]" />
                         Profissionais
                     </div>
                 }
@@ -416,39 +410,41 @@ export const ProfessionalsSettings: React.FC<ProfessionalsSettingsProps> = ({ pr
                 initialSorting={[{ id: 'nome', desc: false }]}
             />
 
-
-            {/* Modal */}
+            {/* Modal Criar/Editar */}
             <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-                <DialogContent className="sm:max-w-[550px] bg-[#242830] border-[#3a3e45] text-[#e8eaed] shadow-2xl">
+                <DialogContent className="sm:max-w-[550px] bg-[var(--ds-bg-elevated)] border-[var(--ds-border-default)] text-[var(--ds-text-primary)] shadow-[var(--ds-shadow-2xl)]">
                     <DialogHeader>
-                        <DialogTitle className="text-white flex items-center gap-2">
-                            {currentProfissional.id ? <Pencil className="w-4 h-4 text-[#0084ff]" /> : <CirclePlus className="w-4 h-4 text-[#0084ff]" />}
+                        <DialogTitle className="flex items-center gap-2">
+                            {currentProfissional.id ? (
+                                <Pencil className="w-4 h-4 text-[var(--ds-primary-500)]" />
+                            ) : (
+                                <CirclePlus className="w-4 h-4 text-[var(--ds-primary-500)]" />
+                            )}
                             {currentProfissional.id ? 'Editar Profissional' : 'Novo Profissional'}
                         </DialogTitle>
-                        <DialogDescription className="text-[#a0a5b0]">
+                        <DialogDescription className="text-[var(--ds-text-secondary)]">
                             Preencha os dados do profissional abaixo.
                         </DialogDescription>
                     </DialogHeader>
                     <form onSubmit={handleSave} className="space-y-4 py-4">
+                        {/* Cargo com Seleção Avançada */}
                         <div className="space-y-2">
-                            <Label htmlFor="cargo" className="text-sm font-medium text-[#e8eaed]">Cargo <span className="text-red-500">*</span></Label>
+                            <Label required>Cargo</Label>
 
-                            {/* ÁREA DE SELEÇÃO DE CARGO ESTILIZADA */}
-                            <div className="flex items-center gap-2 bg-[#1e2329] p-1 rounded-lg border border-[#3a3e45]">
+                            <div className="flex items-center gap-2 bg-[var(--ds-bg-surface)] p-1 rounded-[var(--ds-radius-md)] border border-[var(--ds-border-default)]">
                                 {isCreatingRole ? (
                                     <div className="flex items-center w-full animate-in fade-in slide-in-from-left-2">
                                         <Input
                                             value={newRole}
                                             onChange={e => setNewRole(e.target.value)}
                                             placeholder="Novo cargo..."
-                                            // AJUSTE DE FOCO: Sem ring, borda cinza
-                                            className="flex-1 bg-transparent border-none text-white focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-[#5f656f] h-8"
+                                            className="flex-1 bg-transparent border-none h-8"
                                             autoFocus
                                         />
-                                        <div className="w-px h-4 bg-[#3a3e45] mx-1" />
+                                        <div className="w-px h-4 bg-[var(--ds-border-default)] mx-1" />
                                         <Tooltip>
                                             <TooltipTrigger asChild>
-                                                <Button size="icon" variant="ghost" onClick={handleAddRole} type="button" className="h-8 w-8 text-[#0084ff] hover:bg-[#0084ff]/10 hover:text-[#0084ff]">
+                                                <Button size="icon" variant="ghost" onClick={handleAddRole} type="button" className="h-8 w-8 text-[var(--ds-primary-500)] hover:bg-[var(--ds-primary-500)]/10">
                                                     <Check className="h-4 w-4" />
                                                 </Button>
                                             </TooltipTrigger>
@@ -456,7 +452,7 @@ export const ProfessionalsSettings: React.FC<ProfessionalsSettingsProps> = ({ pr
                                         </Tooltip>
                                         <Tooltip>
                                             <TooltipTrigger asChild>
-                                                <Button size="icon" variant="ghost" onClick={() => { setIsCreatingRole(false); setNewRole(''); }} type="button" className="h-8 w-8 text-[#a0a5b0] hover:text-white hover:bg-[#3a3e45]">
+                                                <Button size="icon" variant="ghost" onClick={() => { setIsCreatingRole(false); setNewRole(''); }} type="button" className="h-8 w-8">
                                                     <X className="h-4 w-4" />
                                                 </Button>
                                             </TooltipTrigger>
@@ -472,12 +468,11 @@ export const ProfessionalsSettings: React.FC<ProfessionalsSettingsProps> = ({ pr
                                                 onChange={(val) => setCurrentProfissional({ ...currentProfissional, cargo: val })}
                                                 placeholder="Selecione um cargo..."
                                                 required
-                                                // AJUSTE DE FOCO: Passando classes para remover o ring azul do botão interno
-                                                className="w-full border-none bg-transparent focus:ring-0 focus:ring-offset-0"
+                                                className="w-full border-none bg-transparent"
                                             />
                                         </div>
 
-                                        <div className="w-px h-4 bg-[#3a3e45] mx-1" />
+                                        <div className="w-px h-4 bg-[var(--ds-border-default)] mx-1" />
 
                                         <Tooltip>
                                             <TooltipTrigger asChild>
@@ -486,7 +481,7 @@ export const ProfessionalsSettings: React.FC<ProfessionalsSettingsProps> = ({ pr
                                                     size="icon"
                                                     onClick={() => setIsCreatingRole(true)}
                                                     type="button"
-                                                    className="h-8 w-8 text-[#0084ff] hover:bg-[#0084ff]/10 hover:text-[#0084ff]"
+                                                    className="h-8 w-8 text-[var(--ds-primary-500)] hover:bg-[var(--ds-primary-500)]/10"
                                                 >
                                                     <Plus className="h-4 w-4" />
                                                 </Button>
@@ -502,7 +497,7 @@ export const ProfessionalsSettings: React.FC<ProfessionalsSettingsProps> = ({ pr
                                                         size="icon"
                                                         type="button"
                                                         onClick={() => handleDeleteRole(currentProfissional.cargo!)}
-                                                        className="h-8 w-8 text-red-400 hover:text-red-500 hover:bg-red-400/10"
+                                                        className="h-8 w-8 text-[var(--ds-error)] hover:bg-[var(--ds-error-bg)]"
                                                     >
                                                         <Trash2 className="h-4 w-4" />
                                                     </Button>
@@ -515,60 +510,57 @@ export const ProfessionalsSettings: React.FC<ProfessionalsSettingsProps> = ({ pr
                             </div>
                         </div>
 
+                        {/* Nome */}
                         <div className="space-y-2">
-                            <Label htmlFor="nome" className="text-sm font-medium text-[#e8eaed]">Nome <span className="text-red-500">*</span></Label>
+                            <Label required>Nome</Label>
                             <Input
-                                id="nome"
                                 value={currentProfissional.nome || ''}
                                 onChange={e => setCurrentProfissional({ ...currentProfissional, nome: e.target.value })}
-                                // AJUSTE DE FOCO: Sem ring, borda cinza
-                                className="bg-[#1e2329] border-[#3a3e45] text-white focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-[#71767f] placeholder:text-[#5f656f]"
                                 placeholder="Ex: João Silva"
                                 required
+                                fullWidth
                             />
                         </div>
+
+                        {/* Email e Telefone */}
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label htmlFor="email" className="text-sm font-medium text-[#e8eaed]">Email</Label>
+                                <Label>Email</Label>
                                 <Input
-                                    id="email"
                                     type="email"
                                     value={currentProfissional.email || ''}
                                     onChange={e => setCurrentProfissional({ ...currentProfissional, email: e.target.value })}
-                                    // AJUSTE DE FOCO: Sem ring, borda cinza
-                                    className="bg-[#1e2329] border-[#3a3e45] text-white focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-[#71767f] placeholder:text-[#5f656f]"
                                     placeholder="joao@exemplo.com"
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="telefone" className="text-sm font-medium text-[#e8eaed]">Telefone</Label>
+                                <Label>Telefone</Label>
                                 <Input
-                                    id="telefone"
                                     value={currentProfissional.telefone || ''}
                                     onChange={e => setCurrentProfissional({ ...currentProfissional, telefone: maskMobilePhone(e.target.value) })}
-                                    // AJUSTE DE FOCO: Sem ring, borda cinza
-                                    className={`bg-[#1e2329] border ${phoneError ? 'border-red-500' : 'border-[#3a3e45]'} text-white focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-[#71767f] placeholder:text-[#5f656f]`}
                                     placeholder="(11) 99999-9999"
+                                    error={!!phoneError}
                                 />
-                                {phoneError && <p className="text-xs text-red-500 mt-1">{phoneError}</p>}
+                                {phoneError && <FormMessage type="error">{phoneError}</FormMessage>}
                             </div>
                         </div>
+
+                        {/* Atividades */}
                         <div className="space-y-2">
-                            <Label htmlFor="atividades" className="text-sm font-medium text-[#e8eaed]">Atividades <span className="text-red-500">*</span></Label>
+                            <Label required>Atividades</Label>
                             <Textarea
-                                id="atividades"
                                 value={currentProfissional.atividades || ''}
                                 onChange={e => setCurrentProfissional({ ...currentProfissional, atividades: e.target.value })}
-                                // AJUSTE DE FOCO: Sem ring, borda cinza
-                                className="bg-[#1e2329] border-[#3a3e45] text-white focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-[#71767f] placeholder:text-[#5f656f]"
+                                className="bg-[var(--ds-bg-surface)] border-[var(--ds-border-default)] text-[var(--ds-text-primary)]"
                                 rows={4}
-                                placeholder="Ex: Coordenação de equipes, elaboração de projetos estruturais, fiscalização de obras"
+                                placeholder="Ex: Coordenação de equipes, elaboração de projetos estruturais"
                                 required
                             />
                         </div>
+
                         <DialogFooter className="gap-2 sm:gap-0">
-                            <Button variant="ghost" onClick={() => setIsModalOpen(false)} type="button" className="text-[#a0a5b0] hover:text-white hover:bg-[#3a3e45]">Cancelar</Button>
-                            <Button type="submit" className="bg-[#0084ff] hover:bg-[#0073e6] text-white shadow-lg shadow-blue-900/20">Salvar Alterações</Button>
+                            <Button variant="ghost" onClick={() => setIsModalOpen(false)} type="button">Cancelar</Button>
+                            <Button type="submit" variant="primary">Salvar Alterações</Button>
                         </DialogFooter>
                     </form>
                 </DialogContent>
@@ -576,19 +568,19 @@ export const ProfessionalsSettings: React.FC<ProfessionalsSettingsProps> = ({ pr
 
             {/* Confirm Dialog */}
             <Dialog open={dialogState.isOpen} onOpenChange={(open) => !open && handleCancel()}>
-                <DialogContent className="sm:max-w-[400px] bg-[#242830] border-[#3a3e45] text-[#e8eaed] shadow-2xl">
+                <DialogContent className="sm:max-w-[400px] bg-[var(--ds-bg-elevated)] border-[var(--ds-border-default)] shadow-[var(--ds-shadow-2xl)]">
                     <DialogHeader>
-                        <DialogTitle className="text-white flex items-center gap-2">
-                            <Trash2 className="w-5 h-5 text-red-400" />
+                        <DialogTitle className="flex items-center gap-2">
+                            <Trash2 className="w-5 h-5 text-[var(--ds-error)]" />
                             {dialogState.title}
                         </DialogTitle>
-                        <DialogDescription className="text-[#a0a5b0] pt-2">
+                        <DialogDescription className="text-[var(--ds-text-secondary)] pt-2">
                             {dialogState.message}
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter className="gap-2 sm:gap-0 mt-4">
-                        <Button variant="ghost" onClick={handleCancel} className="text-[#a0a5b0] hover:text-white hover:bg-[#3a3e45]">{dialogState.cancelText || 'Cancelar'}</Button>
-                        <Button variant="destructive" onClick={handleConfirm} className="bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-900/20">{dialogState.confirmText || 'Confirmar'}</Button>
+                        <Button variant="ghost" onClick={handleCancel}>{dialogState.cancelText || 'Cancelar'}</Button>
+                        <Button variant="destructive" onClick={handleConfirm}>{dialogState.confirmText || 'Confirmar'}</Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>

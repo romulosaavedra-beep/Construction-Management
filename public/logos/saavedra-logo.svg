@@ -1,0 +1,89 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+  <!-- Define gradients -->
+  <defs>
+    <linearGradient id="gradient-primary" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0084ff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0073e6;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="gradient-accent" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#00d4ff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0084ff;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background circle (optional) -->
+  <circle cx="100" cy="100" r="95" fill="none" stroke="url(#gradient-primary)" stroke-width="1" opacity="0.2"/>
+
+  <!-- Main structure: Building silhouette with geometric shapes -->
+  <g id="building-structure">
+    <!-- Left tower -->
+    <rect x="35" y="65" width="30" height="95" fill="url(#gradient-primary)" rx="3"/>
+    
+    <!-- Center tower (taller) -->
+    <rect x="85" y="40" width="30" height="120" fill="url(#gradient-accent)" rx="3"/>
+    
+    <!-- Right tower -->
+    <rect x="135" y="60" width="30" height="100" fill="url(#gradient-primary)" rx="3"/>
+    
+    <!-- Connecting base -->
+    <rect x="30" y="160" width="140" height="8" fill="url(#gradient-accent)" rx="2"/>
+  </g>
+
+  <!-- Windows pattern -->
+  <g id="windows" fill="rgba(255,255,255,0.3)">
+    <!-- Left tower windows -->
+    <rect x="40" y="75" width="6" height="6" rx="1"/>
+    <rect x="50" y="75" width="6" height="6" rx="1"/>
+    <rect x="40" y="90" width="6" height="6" rx="1"/>
+    <rect x="50" y="90" width="6" height="6" rx="1"/>
+    <rect x="40" y="105" width="6" height="6" rx="1"/>
+    <rect x="50" y="105" width="6" height="6" rx="1"/>
+    <rect x="40" y="120" width="6" height="6" rx="1"/>
+    <rect x="50" y="120" width="6" height="6" rx="1"/>
+    <rect x="40" y="135" width="6" height="6" rx="1"/>
+    <rect x="50" y="135" width="6" height="6" rx="1"/>
+    
+    <!-- Center tower windows -->
+    <rect x="90" y="50" width="6" height="6" rx="1"/>
+    <rect x="100" y="50" width="6" height="6" rx="1"/>
+    <rect x="90" y="70" width="6" height="6" rx="1"/>
+    <rect x="100" y="70" width="6" height="6" rx="1"/>
+    <rect x="90" y="90" width="6" height="6" rx="1"/>
+    <rect x="100" y="90" width="6" height="6" rx="1"/>
+    <rect x="90" y="110" width="6" height="6" rx="1"/>
+    <rect x="100" y="110" width="6" height="6" rx="1"/>
+    <rect x="90" y="130" width="6" height="6" rx="1"/>
+    <rect x="100" y="130" width="6" height="6" rx="1"/>
+    
+    <!-- Right tower windows -->
+    <rect x="140" y="75" width="6" height="6" rx="1"/>
+    <rect x="150" y="75" width="6" height="6" rx="1"/>
+    <rect x="140" y="95" width="6" height="6" rx="1"/>
+    <rect x="150" y="95" width="6" height="6" rx="1"/>
+    <rect x="140" y="115" width="6" height="6" rx="1"/>
+    <rect x="150" y="115" width="6" height="6" rx="1"/>
+    <rect x="140" y="135" width="6" height="6" rx="1"/>
+    <rect x="150" y="135" width="6" height="6" rx="1"/>
+  </g>
+
+  <!-- Accent lines (geometric design) -->
+  <g id="accents" stroke="url(#gradient-accent)" stroke-width="2" fill="none" opacity="0.6">
+    <!-- Diagonal accent from top left to center -->
+    <line x1="25" y1="50" x2="85" y2="40"/>
+    <!-- Accent from center to bottom right -->
+    <line x1="115" y1="160" x2="175" y2="180"/>
+  </g>
+
+  <!-- Rooftop peaks (geometric accent) -->
+  <g id="rooftops" fill="url(#gradient-primary)" opacity="0.8">
+    <!-- Left peak -->
+    <polygon points="35,65 52.5,55 70,65"/>
+    <!-- Center peak (taller) -->
+    <polygon points="85,40 100,25 115,40"/>
+    <!-- Right peak -->
+    <polygon points="135,60 152.5,50 170,60"/>
+  </g>
+
+  <!-- Optional: Decorative circle accent (represents growth/stability) -->
+  <circle cx="100" cy="100" r="85" fill="none" stroke="url(#gradient-primary)" stroke-width="0.5" opacity="0.15" stroke-dasharray="5,5"/>
+</svg>

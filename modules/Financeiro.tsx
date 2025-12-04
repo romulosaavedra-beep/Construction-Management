@@ -1,9 +1,9 @@
 
 import React from 'react';
-import { PageHeader } from '../components/layout/page-header';
+import { PageHeader } from '@/components/layout';
 import { Card, CardHeader } from '@/components/ui/card';
 import { KpiCard } from '@/components/widgets/kpi-card';
-import { formatCurrency } from '../utils/formatters';
+import { formatCurrency } from '@/utils/formatters';
 
 // Mock data para o gráfico de fluxo de caixa
 const cashFlowData = [

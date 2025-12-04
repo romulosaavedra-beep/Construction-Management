@@ -45,7 +45,6 @@ interface DataTableProps<TData, TValue> {
     initialSorting?: { id: string; desc: boolean }[];
 }
 
-
 export function DataTable<TData, TValue>({
     columns,
     data,
@@ -96,23 +95,22 @@ export function DataTable<TData, TValue>({
 
     return (
         <TooltipProvider>
-            <Card className="w-full bg-[#1e2329] border-[#3a3e45] text-[#e8eaed] shadow-sm">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 border-b border-[#3a3e45]">
-                    <CardTitle className="text-lg font-semibold text-white flex items-center gap-2">
+            <Card className="w-full bg-[var(--ds-bg-base)] border-[var(--ds-border-default)] text-[var(--ds-text-primary)] shadow-sm">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 border-b border-[var(--ds-border-default)]">
+                    <CardTitle className="text-lg font-semibold text-[var(--ds-text-primary)] flex items-center gap-2">
                         {title}
-                        <span className="text-xs font-normal text-[#a0a5b0] bg-[#242830] px-2 py-0.5 rounded-full border border-[#3a3e45]">
+                        <span className="text-xs font-normal text-[var(--ds-text-secondary)] bg-[var(--ds-bg-elevated)] px-2 py-0.5 rounded-full border border-[var(--ds-border-default)]">
                             {table.getFilteredRowModel().rows.length}
                         </span>
                     </CardTitle>
                     <div className="flex items-center gap-3">
                         <div className="relative">
-                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-[#a0a5b0]" />
+                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-[var(--ds-text-secondary)]" />
                             <Input
                                 placeholder={searchPlaceholder}
                                 value={globalFilter ?? ''}
                                 onChange={e => setGlobalFilter(e.target.value)}
-                                // AJUSTE DE FOCO: Sem ring, borda cinza clara
-                                className="w-64 pl-9 bg-[#0f1419] border-[#3a3e45] text-white placeholder:text-[#5f656f] focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-[#71767f] h-9 transition-colors"
+                                className="w-64 pl-9 bg-[var(--ds-bg-surface)] border-[var(--ds-border-default)] text-[var(--ds-text-primary)] placeholder:text-[var(--ds-text-tertiary)] focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-[var(--ds-border-strong)] h-9 transition-colors"
                             />
                         </div>
 
@@ -123,12 +121,12 @@ export function DataTable<TData, TValue>({
                                         variant="ghost"
                                         size="icon"
                                         onClick={handleBulkDelete}
-                                        className="h-9 w-9 text-red-400 hover:text-red-300 hover:bg-red-400/10 transition-colors"
+                                        className="h-9 w-9 text-[var(--ds-error)] hover:text-[var(--ds-error-hover)] hover:bg-[var(--ds-error-bg)] transition-colors"
                                     >
                                         <Trash2 className="h-4 w-4" />
                                     </Button>
                                 </TooltipTrigger>
-                                <TooltipContent side="right" className="bg-[#242830] border-[#3a3e45] text-white">
+                                <TooltipContent side="right" className="bg-[var(--ds-bg-elevated)] border-[var(--ds-border-default)] text-[var(--ds-text-primary)]">
                                     <p>Excluir {selectedIds.length} selecionados</p>
                                 </TooltipContent>
                             </Tooltip>
@@ -140,12 +138,12 @@ export function DataTable<TData, TValue>({
                                             onClick={onAdd}
                                             size="icon"
                                             variant="ghost"
-                                            className="h-9 w-9 text-[#0084ff] hover:text-[#339dff] hover:bg-[#0084ff]/10 transition-colors"
+                                            className="h-9 w-9 text-[var(--ds-primary-500)] hover:text-[var(--ds-primary-400)] hover:bg-[var(--ds-primary-bg)] transition-colors"
                                         >
                                             <CirclePlus className="h-5 w-5" />
                                         </Button>
                                     </TooltipTrigger>
-                                    <TooltipContent side="right" className="bg-[#242830] border-[#3a3e45] text-white">
+                                    <TooltipContent side="right" className="bg-[var(--ds-bg-elevated)] border-[var(--ds-border-default)] text-[var(--ds-text-primary)]">
                                         <p>Adicionar Novo</p>
                                     </TooltipContent>
                                 </Tooltip>
@@ -157,9 +155,9 @@ export function DataTable<TData, TValue>({
                     <div className="overflow-hidden">
                         <div className="max-h-[600px] overflow-y-auto custom-scrollbar relative">
                             <Table style={{ width: table.getTotalSize(), minWidth: '100%' }}>
-                                <TableHeader className="sticky top-0 z-30 bg-[#242830] shadow-sm">
+                                <TableHeader className="sticky top-0 z-30 bg-[var(--ds-bg-elevated)] shadow-sm">
                                     {table.getHeaderGroups().map(headerGroup => (
-                                        <TableRow key={headerGroup.id} className="border-b border-[#3a3e45] hover:bg-transparent">
+                                        <TableRow key={headerGroup.id} className="border-b border-[var(--ds-border-default)] hover:bg-transparent">
                                             {headerGroup.headers.map(header => {
                                                 const isSelect = header.column.id === 'select';
                                                 const isActions = header.column.id === 'actions';
@@ -169,11 +167,11 @@ export function DataTable<TData, TValue>({
                                                 const stickyStyle: React.CSSProperties = {};
 
                                                 if (isSelect) {
-                                                    stickyClass = 'sticky left-0 z-30 bg-[#242830] border-r border-[#3a3e45]';
+                                                    stickyClass = 'sticky left-0 z-30 bg-[var(--ds-bg-elevated)] border-r border-[var(--ds-border-default)]';
                                                     stickyStyle.left = 0;
                                                 }
                                                 if (isActions) {
-                                                    stickyClass = 'sticky right-0 z-30 bg-[#242830] border-l border-[#3a3e45]';
+                                                    stickyClass = 'sticky right-0 z-30 bg-[var(--ds-bg-elevated)] border-l border-[var(--ds-border-default)]';
                                                     stickyStyle.right = 0;
                                                 }
 
@@ -188,9 +186,9 @@ export function DataTable<TData, TValue>({
                                                     <TableHead
                                                         key={header.id}
                                                         className={cn(
-                                                            "h-10 px-4 py-3 text-[#a0a5b0] font-medium text-xs uppercase tracking-wider select-none bg-[#242830] relative group",
+                                                            "h-10 px-4 py-3 text-[var(--ds-text-secondary)] font-medium text-xs uppercase tracking-wider select-none bg-[var(--ds-bg-elevated)] relative group",
                                                             stickyClass,
-                                                            !isSelect && !isActions && "border-r border-[#3a3e45] last:border-r-0"
+                                                            !isSelect && !isActions && "border-r border-[var(--ds-border-default)] last:border-r-0"
                                                         )}
                                                         style={{ ...widthStyle, ...stickyStyle }}
                                                     >
@@ -199,7 +197,7 @@ export function DataTable<TData, TValue>({
                                                                 <div
                                                                     {...{
                                                                         className: header.column.getCanSort()
-                                                                            ? 'cursor-pointer select-none flex items-center gap-1.5 hover:text-white transition-colors'
+                                                                            ? 'cursor-pointer select-none flex items-center gap-1.5 hover:text-[var(--ds-text-primary)] transition-colors'
                                                                             : 'flex items-center gap-1.5',
                                                                         onClick: header.column.getToggleSortingHandler(),
                                                                     }}
@@ -209,10 +207,10 @@ export function DataTable<TData, TValue>({
                                                                         header.getContext()
                                                                     )}
                                                                     {{
-                                                                        asc: <ArrowUp className="h-3 w-3 text-[#a0a5b0]" />,
-                                                                        desc: <ArrowDown className="h-3 w-3 text-[#a0a5b0]" />,
+                                                                        asc: <ArrowUp className="h-3 w-3 text-[var(--ds-text-secondary)]" />,
+                                                                        desc: <ArrowDown className="h-3 w-3 text-[var(--ds-text-secondary)]" />,
                                                                     }[header.column.getIsSorted() as string] ?? (
-                                                                        header.column.getCanSort() ? <ArrowUpDown className="h-3 w-3 text-[#3a3e45] group-hover:text-[#a0a5b0]" /> : null
+                                                                        header.column.getCanSort() ? <ArrowUpDown className="h-3 w-3 text-[var(--ds-border-default)] group-hover:text-[var(--ds-text-secondary)]" /> : null
                                                                     )}
                                                                 </div>
                                                                 
@@ -223,9 +221,9 @@ export function DataTable<TData, TValue>({
                                                                         onDoubleClick={() => header.column.resetSize()}
                                                                         className={cn(
                                                                             "absolute right-0 top-0 h-full w-[1px] cursor-col-resize touch-none z-50 transition-all",
-                                                                            "bg-[#3a3e45]",
-                                                                            "hover:w-[4px] hover:bg-[#0084ff]",
-                                                                            header.column.getIsResizing() && "w-[4px] bg-[#0084ff]"
+                                                                            "bg-[var(--ds-border-default)]",
+                                                                            "hover:w-[4px] hover:bg-[var(--ds-primary-500)]",
+                                                                            header.column.getIsResizing() && "w-[4px] bg-[var(--ds-primary-500)]"
                                                                         )}
                                                                         onClick={e => e.stopPropagation()}
                                                                     />
@@ -241,19 +239,19 @@ export function DataTable<TData, TValue>({
                                 <TableBody>
                                     {isLoading ? (
                                         <TableRow>
-                                            <TableCell colSpan={columns.length} className="h-32 text-center text-[#a0a5b0]">
+                                            <TableCell colSpan={columns.length} className="h-32 text-center text-[var(--ds-text-secondary)]">
                                                 <div className="flex flex-col items-center justify-center gap-2">
-                                                    <div className="h-6 w-6 border-2 border-[#0084ff] border-t-transparent rounded-full animate-spin" />
+                                                    <div className="h-6 w-6 border-2 border-[var(--ds-primary-500)] border-t-transparent rounded-full animate-spin" />
                                                     <span className="text-sm">Carregando dados...</span>
                                                 </div>
                                             </TableCell>
                                         </TableRow>
                                     ) : table.getRowModel().rows.length === 0 ? (
                                         <TableRow>
-                                            <TableCell colSpan={columns.length} className="h-32 text-center text-[#a0a5b0]">
+                                            <TableCell colSpan={columns.length} className="h-32 text-center text-[var(--ds-text-secondary)]">
                                                 <div className="flex flex-col items-center justify-center gap-1">
-                                                    <Search className="h-8 w-8 text-[#3a3e45] mb-2" />
-                                                    <span className="text-sm font-medium text-[#e8eaed]">Nenhum registro encontrado</span>
+                                                    <Search className="h-8 w-8 text-[var(--ds-border-default)] mb-2" />
+                                                    <span className="text-sm font-medium text-[var(--ds-text-primary)]">Nenhum registro encontrado</span>
                                                     <span className="text-xs">Tente ajustar seus filtros ou adicione um novo item.</span>
                                                 </div>
                                             </TableCell>
@@ -266,9 +264,9 @@ export function DataTable<TData, TValue>({
                                                     key={row.id}
                                                     data-state={isSelected && "selected"}
                                                     className={cn(
-                                                        "border-b border-[#3a3e45] transition-colors group text-[#e8eaed]",
-                                                        "hover:bg-[#24282f]",
-                                                        "data-[state=selected]:bg-[#161b22] data-[state=selected]:hover:bg-[#1c222b]"
+                                                        "border-b border-[var(--ds-border-default)] transition-colors group text-[var(--ds-text-primary)]",
+                                                        "hover:bg-[var(--ds-bg-hover)]",
+                                                        "data-[state=selected]:bg-[var(--ds-bg-active)] data-[state=selected]:hover:bg-[var(--ds-bg-active)]"
                                                     )}
                                                 >
                                                     {row.getVisibleCells().map(cell => {
@@ -280,11 +278,17 @@ export function DataTable<TData, TValue>({
                                                         const stickyStyle: React.CSSProperties = {};
                                                         
                                                         if (isSelect) {
-                                                            stickyClass = cn("sticky left-0 z-20 border-r border-[#3a3e45]", isSelected ? "bg-[#161b22]" : "bg-[#1e2329] group-hover:bg-[#24282f]");
+                                                            stickyClass = cn(
+                                                                "sticky left-0 z-20 border-r border-[var(--ds-border-default)]", 
+                                                                isSelected ? "bg-[var(--ds-bg-active)]" : "bg-[var(--ds-bg-base)] group-hover:bg-[var(--ds-bg-hover)]"
+                                                            );
                                                             stickyStyle.left = 0;
                                                         }
                                                         if (isActions) {
-                                                            stickyClass = cn("sticky right-0 z-20 border-l border-[#3a3e45]", isSelected ? "bg-[#161b22]" : "bg-[#1e2329] group-hover:bg-[#24282f]");
+                                                            stickyClass = cn(
+                                                                "sticky right-0 z-20 border-l border-[var(--ds-border-default)]", 
+                                                                isSelected ? "bg-[var(--ds-bg-active)]" : "bg-[var(--ds-bg-base)] group-hover:bg-[var(--ds-bg-hover)]"
+                                                            );
                                                             stickyStyle.right = 0;
                                                         }
 

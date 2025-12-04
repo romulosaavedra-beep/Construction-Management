@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import type { Compra, Fornecedor } from '../types';
-import { PageHeader } from '../components/layout/page-header';
+import type { Compra, Fornecedor } from '@/types';
+import { PageHeader } from '@/components/layout';
 import { Card, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { StatusBadge } from '@/components/widgets/status-badge';

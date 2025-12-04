@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { Toaster } from 'react-hot-toast';
+import { Toaster } from 'sonner';
 import App from './App';
 import './index.css';
 
@@ -20,13 +20,6 @@ root.render(
         style: {
           background: '#363636',
           color: '#fff',
-        },
-        success: {
-          duration: 3000,
-          iconTheme: {
-            primary: '#10b981',
-            secondary: '#fff',
-          },
         },
       }}
     />

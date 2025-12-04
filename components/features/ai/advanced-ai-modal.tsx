@@ -1,15 +1,15 @@
 
 import React, { useState, useEffect } from 'react';
-import { Button } from './Button';
-import type { PlanejamentoItem, ConstraintItem } from '../types';
+import { Button } from '@/components/ui/button';
+import type { PlanejamentoItem, ConstraintItem } from '@/types';
 import { 
     generateScheduleWithGemini, 
     predictAndAdjustScheduleGemini, 
     optimizeCriticalPathGemini,
     manageConstraintsGemini,
     generateExecutiveReportGemini
-} from '../services/aiPlannerService';
-import { WorkScheduleConfig } from '../utils/formatters';
+} from '@/services/aiPlannerService';
+import { WorkScheduleConfig } from '@/utils/formatters';
 
 interface AdvancedAIModalProps {
   isOpen: boolean;

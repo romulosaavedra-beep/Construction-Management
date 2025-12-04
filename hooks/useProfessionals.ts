@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../services/supabase';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import type { Profissional } from '../types';
 
 export const useProfessionals = (projectId?: string) => {
