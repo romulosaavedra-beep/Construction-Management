@@ -31,7 +31,7 @@ export const Header: React.FC<HeaderProps> = ({ showWeather = true }) => {
         : 'São Paulo, SP - Brasil';
 
     return (
-        <header className="header hidden md:flex bg-[var(--ds-bg-base)] px-5 py-3 border-b border-[var(--ds-border-default)] items-center justify-between flex-shrink-0">
+        <header className="header hidden md:flex bg-base px-5 py-3 border-b border-border items-center justify-between flex-shrink-0">
             <DateTimeWidget location={locationDisplay} />
 
             {showWeather && <WeatherWidget location={locationData} />}

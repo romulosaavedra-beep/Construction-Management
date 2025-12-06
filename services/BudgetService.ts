@@ -34,7 +34,8 @@ export const BudgetService = {
      */
     generateNextId: (items: OrcamentoItem[]): number => {
         if (items.length === 0) return 1;
-        return Math.max(...items.map(i => i.id)) + 1;
+        const ids = items.map(i => typeof i.id === 'string' ? parseInt(i.id, 10) : i.id).filter(id => !isNaN(id));
+        return ids.length > 0 ? Math.max(...ids) + 1 : 1;
     },
 
     /**
@@ -42,14 +43,14 @@ export const BudgetService = {
      * This ensures consistency between children and parents.
      */
     recalculateTotals: (items: OrcamentoItem[]): OrcamentoItem[] => {
-        const itemMap = new Map<number, OrcamentoItem>();
+        const itemMap = new Map<string | number, OrcamentoItem>();
         // Clone items to avoid mutation side effects on the input array
         const newItems = items.map(i => ({ ...i }));
 
         newItems.forEach(item => itemMap.set(item.id, item));
 
         // Helper to process a node
-        const processNode = (itemId: number): { mat: number; mo: number; total: number } => {
+        const processNode = (itemId: string | number): { mat: number; mo: number; total: number } => {
             const item = itemMap.get(itemId);
             if (!item) return { mat: 0, mo: 0, total: 0 };
 

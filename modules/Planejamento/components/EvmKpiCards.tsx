@@ -1,9 +1,8 @@
 // src/components/planning/EvmKpiCards.tsx
 import React from 'react';
 import { DollarSign, Clock, TrendingUp, TrendingDown, AlertCircle } from 'lucide-react';
-import { constructionProTheme } from '@/lib/theme/colors';
-import { Card } from '@/components/ui/card';
-import type { EvmMetrics } from '@/utils/planning/evmCalculator';
+
+import type { EvmMetrics } from '../utils/evmCalculator';
 
 interface EvmKpiCardsProps {
     metrics: EvmMetrics;

@@ -68,7 +68,7 @@ export const CreateBudgetDialog: React.FC<CreateBudgetDialogProps> = ({
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
-                        <FileSpreadsheet className="w-5 h-5 text-[var(--ds-primary-500)]" />
+                        <FileSpreadsheet className="w-5 h-5 text-accent-500" />
                         Novo Orçamento
                     </DialogTitle>
                     <DialogDescription>

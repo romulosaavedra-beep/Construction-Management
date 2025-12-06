@@ -3,34 +3,34 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const badgeVariants = cva(
-    "inline-flex items-center gap-1.5 rounded-[var(--ds-radius-full)] px-2.5 py-1 text-[length:var(--ds-text-xs)] font-medium transition-colors focus:outline-none focus:shadow-[var(--ds-focus-ring)]",
+    "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-focus",
     {
         variants: {
             variant: {
                 success: [
-                    "bg-[var(--ds-success-bg)]",
-                    "border border-[var(--ds-success-border)]",
-                    "text-[var(--ds-success)]"
+                    "bg-success-bg",
+                    "border border-success",
+                    "text-success"
                 ],
                 error: [
-                    "bg-[var(--ds-error-bg)]",
-                    "border border-[var(--ds-error-border)]",
-                    "text-[var(--ds-error)]"
+                    "bg-error-bg",
+                    "border border-error",
+                    "text-error"
                 ],
                 warning: [
-                    "bg-[var(--ds-warning-bg)]",
-                    "border border-[var(--ds-warning-border)]",
-                    "text-[var(--ds-warning)]"
+                    "bg-warning-bg",
+                    "border border-warning",
+                    "text-warning"
                 ],
                 info: [
-                    "bg-[var(--ds-info-bg)]",
-                    "border border-[var(--ds-info-border)]",
-                    "text-[var(--ds-info)]"
+                    "bg-info-bg",
+                    "border border-info",
+                    "text-info"
                 ],
                 default: [
-                    "bg-[var(--ds-bg-surface)]",
-                    "border border-[var(--ds-border-subtle)]",
-                    "text-[var(--ds-text-secondary)]"
+                    "bg-surface",
+                    "border border-border-subtle",
+                    "text-secondary"
                 ],
             },
         },

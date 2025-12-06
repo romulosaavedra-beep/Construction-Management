@@ -34,10 +34,10 @@ export const DateTimeWidget: React.FC<DateTimeWidgetProps> = ({
     return (
         <div className="flex items-center gap-4">
             <div>
-                <div className="font-semibold text-sm text-[var(--ds-text-primary)]">
+                <div className="font-semibold text-sm text-primary">
                     {dateTime.date} | {dateTime.time}
                 </div>
-                <div className="text-xs text-[var(--ds-text-secondary)] flex items-center gap-1">
+                <div className="text-xs text-secondary flex items-center gap-1">
                     <span>📍</span>
                     {location}
                 </div>

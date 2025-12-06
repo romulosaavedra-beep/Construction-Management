@@ -13,14 +13,18 @@ interface ModuleHeaderProps {
     title: string;
     subtitle: string;
     icon?: LucideIcon;
+    breadcrumbs?: { label: string; href?: string }[];
     showBudgetSelector?: boolean;
+    children?: React.ReactNode;
 }
 
 export const ModuleHeader: React.FC<ModuleHeaderProps> = ({
     title,
     subtitle,
     icon,
+    breadcrumbs,
     showBudgetSelector = true,
+    children
 }) => {
     const { selectedProjectId } = useProjectContext();
 
@@ -30,9 +34,10 @@ export const ModuleHeader: React.FC<ModuleHeaderProps> = ({
     return (
         <>
             <div className="module-header flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <PageHeader icon={icon} title={title} subtitle={subtitle} />
+                <PageHeader icon={icon} title={title} subtitle={subtitle} breadcrumbs={breadcrumbs} marginBottom="mb-0" />
 
-                <div className="module-header__selector-group">
+                <div className="module-header__selector-group flex items-center gap-4">
+                    {children}
                     <ProjectSelector onCreateClick={() => setIsCreatingProject(true)} />
 
                     {showBudgetSelector && selectedProjectId && (

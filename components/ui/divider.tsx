@@ -15,11 +15,11 @@ const Divider = React.forwardRef<HTMLDivElement, DividerProps>(
                 {...props}
             >
                 <div className="absolute inset-0 flex items-center">
-                    <span className="w-full h-px bg-gradient-to-r from-transparent via-[var(--ds-border-subtle)] to-transparent" />
+                    <span className="w-full h-px bg-gradient-to-r from-transparent via-border-subtle to-transparent" />
                 </div>
                 {(label || icon) && (
                     <div className="relative flex justify-center">
-                        <span className="flex items-center gap-1.5 bg-[var(--ds-bg-elevated)] px-3 text-[length:var(--ds-text-xs)] font-semibold uppercase tracking-wider text-[var(--ds-text-tertiary)]">
+                        <span className="flex items-center gap-1.5 bg-elevated px-3 text-xs font-semibold uppercase tracking-wider text-secondary">
                             {icon}
                             {label}
                         </span>

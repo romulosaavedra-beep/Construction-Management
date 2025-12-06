@@ -25,11 +25,11 @@ const FormMessage = React.forwardRef<HTMLParagraphElement, FormMessageProps>(
                 ref={ref}
                 className={cn(
                     "flex items-center gap-1.5 mt-1.5",
-                    "text-[length:var(--ds-text-xs)] font-medium",
-                    type === "error" && "text-[var(--ds-error)]",
-                    type === "success" && "text-[var(--ds-success)]",
-                    type === "warning" && "text-[var(--ds-warning)]",
-                    type === "info" && "text-[var(--ds-info)]",
+                    "text-xs font-medium",
+                    type === "error" && "text-error",
+                    type === "success" && "text-success",
+                    type === "warning" && "text-warning",
+                    type === "info" && "text-info",
                     className
                 )}
                 {...props}

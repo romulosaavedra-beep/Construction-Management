@@ -63,16 +63,16 @@ export function SettingsDataTable<TData>({
                     placeholder={searchPlaceholder}
                     value={globalFilter}
                     onChange={(e) => setGlobalFilter(e.target.value)}
-                    className="pl-10 bg-surface border-default text-white"
+                    className="pl-10 bg-surface border-border text-primary"
                 />
             </div>
 
             {/* Table */}
-            <div className="rounded-lg border border-default overflow-hidden">
+            <div className="rounded-lg border border-border overflow-hidden">
                 <Table>
                     <TableHeader>
                         {table.getHeaderGroups().map((headerGroup) => (
-                            <TableRow key={headerGroup.id} className="border-default">
+                            <TableRow key={headerGroup.id} className="border-border">
                                 {headerGroup.headers.map((header) => (
                                     <TableHead key={header.id} className="text-secondary">
                                         {header.isPlaceholder
@@ -88,10 +88,10 @@ export function SettingsDataTable<TData>({
                             table.getRowModel().rows.map((row) => (
                                 <TableRow
                                     key={row.id}
-                                    className="border-default hover:bg-surface transition-colors"
+                                    className="border-border hover:bg-surface transition-colors"
                                 >
                                     {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id} className="text-white">
+                                        <TableCell key={cell.id} className="text-primary">
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                         </TableCell>
                                     ))}

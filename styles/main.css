@@ -1,0 +1,25 @@
+/* 
+ * Main Entry Point for Application Styles
+ * Imports the Design System variables and Tailwind directives
+ */
+
+/* 1. Design System Tokens (Variables) */
+@import './design-system.css';
+
+/* 2. Tailwind Directives */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 3. Base Overrides (if needed, keep minimal) */
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    background-color: var(--ds-bg-base);
+    color: var(--ds-text-primary);
+    @apply font-sans antialiased;
+  }
+}

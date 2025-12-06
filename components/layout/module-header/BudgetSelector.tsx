@@ -53,8 +53,8 @@ export const BudgetSelector: React.FC<BudgetSelectorProps> = ({ onCreateClick })
     return (
         <div className="flex items-center gap-2">
             <div className="flex items-center gap-2 px-2">
-                <FileSpreadsheet className="w-4 h-4 text-[var(--ds-text-secondary)]" />
-                <span className="text-sm font-medium text-[var(--ds-text-secondary)]">Orçamento:</span>
+                <FileSpreadsheet className="w-4 h-4 text-secondary" />
+                <span className="text-sm font-medium text-secondary">Orçamento:</span>
             </div>
 
             <Select
@@ -102,7 +102,7 @@ export const BudgetSelector: React.FC<BudgetSelectorProps> = ({ onCreateClick })
                             variant="ghost"
                             size="icon"
                             onClick={handleDeleteBudget}
-                            className="h-8 w-8 text-[var(--ds-error)] hover:bg-[var(--ds-error-bg)]"
+                            className="h-8 w-8 text-error hover:bg-error-bg"
                         >
                             <Trash2 className="w-4 h-4" />
                         </Button>

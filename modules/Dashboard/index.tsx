@@ -45,7 +45,7 @@ const Dashboard: React.FC = () => {
                     <CardHeader title="Progresso por Etapa" />
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm text-left text-secondary">
-                            <thead className="text-xs text-primary uppercase bg-surface">
+                            <thead className="text-xs text-primary uppercase bg-elevated">
                                 <tr>
                                     <th scope="col" className="px-4 py-3">Etapa</th>
                                     <th scope="col" className="px-4 py-3">Previsto</th>
@@ -56,8 +56,8 @@ const Dashboard: React.FC = () => {
                             </thead>
                             <tbody>
                                 {etapasData.map((etapa) => (
-                                    <tr key={etapa.nome} className="border-b border-default hover:bg-elevated">
-                                        <td className="px-4 py-3 font-medium text-white">{etapa.nome}</td>
+                                    <tr key={etapa.nome} className="border-b border-border hover:bg-surface">
+                                        <td className="px-4 py-3 font-medium text-primary">{etapa.nome}</td>
                                         <td className="px-4 py-3">{formatCurrency(etapa.previsto)}</td>
                                         <td className="px-4 py-3">{formatCurrency(etapa.realizado)}</td>
                                         <td className="px-4 py-3">
@@ -80,7 +80,7 @@ const Dashboard: React.FC = () => {
                     <CardHeader title="Últimos Registros do Diário" />
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm text-left text-secondary">
-                            <thead className="text-xs text-primary uppercase bg-surface">
+                            <thead className="text-xs text-primary uppercase bg-elevated">
                                 <tr>
                                     <th scope="col" className="px-4 py-3">Data</th>
                                     <th scope="col" className="px-4 py-3">Etapa</th>
@@ -89,10 +89,10 @@ const Dashboard: React.FC = () => {
                             </thead>
                             <tbody>
                                 {diarioRegistrosData.slice(0, 3).map((log) => (
-                                    <tr key={log.id} className="border-b border-default hover:bg-elevated">
+                                    <tr key={log.id} className="border-b border-border hover:bg-surface">
                                         <td className="px-4 py-3">{formatDate(log.data)}</td>
                                         <td className="px-4 py-3">{log.etapa}</td>
-                                        <td className="px-4 py-3 font-medium text-white">
+                                        <td className="px-4 py-3 font-medium text-primary">
                                             {log.observacoes}
                                             <ul className="list-disc list-inside text-xs text-secondary mt-1">
                                                 {log.servicos.map(s => <li key={s.id}>{s.servico}</li>)}

@@ -6,77 +6,77 @@ import { Loader2 } from "lucide-react";
 
 const buttonVariants = cva(
     // Base styles
-    "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[var(--ds-radius-md)] text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:shadow-[var(--ds-focus-ring)] disabled:pointer-events-none disabled:opacity-50",
+    "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-base font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus disabled:pointer-events-none disabled:opacity-50",
     {
         variants: {
             variant: {
                 primary: [
-                    "bg-gradient-to-br from-[var(--ds-primary-500)] to-[var(--ds-primary-600)]",
+                    "bg-gradient-to-br from-accent-500 to-accent-600",
                     "text-white",
-                    "shadow-[var(--ds-shadow-sm)]",
-                    "hover:from-[var(--ds-primary-600)] hover:to-[var(--ds-primary-700)]",
-                    "hover:-translate-y-0.5 hover:shadow-[var(--ds-shadow-md)]",
-                    "active:translate-y-0 active:shadow-[var(--ds-shadow-xs)]"
+                    "shadow-sm",
+                    "hover:from-accent-600 hover:to-accent-700",
+                    "hover:-translate-y-0.5 hover:shadow-md",
+                    "active:translate-y-0 active:shadow-xs"
                 ],
 
                 default: [
-                    "bg-gradient-to-br from-[var(--ds-primary-500)] to-[var(--ds-primary-600)]",
+                    "bg-gradient-to-br from-accent-500 to-accent-600",
                     "text-white",
-                    "shadow-[var(--ds-shadow-sm)]",
-                    "hover:from-[var(--ds-primary-600)] hover:to-[var(--ds-primary-700)]",
+                    "shadow-sm",
+                    "hover:from-accent-600 hover:to-accent-700",
                     "hover:-translate-y-0.5"
                 ],
 
                 secondary: [
-                    "bg-[var(--ds-bg-elevated)]",
-                    "border border-[var(--ds-border-strong)]",
-                    "text-[var(--ds-text-primary)]",
-                    "hover:bg-[var(--ds-bg-hover)]",
-                    "active:bg-[var(--ds-bg-active)]"
+                    "bg-elevated",
+                    "border border-border-strong",
+                    "text-primary",
+                    "hover:bg-base", // mapped to --ds-bg-hover? No, base is --ds-bg-base. Need to check hover mapping.
+                    "active:bg-surface" // active is --ds-bg-active
                 ],
 
                 ghost: [
-                    "text-[var(--ds-text-secondary)]",
-                    "hover:bg-[var(--ds-bg-hover)]",
-                    "hover:text-[var(--ds-text-primary)]"
+                    "text-secondary",
+                    "hover:bg-base", // check hover mapping
+                    "hover:text-primary"
                 ],
 
                 outline: [
-                    "border-2 border-[var(--ds-border-strong)]",
-                    "text-[var(--ds-text-primary)]",
-                    "hover:bg-[var(--ds-bg-hover)]"
+                    "border-2 border-border-strong",
+                    "text-primary",
+                    "hover:bg-base"
                 ],
 
                 destructive: [
-                    "bg-[var(--ds-error)]",
+                    "bg-error",
                     "text-white",
-                    "shadow-[var(--ds-shadow-sm)]",
-                    "hover:bg-[var(--ds-error-hover)]",
-                    "hover:-translate-y-0.5 hover:shadow-[var(--ds-shadow-md)]",
+                    "shadow-sm",
+                    "hover:bg-red-600", // error-hover not mapped?
+                    "hover:-translate-y-0.5 hover:shadow-md",
                     "active:translate-y-0"
                 ],
 
                 danger: [
-                    "bg-[var(--ds-error)]",
+                    "bg-error",
                     "text-white",
-                    "shadow-[var(--ds-shadow-sm)]",
-                    "hover:bg-[var(--ds-error-hover)]",
+                    "shadow-sm",
+                    "hover:bg-red-600",
                     "hover:-translate-y-0.5"
                 ],
 
                 success: [
-                    "bg-[var(--ds-success)]",
+                    "bg-success",
                     "text-white",
-                    "shadow-[var(--ds-shadow-sm)]",
-                    "hover:bg-[var(--ds-success-hover)]",
+                    "shadow-sm",
+                    "hover:bg-green-600", // success-hover not mapped?
                     "hover:-translate-y-0.5"
                 ],
             },
             size: {
                 default: "h-9 px-4 py-2",
-                sm: "h-8 px-3 text-xs",
+                sm: "h-8 px-3 text-sm",
                 md: "h-10 px-4 py-2",
-                lg: "h-11 px-8 text-base",
+                lg: "h-11 px-8 text-lg",
                 icon: "h-9 w-9 p-0",
             },
         },

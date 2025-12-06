@@ -1,18 +1,14 @@
-
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { PageHeader } from '@/components/layout';
 import { Card, CardHeader } from '@/components/ui/card';
-import { clima15DiasData, climaIntraDiarioData } from '../data/mockData';
+import { clima15DiasData, climaIntraDiarioData } from '../../data/mockData';
 import { Button } from '@/components/ui/button';
-import type { Module } from '@/types';
-
-interface ClimaProps {
-    setActiveModule: (module: Module) => void;
-}
 
 const LOCAL_STORAGE_KEY_GENERAL = 'vobi-settings-general';
 
-const Clima: React.FC<ClimaProps> = ({ setActiveModule }) => {
+const Clima: React.FC = () => {
+    const navigate = useNavigate();
     const [localizacao, setLocalizacao] = useState("São Paulo, SP - Brasil");
 
     useEffect(() => {
@@ -46,17 +42,17 @@ const Clima: React.FC<ClimaProps> = ({ setActiveModule }) => {
 
             <Card>
                 <CardHeader title="📅 PREVISÃO PRÓXIMOS 7 DIAS">
-                    <Button variant="secondary" onClick={() => setActiveModule('settings')}>
+                    <Button variant="secondary" onClick={() => navigate('/settings')}>
                         ⚙️ Configurações
                     </Button>
                 </CardHeader>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-4">
                     {clima15DiasData.map((dia, index) => (
-                        <div key={index} className={`bg-[#242830] p-3 rounded-lg text-center border-l-4 ${getCardClass(dia.chuva)}`}>
+                        <div key={index} className={`bg-surface p-3 rounded-lg text-center border-l-4 ${getCardClass(dia.chuva)}`}>
                             <p className="font-semibold text-sm">{dia.dia}</p>
                             <p className="text-4xl my-2">{dia.icone}</p>
                             <p className="font-bold text-xl">{dia.max}°</p>
-                            <p className="text-sm text-[#a0a5b0]">Min {dia.min}°</p>
+                            <p className="text-sm text-secondary">Min {dia.min}°</p>
                             <p className="text-xs text-blue-400 mt-1">{dia.chuva}% 💧</p>
                         </div>
                     ))}
@@ -67,7 +63,7 @@ const Clima: React.FC<ClimaProps> = ({ setActiveModule }) => {
                 <CardHeader title="⏰ INTRADIÁRIO (Próximas Horas)" />
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
                     {climaIntraDiarioData.map((hora, index) => (
-                        <div key={index} className="bg-[#242830] p-3 rounded-lg text-center">
+                        <div key={index} className="bg-surface p-3 rounded-lg text-center">
                             <p className="font-semibold text-sm">{hora.hora}</p>
                             <p className="text-4xl my-2">{hora.icone}</p>
                             <p className="font-bold text-xl">{hora.temp}°C</p>

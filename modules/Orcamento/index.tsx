@@ -1,4 +1,4 @@
-import { useBudgets } from '../hooks/useBudgets';
+﻿import { useBudgets } from '../../hooks/useBudgets';
 import { ModuleHeader } from '@/components/layout';
 import { useProjectContext } from '@/contexts/project-context';
 import {
@@ -44,11 +44,11 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { formatCurrency } from '../utils/formatters';
-import { initialOrcamentoData, DEFAULT_UNITS_DATA } from '../data/mockData';
+import { formatCurrency } from '../../utils/formatters';
+import { initialOrcamentoData, DEFAULT_UNITS_DATA } from '../../data/mockData';
 import { GoogleGenAI, Type } from "@google/genai";
-import { useConfirm } from '../utils/useConfirm';
-import { exportToCsv, exportToExcel } from '../utils/exportOrcamento';
+import { useConfirm } from '../../utils/useConfirm';
+import { exportToCsv, exportToExcel } from './utils/exportOrcamento';
 import {
     Save,
     Pencil,
@@ -97,7 +97,7 @@ const formatCurrencyOrDash = (value: number): string => {
     return formatCurrency(value);
 };
 
-// Helper para navega��o com Enter
+// Helper para navega´┐¢´┐¢o com Enter
 const handleEnterNavigation = (e: React.KeyboardEvent<HTMLElement>, colId: string) => {
     e.preventDefault();
     const currentInput = e.currentTarget;
@@ -397,7 +397,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
         nivel: { enabled: false, name: '' },
         fonte: { enabled: false, name: '' },
         codigo: { enabled: false, name: '' },
-        discriminacao: { enabled: true, name: 'Discrimina��o' },
+        discriminacao: { enabled: true, name: 'Discrimina´┐¢´┐¢o' },
         unidade: { enabled: true, name: 'Un.' },
         quantidade: { enabled: true, name: 'Quant.' },
         mat_unit: { enabled: true, name: 'Mat. Unit.' },
@@ -576,10 +576,10 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
 
     const columnsConfig = useMemo((): ColumnConfig[] => {
         const baseColumns: ColumnConfig[] = [
-            { id: 'nivel', label: 'N�vel', initialWidth: 100, minWidth: 60 },
+            { id: 'nivel', label: 'N´┐¢vel', initialWidth: 100, minWidth: 60 },
             { id: 'fonte', label: 'Fonte', initialWidth: 60, minWidth: 60, align: 'left' },
-            { id: 'codigo', label: 'C�digo', initialWidth: 60, minWidth: 60, align: 'left' },
-            { id: 'discriminacao', label: 'Discrimina��o', initialWidth: 250, minWidth: 150, align: 'left' },
+            { id: 'codigo', label: 'C´┐¢digo', initialWidth: 60, minWidth: 60, align: 'left' },
+            { id: 'discriminacao', label: 'Discrimina´┐¢´┐¢o', initialWidth: 250, minWidth: 150, align: 'left' },
             { id: 'un', label: 'Un.', initialWidth: 60, minWidth: 50, align: 'center' },
             { id: 'quant', label: 'Quant.', initialWidth: 70, minWidth: 70, align: 'right' },
             { id: 'mat_unit', label: 'Mat. Unit.', initialWidth: 80, minWidth: 80, align: 'right' },
@@ -588,15 +588,15 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
             { id: 'mat_total', label: 'Mat. Total', initialWidth: 80, minWidth: 80, align: 'right' },
             { id: 'mo_total', label: 'M.O. Total', initialWidth: 80, minWidth: 80, align: 'right' },
             { id: 'mat_mo_total', label: 'Mat.+M.O Total', initialWidth: 100, minWidth: 100, align: 'right' },
-            { id: 'total_nivel', label: 'Total N�vel', initialWidth: 80, minWidth: 80, align: 'right' },
-            { id: 'percent_nivel', label: '% N�vel', initialWidth: 70, minWidth: 70, align: 'right' },
+            { id: 'total_nivel', label: 'Total N´┐¢vel', initialWidth: 80, minWidth: 80, align: 'right' },
+            { id: 'percent_nivel', label: '% N´┐¢vel', initialWidth: 70, minWidth: 70, align: 'right' },
         ];
 
         if (isEditing) {
             return [
                 { id: 'select', label: '', initialWidth: 50, minWidth: 50, resizable: false, align: 'center' },
                 ...baseColumns,
-                { id: 'action', label: 'A��o', initialWidth: 100, minWidth: 100, align: 'left' },
+                { id: 'action', label: 'A´┐¢´┐¢o', initialWidth: 100, minWidth: 100, align: 'left' },
             ];
         }
         return baseColumns;
@@ -856,14 +856,14 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                 // 2. Save budget items
                 await saveBudgetItems(activeBudget.id, localOrcamento);
 
-                toast.success('Or�amento salvo com sucesso!');
+                toast.success('Or´┐¢amento salvo com sucesso!');
             } catch (error) {
                 console.error('Error saving budget:', error);
-                toast.error('Erro ao salvar or�amento');
+                toast.error('Erro ao salvar or´┐¢amento');
                 return; // Don't reset state if save failed
             }
         } else {
-            toast.error('Nenhum or�amento selecionado para salvar.');
+            toast.error('Nenhum or´┐¢amento selecionado para salvar.');
             return;
         }
 
@@ -878,8 +878,8 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
 
     const handleExit = async () => {
         const confirmExit = await confirm({
-            title: 'Confirmar Sa�da',
-            message: 'Tem certeza que deseja sair sem salvar? Todas as altera��es ser�o perdidas.',
+            title: 'Confirmar Sa´┐¢da',
+            message: 'Tem certeza que deseja sair sem salvar? Todas as altera´┐¢´┐¢es ser´┐¢o perdidas.',
             confirmText: 'Sair sem Salvar',
             cancelText: 'Cancelar'
         });
@@ -1088,7 +1088,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
         const newId = crypto.randomUUID();
         const newItem: OrcamentoItem = {
             id: newId, nivel: '', pai: afterItem.pai, fonte: '', codigo: '',
-            discriminacao: 'Novo Servi�o', unidade: '', quantidade: 0,
+            discriminacao: 'Novo Servi´┐¢o', unidade: '', quantidade: 0,
             mat_unit: 0, mo_unit: 0, expandido: false,
         };
 
@@ -1125,7 +1125,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
         const newId = crypto.randomUUID();
         const newItem: OrcamentoItem = {
             ...originalItem, id: newId,
-            discriminacao: `${originalItem.discriminacao} (C�pia)`,
+            discriminacao: `${originalItem.discriminacao} (C´┐¢pia)`,
             expandido: false,
         };
 
@@ -1278,7 +1278,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
     };
 
     const getStandardizedUnitsReference = () => {
-        return allUnits.map(u => `Nome: "${u.name}" | S�mbolo: "${u.symbol}"`).join('\n');
+        return allUnits.map(u => `Nome: "${u.name}" | S´┐¢mbolo: "${u.symbol}"`).join('\n');
     };
 
     const handleAiImport = async () => {
@@ -1292,7 +1292,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
 
         let mappingDescription = '';
         if (isAutoAiMapping) {
-            mappingDescription = "Usando sua intelig�ncia detecte automaticamente as colunas com base em seu conte�do seguindo o modelo (DE ? PARA), Infira a estrutura de dados de forma inteligente.";
+            mappingDescription = "Usando sua intelig´┐¢ncia detecte automaticamente as colunas com base em seu conte´┐¢do seguindo o modelo (DE ? PARA), Infira a estrutura de dados de forma inteligente.";
         } else {
             mappingDescription = (Object.entries(columnMapping) as [string, { enabled: boolean; name: string }][])
                 .filter(([, value]) => value.enabled && value.name)
@@ -1303,89 +1303,89 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
         const unitsReference = getStandardizedUnitsReference();
 
         const prompt = `
-            Analise o seguinte conte�do de um arquivo de or�amento de constru��o civil. O conte�do �:
+            Analise o seguinte conte´┐¢do de um arquivo de or´┐¢amento de constru´┐¢´┐¢o civil. O conte´┐¢do ´┐¢:
             ---
             ${uploadedFileContent}
             ---
-            As regras de mapeamento de colunas s�o: ${mappingDescription}.
-            Sua tarefa � extrair os dados e estrutur�-los em um JSON.
+            As regras de mapeamento de colunas s´┐¢o: ${mappingDescription}.
+            Sua tarefa ´┐¢ extrair os dados e estrutur´┐¢-los em um JSON.
             
-            TABELA DE REFER�NCIA DE UNIDADES DE MEDIDA (PADR�O DO SISTEMA):
-            --- IN�CIO DA LISTA DE UNIDADES ---
+            TABELA DE REFER´┐¢NCIA DE UNIDADES DE MEDIDA (PADR´┐¢O DO SISTEMA):
+            --- IN´┐¢CIO DA LISTA DE UNIDADES ---
             ${unitsReference}
             --- FIM DA LISTA DE UNIDADES ---
 
             Regras Importantes:
-            1.  **Estrutura e Hierarquia (L�GICA DE INFER�NCIA AVAN�ADA):** Se a coluna "n�vel" (ex: 1, 1.1, 2.1.3) N�O for fornecida explicitamente no texto, voc� DEVE inferir a estrutura hier�rquica (WBS/EAP) seguindo estritamente este crit�rio l�gico:
-                *   **Crit�rio para N�vel FILHO (Item Execut�vel):**
-                    - Qualquer linha que POSSUA valores expl�citos de **Quantidade** E **Valor Unit�rio** (maiores que zero).
-                    - Estes s�o os itens finais da composi��o.
+            1.  **Estrutura e Hierarquia (L´┐¢GICA DE INFER´┐¢NCIA AVAN´┐¢ADA):** Se a coluna "n´┐¢vel" (ex: 1, 1.1, 2.1.3) N´┐¢O for fornecida explicitamente no texto, voc´┐¢ DEVE inferir a estrutura hier´┐¢rquica (WBS/EAP) seguindo estritamente este crit´┐¢rio l´┐¢gico:
+                *   **Crit´┐¢rio para N´┐¢vel FILHO (Item Execut´┐¢vel):**
+                    - Qualquer linha que POSSUA valores expl´┐¢citos de **Quantidade** E **Valor Unit´┐¢rio** (maiores que zero).
+                    - Estes s´┐¢o os itens finais da composi´┐¢´┐¢o.
                 
-                *   **Crit�rio para N�vel PAI (Agrupador/T�tulo):**
-                    - Qualquer linha que possua uma Descri��o, mas **N�O POSSUA** Quantidade ou Valor Unit�rio (ou sejam vazios/zero).
-                    - Estes itens servem apenas como cabe�alhos ou categorias para os itens abaixo deles.
+                *   **Crit´┐¢rio para N´┐¢vel PAI (Agrupador/T´┐¢tulo):**
+                    - Qualquer linha que possua uma Descri´┐¢´┐¢o, mas **N´┐¢O POSSUA** Quantidade ou Valor Unit´┐¢rio (ou sejam vazios/zero).
+                    - Estes itens servem apenas como cabe´┐¢alhos ou categorias para os itens abaixo deles.
                     
-                *   **Constru��o da Numera��o:**
-                    - Ao identificar um "Pai", inicie ou aprofunde a numera��o (ex: de "2" para "2.1").
-                    - Ao identificar um "Filho", ele deve herdar a numera��o do �ltimo "Pai" ativo (ex: se o pai � "2.1.1", o filho ser� "2.1.1.1", "2.1.1.2", etc.).
+                *   **Constru´┐¢´┐¢o da Numera´┐¢´┐¢o:**
+                    - Ao identificar um "Pai", inicie ou aprofunde a numera´┐¢´┐¢o (ex: de "2" para "2.1").
+                    - Ao identificar um "Filho", ele deve herdar a numera´┐¢´┐¢o do ´┐¢ltimo "Pai" ativo (ex: se o pai ´┐¢ "2.1.1", o filho ser´┐¢ "2.1.1.1", "2.1.1.2", etc.).
                     - A hierarquia pode ser profunda (ex: 2 -> 2.1 -> 2.1.1 -> 2.1.1.1).
-                    - **Exemplo de L�gica:**
-                        - "Funda��o" (Sem qtd/valor) -> N�vel 2 (Pai)
-                        - "Terraplenagem" (Sem qtd/valor) -> N�vel 2.1 (Sub-Pai)
-                        - "Estacas" (Sem qtd/valor) -> N�vel 2.1.1 (Sub-Pai)
-                        - "Estaca Raiz..." (COM qtd 200 e valor 1200) -> N�vel 2.1.1.1 (Filho)
+                    - **Exemplo de L´┐¢gica:**
+                        - "Funda´┐¢´┐¢o" (Sem qtd/valor) -> N´┐¢vel 2 (Pai)
+                        - "Terraplenagem" (Sem qtd/valor) -> N´┐¢vel 2.1 (Sub-Pai)
+                        - "Estacas" (Sem qtd/valor) -> N´┐¢vel 2.1.1 (Sub-Pai)
+                        - "Estaca Raiz..." (COM qtd 200 e valor 1200) -> N´┐¢vel 2.1.1.1 (Filho)
 
-            2.  **Unidades (CR�TICO):** Para cada linha, verifique o valor da unidade no arquivo original.
-                - Procure esse valor na tabela de refer�ncia acima (compare com "Nome" ou "S�mbolo", ignorando mai�sculas/min�sculas).
-                - **SE encontrar correspond�ncia:** Preencha o campo "unidade" OBRIGATORIAMENTE com o valor do **S�mbolo** listado na tabela. Exemplo: Se o arquivo diz "Metro", e a tabela tem "Nome: Metro | S�mbolo: m", voc� DEVE usar "m".
-                - **SE N�O encontrar correspond�ncia exata:** Tente padronizar para o s�mbolo mais pr�ximo e comum (ex: "M2", "m2", "metro q" -> "m�").
+            2.  **Unidades (CR´┐¢TICO):** Para cada linha, verifique o valor da unidade no arquivo original.
+                - Procure esse valor na tabela de refer´┐¢ncia acima (compare com "Nome" ou "S´┐¢mbolo", ignorando mai´┐¢sculas/min´┐¢sculas).
+                - **SE encontrar correspond´┐¢ncia:** Preencha o campo "unidade" OBRIGATORIAMENTE com o valor do **S´┐¢mbolo** listado na tabela. Exemplo: Se o arquivo diz "Metro", e a tabela tem "Nome: Metro | S´┐¢mbolo: m", voc´┐¢ DEVE usar "m".
+                - **SE N´┐¢O encontrar correspond´┐¢ncia exata:** Tente padronizar para o s´┐¢mbolo mais pr´┐¢ximo e comum (ex: "M2", "m2", "metro q" -> "m´┐¢").
                 - Unidades como "UN", "Unid" devem virar "un".
             
-            3.  **FONTE e C�DIGO (MUITO IMPORTANTE):**
-                - **Fonte:** � a ORIGEM/REFER�NCIA de onde vem o servi�o/atividade. Exemplos comuns: "SINAPI", "SICRO", "SEINFRA", "ORSE", "SBC", "Pr�prio", "Cota��o", etc.
-                - **C�digo:** � o C�DIGO IDENTIFICADOR espec�fico da fonte. Exemplos: "73983/001", "C00123", "SUB-01234", "12345.678", etc.
+            3.  **FONTE e C´┐¢DIGO (MUITO IMPORTANTE):**
+                - **Fonte:** ´┐¢ a ORIGEM/REFER´┐¢NCIA de onde vem o servi´┐¢o/atividade. Exemplos comuns: "SINAPI", "SICRO", "SEINFRA", "ORSE", "SBC", "Pr´┐¢prio", "Cota´┐¢´┐¢o", etc.
+                - **C´┐¢digo:** ´┐¢ o C´┐¢DIGO IDENTIFICADOR espec´┐¢fico da fonte. Exemplos: "73983/001", "C00123", "SUB-01234", "12345.678", etc.
                 
-                **?? ATEN��O CR�TICA - N�O CONFUNDIR:**
-                - **"n�vel"** = Hierarquia pai/filho (ex: "1", "1.1", "1.1.1", "1.1.2", "2", "2.1") ? Campo separado
-                - **"codigo"** = Identificador da fonte (ex: "73983", "C-00123") ? NUNCA ser� hier�rquico como "1.1.1"
-                - Se voc� encontrar valores como "1", "1.1", "1.2" ? isso � "n�vel", N�O � "codigo"!
+                **?? ATEN´┐¢´┐¢O CR´┐¢TICA - N´┐¢O CONFUNDIR:**
+                - **"n´┐¢vel"** = Hierarquia pai/filho (ex: "1", "1.1", "1.1.1", "1.1.2", "2", "2.1") ? Campo separado
+                - **"codigo"** = Identificador da fonte (ex: "73983", "C-00123") ? NUNCA ser´┐¢ hier´┐¢rquico como "1.1.1"
+                - Se voc´┐¢ encontrar valores como "1", "1.1", "1.2" ? isso ´┐¢ "n´┐¢vel", N´┐¢O ´┐¢ "codigo"!
                 
                 **Como identificar:**
-                a) **Colunas Separadas:** Se houver colunas com nomes como "Fonte", "Ref", "Refer�ncia", "Origem", "Base", "Tabela" ? use como "fonte"
-                   E colunas como "C�digo", "C�d", "C�d. Ref", "Item", "Composi��o", "ID" ? use como "codigo"
+                a) **Colunas Separadas:** Se houver colunas com nomes como "Fonte", "Ref", "Refer´┐¢ncia", "Origem", "Base", "Tabela" ? use como "fonte"
+                   E colunas como "C´┐¢digo", "C´┐¢d", "C´┐¢d. Ref", "Item", "Composi´┐¢´┐¢o", "ID" ? use como "codigo"
                 
                 b) **Mesma Coluna (Formato Combinado):** Se houver uma coluna com valores como:
                    - "SINAPI 73983/001" ? fonte: "SINAPI", codigo: "73983/001"
                    - "SICRO C00123-SUB" ? fonte: "SICRO", codigo: "C00123-SUB"
                    - "SEINFRA 12345.678/9" ? fonte: "SEINFRA", codigo: "12345.678/9"
-                   **Regra de Separa��o:** A primeira palavra em MAI�SCULAS geralmente � a fonte, o restante � o c�digo.
+                   **Regra de Separa´┐¢´┐¢o:** A primeira palavra em MAI´┐¢SCULAS geralmente ´┐¢ a fonte, o restante ´┐¢ o c´┐¢digo.
                 
-                c) **Identifica��o Inteligente:** Mesmo que as colunas N�O sejam especificamente nomeadas "Fonte" ou "C�digo", identifique-as pelo conte�do:
-                   - Valores curtos e geralmente em mai�sculas como "SINAPI", "SICRO" ? provavelmente fonte
-                   - Valores alfanum�ricos com n�meros, tra�os, pontos como "73983/001", "C-123" ? provavelmente c�digo
+                c) **Identifica´┐¢´┐¢o Inteligente:** Mesmo que as colunas N´┐¢O sejam especificamente nomeadas "Fonte" ou "C´┐¢digo", identifique-as pelo conte´┐¢do:
+                   - Valores curtos e geralmente em mai´┐¢sculas como "SINAPI", "SICRO" ? provavelmente fonte
+                   - Valores alfanum´┐¢ricos com n´┐¢meros, tra´┐¢os, pontos como "73983/001", "C-123" ? provavelmente c´┐¢digo
                 
-                d) **Se N�O houver fonte/c�digo:** Deixe os campos vazios (""). N�O invente valores.
+                d) **Se N´┐¢O houver fonte/c´┐¢digo:** Deixe os campos vazios (""). N´┐¢O invente valores.
                 
-                e) **Se houver d�vida:** � melhor deixar vazio do que preencher incorretamente.
+                e) **Se houver d´┐¢vida:** ´┐¢ melhor deixar vazio do que preencher incorretamente.
             
-            4.  **CUSTOS - DETEC��O INTELIGENTE (MUITO IMPORTANTE):**
+            4.  **CUSTOS - DETEC´┐¢´┐¢O INTELIGENTE (MUITO IMPORTANTE):**
                 
-                **Cen�rio A: Valores Separados (Material + M�o de Obra)**
-                Se o arquivo tiver colunas separadas para Material e M�o de Obra:
-                - Preencha "mat_unit" com custo unit�rio de material
-                - Preencha "mo_unit" com custo unit�rio de m�o de obra
+                **Cen´┐¢rio A: Valores Separados (Material + M´┐¢o de Obra)**
+                Se o arquivo tiver colunas separadas para Material e M´┐¢o de Obra:
+                - Preencha "mat_unit" com custo unit´┐¢rio de material
+                - Preencha "mo_unit" com custo unit´┐¢rio de m´┐¢o de obra
                 - use_total_unit: false (ou omita o campo)
                 
-                **Cen�rio B: Apenas Valor Unit�rio Total**
-                Se houver apenas UMA coluna de custo unit�rio (sem separa��o Material/M.O.):
+                **Cen´┐¢rio B: Apenas Valor Unit´┐¢rio Total**
+                Se houver apenas UMA coluna de custo unit´┐¢rio (sem separa´┐¢´┐¢o Material/M.O.):
                 - Coloque o valor total em "mat_unit"
                 - mo_unit: 0
                 - use_total_unit: true
                 
-                **Como detectar qual cen�rio:**
-                - **Cen�rio A**: Se houver colunas como "Material", "Mat", "Materiais", "Mat. Unit." E simultaneamente "M.O.", "M�o de Obra", "MO", "Labor", "M.O. Unit."
-                - **Cen�rio B**: Se houver apenas colunas como "Valor Unit.", "Pre�o", "Custo Unit.", "P.U.", "Unit�rio", "Valor", "Custo" (sem separa��o)
-                - **Em caso de d�vida:** Use Cen�rio B (valor total � mais comum)
+                **Como detectar qual cen´┐¢rio:**
+                - **Cen´┐¢rio A**: Se houver colunas como "Material", "Mat", "Materiais", "Mat. Unit." E simultaneamente "M.O.", "M´┐¢o de Obra", "MO", "Labor", "M.O. Unit."
+                - **Cen´┐¢rio B**: Se houver apenas colunas como "Valor Unit.", "Pre´┐¢o", "Custo Unit.", "P.U.", "Unit´┐¢rio", "Valor", "Custo" (sem separa´┐¢´┐¢o)
+                - **Em caso de d´┐¢vida:** Use Cen´┐¢rio B (valor total ´┐¢ mais comum)
                 
                 **Exemplos:**
                 | Entrada | mat_unit | mo_unit | use_total_unit |
@@ -1395,15 +1395,15 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                 | P.U.: 75.50 | 75.50 | 0 | true |
                 | Custo: 45.00 | 45.00 | 0 | true |
             
-            5.  **Tipos de Dados:** "quantidade", "mat_unit", "mo_unit" devem ser n�meros (float). "discriminacao" � string obrigat�ria. "fonte", "codigo" e "use_total_unit" s�o opcionais.
+            5.  **Tipos de Dados:** "quantidade", "mat_unit", "mo_unit" devem ser n´┐¢meros (float). "discriminacao" ´┐¢ string obrigat´┐¢ria. "fonte", "codigo" e "use_total_unit" s´┐¢o opcionais.
             
-            6.  Ignore cabe�alhos e rodap�s.
+            6.  Ignore cabe´┐¢alhos e rodap´┐¢s.
 
-            **Exemplos de Identifica��o Fonte/C�digo:**
+            **Exemplos de Identifica´┐¢´┐¢o Fonte/C´┐¢digo:**
             - "SINAPI 94521" ? fonte: "SINAPI", codigo: "94521"
             - Coluna "Ref: SICRO" + Coluna "Comp: 123.456" ? fonte: "SICRO", codigo: "123.456"
-            - "Pr�prio" ? fonte: "Pr�prio", codigo: ""
-            - Sem refer�ncia vis�vel ? fonte: "", codigo: ""
+            - "Pr´┐¢prio" ? fonte: "Pr´┐¢prio", codigo: ""
+            - Sem refer´┐¢ncia vis´┐¢vel ? fonte: "", codigo: ""
 
             Retorne APENAS o array de objetos JSON.
         `;
@@ -1454,7 +1454,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
 
                 const columnsToHide: string[] = [];
                 if (!hasFonte) columnsToHide.push('Fonte');
-                if (!hasCodigo) columnsToHide.push('C�digo');
+                if (!hasCodigo) columnsToHide.push('C´┐¢digo');
                 if (shouldHideSplitColumns) {
                     columnsToHide.push('Mat. Unit.', 'M.O. Unit.', 'Mat. Total', 'M.O. Total');
                 }
@@ -1490,10 +1490,10 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                     </div>
                                     <div className="ml-3 flex-1">
                                         <p className="text-sm font-medium text-white">
-                                            Importa��o Conclu�da
+                                            Importa´┐¢´┐¢o Conclu´┐¢da
                                         </p>
                                         <p className="mt-1 text-sm text-secondary">
-                                            O or�amento foi processado e importado com sucesso.
+                                            O or´┐¢amento foi processado e importado com sucesso.
                                         </p>
                                     </div>
                                 </div>
@@ -1509,7 +1509,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                         </div>
                     ), { duration: 4000 });
 
-                    // 2. TOAST DE COLUNAS OCULTAS (Azul - Gen�rico)
+                    // 2. TOAST DE COLUNAS OCULTAS (Azul - Gen´┐¢rico)
                     const genericHiddenCols = columnsToHide.filter(c => !['Mat. Unit.', 'M.O. Unit.', 'Mat. Total', 'M.O. Total'].includes(c));
 
                     if (genericHiddenCols.length > 0) {
@@ -1526,7 +1526,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                                     Colunas Ocultadas
                                                 </p>
                                                 <p className="mt-1 text-sm text-secondary">
-                                                    As colunas <span className="text-white font-medium">{genericHiddenCols.join("' e '")}</span> foram ocultadas automaticamente pois n�o continham dados.
+                                                    As colunas <span className="text-white font-medium">{genericHiddenCols.join("' e '")}</span> foram ocultadas automaticamente pois n´┐¢o continham dados.
                                                 </p>
                                             </div>
                                         </div>
@@ -1544,7 +1544,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                         }, 300); // Pequeno delay para efeito cascata
                     }
 
-                    // 3. TOAST DE COLUNAS DE CUSTO (Azul - Espec�fico)
+                    // 3. TOAST DE COLUNAS DE CUSTO (Azul - Espec´┐¢fico)
                     if (shouldHideSplitColumns) {
                         setTimeout(() => {
                             toast.custom((t) => (
@@ -1559,7 +1559,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                                     Formato de Custo Detectado
                                                 </p>
                                                 <p className="mt-1 text-sm text-secondary">
-                                                    O or�amento usa valor unit�rio total. As colunas de separa��o (Material/M.O.) foram ocultadas para simplificar a visualiza��o.
+                                                    O or´┐¢amento usa valor unit´┐¢rio total. As colunas de separa´┐¢´┐¢o (Material/M.O.) foram ocultadas para simplificar a visualiza´┐¢´┐¢o.
                                                 </p>
                                             </div>
                                         </div>
@@ -1574,12 +1574,12 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                     </div>
                                 </div>
                             ), { duration: 7000 });
-                        }, 600); // Delay maior para aparecer por �ltimo
+                        }, 600); // Delay maior para aparecer por ´┐¢ltimo
                     }
                 }
             } else {
                 if (!abortAiRef.current) {
-                    toast.error("A IA n�o conseguiu processar o arquivo. Verifique o mapeamento e o conte�do do arquivo.");
+                    toast.error("A IA n´┐¢o conseguiu processar o arquivo. Verifique o mapeamento e o conte´┐¢do do arquivo.");
                 }
             }
 
@@ -1597,13 +1597,13 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
 
     const handleExportCsv = () => {
         exportToCsv(localOrcamento, 'orcamento_vobi');
-        toast.success('Exporta��o CSV iniciada!');
+        toast.success('Exporta´┐¢´┐¢o CSV iniciada!');
     };
 
     const handleExportExcel = async () => {
         try {
             await exportToExcel(localOrcamento, 'orcamento_vobi', hiddenColumns);
-            toast.success('Exporta��o Excel iniciada!');
+            toast.success('Exporta´┐¢´┐¢o Excel iniciada!');
         } catch (error) {
             console.error('Erro ao exportar Excel:', error);
             toast.error('Erro ao exportar Excel');
@@ -1771,29 +1771,29 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
     const canUndo = historyIndex > 0;
     const canRedo = historyIndex < history.length - 1;
     const columnMappingLabels: { [key: string]: string } = {
-        nivel: 'N�vel',
+        nivel: 'N´┐¢vel',
         fonte: 'Fonte',
-        codigo: 'C�digo',
-        discriminacao: 'Discrimina��o',
+        codigo: 'C´┐¢digo',
+        discriminacao: 'Discrimina´┐¢´┐¢o',
         unidade: 'Unidade',
         quantidade: 'Quantidade',
-        mat_unit: 'Valor Material Unit�rio',
-        mo_unit: 'Valor M�o de Obra Unit�rio',
-        mat_mo_unit: 'Valor Material + M�o de Obra Unit�rios',
+        mat_unit: 'Valor Material Unit´┐¢rio',
+        mo_unit: 'Valor M´┐¢o de Obra Unit´┐¢rio',
+        mat_mo_unit: 'Valor Material + M´┐¢o de Obra Unit´┐¢rios',
     };
 
     return (
-        <div className="w-full p-6 space-y-6">
+        <div className="space-y-6">
             {isImportModalOpen && (
                 <Dialog open={isImportModalOpen} onOpenChange={setImportModalOpen}>
                     <DialogContent className="bg-surface border-default text-white sm:max-w-[700px]">
                         <DialogHeader>
                             <DialogTitle className="flex items-center gap-2">
                                 <Bot className="w-5 h-5 text-accent-500" />
-                                Importar Or�amento com IA - Etapa {importStep}/2
+                                Importar Or´┐¢amento com IA - Etapa {importStep}/2
                             </DialogTitle>
                             <DialogDescription className="text-secondary">
-                                {importStep === 1 ? "Envie seu arquivo para an�lise." : "Configure o mapeamento das colunas."}
+                                {importStep === 1 ? "Envie seu arquivo para an´┐¢lise." : "Configure o mapeamento das colunas."}
                             </DialogDescription>
                         </DialogHeader>
 
@@ -1838,8 +1838,8 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                         className="mt-1 h-4 w-4 rounded border-default bg-base text-accent-500 focus:ring-0 focus:ring-offset-0"
                                     />
                                     <div>
-                                        <label htmlFor="auto-ai" className="font-medium text-white cursor-pointer block mb-1">Ajuste autom�tico com IA (Recomendado)</label>
-                                        <p className="text-xs text-secondary">A IA identificar� automaticamente as colunas e a estrutura do arquivo, ignorando cabe�alhos irrelevantes.</p>
+                                        <label htmlFor="auto-ai" className="font-medium text-white cursor-pointer block mb-1">Ajuste autom´┐¢tico com IA (Recomendado)</label>
+                                        <p className="text-xs text-secondary">A IA identificar´┐¢ automaticamente as colunas e a estrutura do arquivo, ignorando cabe´┐¢alhos irrelevantes.</p>
                                     </div>
                                 </div>
 
@@ -1887,8 +1887,8 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
             <span ref={measureCellRef} aria-hidden="true" className="text-xs absolute invisible whitespace-nowrap z-[-1]"></span>
 
             <ModuleHeader
-                title="Or�amento de Obra"
-                subtitle="Gerencie a estrutura anal�tica, custos e insumos do projeto"
+                title="Or´┐¢amento de Obra"
+                subtitle="Gerencie a estrutura anal´┐¢tica, custos e insumos do projeto"
                 icon={FileSpreadsheet}
                 showBudgetSelector={true}
             />
@@ -1899,7 +1899,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                         <div className="flex items-center gap-4 flex-1">
                             <CardTitle className="text-lg font-semibold text-white flex items-center gap-2 shrink-0">
                                 <FileText className="w-5 h-5 text-accent-500" />
-                                Planilha Or�ament�ria
+                                Planilha Or´┐¢ament´┐¢ria
                             </CardTitle>
 
                             {/* Budget Name - Editable only in edit mode, or empty state message */}
@@ -1910,7 +1910,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                             value={activeBudget.name}
                                             onChange={(e) => setActiveBudget({ ...activeBudget, name: e.target.value })}
                                             className="h-8 bg-base border-default text-white focus-visible:ring-0 focus-visible:border-accent-500 max-w-md"
-                                            placeholder="Nome do Or�amento"
+                                            placeholder="Nome do Or´┐¢amento"
                                         />
                                     ) : (
                                         <span className="text-sm text-secondary font-normal">
@@ -1919,7 +1919,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                     )
                                 ) : (
                                     <span className="text-sm text-secondary italic">
-                                        Crie um novo or�amento
+                                        Crie um novo or´┐¢amento
                                     </span>
                                 );
                             })()}
@@ -1935,7 +1935,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                     </div>
                                     <div className="w-px bg-elevated"></div>
                                     <div className="text-right">
-                                        <div className="text-[10px] text-secondary uppercase font-bold">M�o de Obra</div>
+                                        <div className="text-[10px] text-secondary uppercase font-bold">M´┐¢o de Obra</div>
                                         <div className="text-sm font-bold text-yellow-400">{formatCurrency(grandTotalMaoDeObra)}</div>
                                     </div>
                                     <div className="w-px bg-elevated"></div>
@@ -1993,7 +1993,7 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                                                 </Button>
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent align="end" className="bg-surface border-default text-primary w-56">
-                                                <DropdownMenuLabel>Op��es</DropdownMenuLabel>
+                                                <DropdownMenuLabel>Op´┐¢´┐¢es</DropdownMenuLabel>
                                                 <DropdownMenuSeparator className="bg-elevated" />
 
                                                 {/* Export Options */}
@@ -2053,8 +2053,8 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
 
                 <CardContent className="p-0">
                     {activeBudget ? (
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left text-secondary table-fixed border-collapse">
+                        <div className="overflow-x-auto border border-default rounded-lg shadow-sm">
+                            <table className="w-full text-left text-secondary table-fixed table-separate-borders">
                                 <colgroup>
                                     {visibleColumns.map(({ col, index }) => (
                                         <col key={col.id} style={{ width: `${columnWidths[index]}px` }} />
@@ -2168,14 +2168,14 @@ const Orcamento: React.FC<OrcamentoProps> = ({ orcamentoData, setOrcamentoData }
                     ) : (
                         <div className="flex flex-col items-center justify-center py-20 text-center">
                             <FileSpreadsheet className="w-16 h-16 text-secondary mb-4" />
-                            <h3 className="text-lg font-semibold text-secondary mb-2">Nenhum or�amento selecionado</h3>
-                            <p className="text-sm text-secondary mb-4">Selecione um or�amento existente ou crie um novo para come�ar</p>
+                            <h3 className="text-lg font-semibold text-secondary mb-2">Nenhum or´┐¢amento selecionado</h3>
+                            <p className="text-sm text-secondary mb-4">Selecione um or´┐¢amento existente ou crie um novo para come´┐¢ar</p>
                         </div>
                     )}
                 </CardContent>
             </Card>
 
-            {/* Di�logo de Confirma��o Centralizado */}
+            {/* Di´┐¢logo de Confirma´┐¢´┐¢o Centralizado */}
             <Dialog open={dialogState.isOpen} onOpenChange={(open) => !open && handleCancel()}>
                 <DialogContent className="sm:max-w-[400px] bg-surface border-default text-primary shadow-2xl">
                     <DialogHeader>

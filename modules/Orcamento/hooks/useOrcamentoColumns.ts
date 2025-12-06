@@ -1,28 +1,19 @@
-import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { ColumnConfig } from '../types';
-import { getCellContentAsString } from '../utils';
+
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import type { ColumnConfig } from '../types';
 
 const LOCAL_STORAGE_KEY_VIEW = 'vobi-orcamento-column-widths-view';
 const LOCAL_STORAGE_KEY_EDIT = 'vobi-orcamento-column-widths-edit';
 const LOCAL_STORAGE_KEY_HIDDEN_COLUMNS = 'vobi-orcamento-hidden-columns-v2';
 const LOCAL_STORAGE_KEY_PINNED_COLUMNS = 'vobi-orcamento-pinned-columns';
 
-interface UseOrcamentoColumnsProps {
-    isEditing: boolean;
-    processedOrcamento: any[];
-}
+export const useOrcamentoColumns = (isEditing: boolean, processedOrcamento: any[], measureCellRef: React.RefObject<HTMLSpanElement>, getCellContentAsString: (item: any, colId: string) => string) => {
 
-export const useOrcamentoColumns = ({ isEditing, processedOrcamento }: UseOrcamentoColumnsProps) => {
+    // NOTE: Default hidden/pinned columns logic can stand here or be passed as props if needed
     const [hiddenColumns, setHiddenColumns] = useState<Set<string>>(new Set(['mat_mo_total']));
     const [pinnedColumns, setPinnedColumns] = useState<Set<string>>(new Set());
-    const [columnWidths, setColumnWidths] = useState<number[]>([]);
     const [areSettingsLoaded, setAreSettingsLoaded] = useState(false);
 
-    const resizingColumnRef = useRef<{ index: number; startX: number; startWidth: number; } | null>(null);
-    const measureCellRef = useRef<HTMLSpanElement | null>(null);
-    const isInitialMount = useRef(true);
-
-    // Load Settings
     useEffect(() => {
         try {
             const savedHidden = localStorage.getItem(LOCAL_STORAGE_KEY_HIDDEN_COLUMNS);
@@ -44,7 +35,6 @@ export const useOrcamentoColumns = ({ isEditing, processedOrcamento }: UseOrcame
         }
     }, []);
 
-    // Save Settings
     useEffect(() => {
         if (!areSettingsLoaded) return;
         try {
@@ -62,6 +52,7 @@ export const useOrcamentoColumns = ({ isEditing, processedOrcamento }: UseOrcame
             console.error("Could not save pinned columns", e);
         }
     }, [pinnedColumns, areSettingsLoaded]);
+
 
     const columnsConfig = useMemo((): ColumnConfig[] => {
         const baseColumns: ColumnConfig[] = [
@@ -91,7 +82,9 @@ export const useOrcamentoColumns = ({ isEditing, processedOrcamento }: UseOrcame
         return baseColumns;
     }, [isEditing]);
 
-    // Load/Save Widths
+    const [columnWidths, setColumnWidths] = useState<number[]>([]);
+    const isInitialMount = useRef(true);
+
     useEffect(() => {
         const key = isEditing ? LOCAL_STORAGE_KEY_EDIT : LOCAL_STORAGE_KEY_VIEW;
         let loaded = false;
@@ -145,6 +138,8 @@ export const useOrcamentoColumns = ({ isEditing, processedOrcamento }: UseOrcame
         }
         return left;
     }, [visibleColumns, pinnedColumns, columnWidths]);
+
+    const resizingColumnRef = useRef<{ index: number; startX: number; startWidth: number; } | null>(null);
 
     const handleResizeMove = useCallback((e: MouseEvent) => {
         if (!resizingColumnRef.current) return;
@@ -231,7 +226,7 @@ export const useOrcamentoColumns = ({ isEditing, processedOrcamento }: UseOrcame
             newWidths[originalIndex] = finalWidth;
             return newWidths;
         });
-    }, [columnsConfig, processedOrcamento, visibleColumns]);
+    }, [columnsConfig, processedOrcamento, getCellContentAsString, visibleColumns, measureCellRef]);
 
     const handleTogglePin = (columnId: string) => {
         setPinnedColumns(prev => {
@@ -245,36 +240,37 @@ export const useOrcamentoColumns = ({ isEditing, processedOrcamento }: UseOrcame
         });
     };
 
-    const handleHideColumn = (columnId: string) => {
-        setHiddenColumns(prev => new Set(prev).add(columnId));
-    };
-
-    const handleShowColumn = (columnId: string) => {
+    const handleHideColumn = (id: string) => {
         setHiddenColumns(prev => {
             const newSet = new Set(prev);
-            newSet.delete(columnId);
+            newSet.add(id);
             return newSet;
         });
-    };
+    }
 
-    const handleShowAllColumns = () => {
-        setHiddenColumns(new Set(['mat_mo_total']));
-    };
+    const handleShowColumn = (id: string) => {
+        setHiddenColumns(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(id);
+            return newSet;
+        });
+    }
+
+    const handleShowAllColumns = () => setHiddenColumns(new Set());
 
     return {
-        hiddenColumns,
-        setHiddenColumns,
-        pinnedColumns,
-        columnWidths,
         columnsConfig,
         visibleColumns,
-        getStickyLeft,
+        columnWidths,
+        hiddenColumns,
+        pinnedColumns,
         handleResizeStart,
         handleAutoResize,
         handleTogglePin,
+        getStickyLeft,
+        setHiddenColumns, // Expose setter if needed
         handleHideColumn,
         handleShowColumn,
-        handleShowAllColumns,
-        measureCellRef
+        handleShowAllColumns
     };
 };

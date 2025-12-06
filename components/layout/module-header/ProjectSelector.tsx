@@ -52,8 +52,8 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ onCreateClick 
     return (
         <div className="flex items-center gap-2">
             <div className="flex items-center gap-2 px-2">
-                <Briefcase className="w-4 h-4 text-[var(--ds-text-secondary)]" />
-                <span className="text-sm font-medium text-[var(--ds-text-secondary)]">Projeto:</span>
+                <Briefcase className="w-4 h-4 text-secondary" />
+                <span className="text-sm font-medium text-secondary">Projeto:</span>
             </div>
 
             <Select value={selectedProjectId || ''} onValueChange={setSelectedProjectId}>
@@ -95,7 +95,7 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ onCreateClick 
                             variant="ghost"
                             size="icon"
                             onClick={handleDeleteProject}
-                            className="h-8 w-8 text-[var(--ds-error)] hover:bg-[var(--ds-error-bg)]"
+                            className="h-8 w-8 text-error hover:bg-error-bg"
                         >
                             <Trash2 className="w-4 h-4" />
                         </Button>

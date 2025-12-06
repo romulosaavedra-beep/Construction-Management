@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { NavLink } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
 import { ChevronLeft, ChevronRight, Building2 } from 'lucide-react';
@@ -12,28 +11,15 @@ import { APP_CONFIG } from '@/config/app.config';
 import { cn } from '@/lib/utils';
 
 interface SidebarProps {
+    activeModule: Module;
+    setActiveModule: (module: Module) => void;
     isMobileMenuOpen: boolean;
     setMobileMenuOpen: (isOpen: boolean) => void;
 }
 
-const getRouteForModule = (moduleId: Module): string => {
-    switch (moduleId) {
-        case 'dashboard': return '/';
-        case 'orcamento': return '/orcamento';
-        case 'planejamento': return '/planejamento';
-        case 'composicao': return '/composicao';
-        case 'diario': return '/diario';
-        case 'medicao': return '/medicao';
-        case 'curva-abc': return '/curva-abc';
-        case 'compras': return '/compras';
-        case 'financeiro': return '/financeiro';
-        case 'clima': return '/clima';
-        case 'settings': return '/settings';
-        default: return '/';
-    }
-};
-
 export const Sidebar: React.FC<SidebarProps> = ({
+    activeModule,
+    setActiveModule,
     isMobileMenuOpen,
     setMobileMenuOpen,
 }) => {
@@ -60,7 +46,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
     const isExpanded = isPinned;
 
-    const handleNavItemClick = () => {
+    const handleNavItemClick = (moduleId: Module) => {
+        setActiveModule(moduleId);
         if (typeof window !== 'undefined' && window.innerWidth < 768) {
             setMobileMenuOpen(false);
         }
@@ -133,16 +120,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     <ul className="space-y-1">
                         {NAVIGATION_ITEMS.map((item) => {
                             const Icon = item.icon;
-                            const route = getRouteForModule(item.id);
+                            const isActive = activeModule === item.id;
 
                             return (
                                 <li key={item.id}>
                                     <Tooltip>
                                         <TooltipTrigger asChild>
-                                            <NavLink
-                                                to={route}
-                                                onClick={handleNavItemClick}
-                                                className={({ isActive }) => cn(
+                                            <button
+                                                onClick={() => handleNavItemClick(item.id)}
+                                                className={cn(
                                                     'sidebar__nav-item w-full flex items-center gap-3 h-12 px-5 transition-all duration-200 ease-in-out text-left',
                                                     !isExpanded && 'md:justify-center md:px-0',
                                                     isActive
@@ -163,7 +149,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                                                 >
                                                     {item.label}
                                                 </span>
-                                            </NavLink>
+                                            </button>
                                         </TooltipTrigger>
 
                                         {!isExpanded && (

@@ -1,61 +1,14 @@
+
 import { useMemo } from 'react';
-import { OrcamentoItem } from '../../../types';
-
-// Helper functions that don't depend on state
-export const regenerateNiveles = (items: OrcamentoItem[]): OrcamentoItem[] => {
-    const newItems = items.map(i => ({ ...i }));
-
-    const processLevel = (parentId: number | null, parentNivel: string) => {
-        let siblingIndex = 1;
-        const children = newItems.filter(item => item.pai === parentId);
-        for (const child of children) {
-            const newNivel = parentNivel ? `${parentNivel}.${siblingIndex}` : `${siblingIndex}`;
-            child.nivel = newNivel;
-            siblingIndex++;
-            processLevel(child.id, child.nivel);
-        }
-    };
-
-    processLevel(null, '');
-    return newItems;
-}
-
-export const getAllDescendantIds = (items: OrcamentoItem[], parentId: number): number[] => {
-    const descendantIds: number[] = [];
-    const children = items.filter(item => item.pai === parentId);
-    for (const child of children) {
-        descendantIds.push(child.id);
-        descendantIds.push(...getAllDescendantIds(items, child.id));
-    }
-    return descendantIds;
-};
-
-export const updateHierarchy = (items: OrcamentoItem[]): OrcamentoItem[] => {
-    const parentIds = new Set(items.map(i => i.pai).filter(p => p !== null));
-    const cleanedItems = items.map(item => {
-        if (parentIds.has(item.id)) {
-            return {
-                ...item,
-                unidade: '',
-                quantidade: 0,
-                mat_unit: 0,
-                mo_unit: 0,
-            };
-        }
-        return item;
-    });
-    return regenerateNiveles(cleanedItems);
-};
+import type { OrcamentoItem } from '@/types';
 
 export const useOrcamentoCalculations = (localOrcamento: OrcamentoItem[]) => {
+
     const processedOrcamento = useMemo(() => {
         const itemsMap = new Map();
         const parentIds = new Set(localOrcamento.map(i => i.pai).filter(p => p !== null));
         let grandTotal = 0;
-        let grandTotalMaterial = 0;
-        let grandTotalMaoDeObra = 0;
 
-        // First pass: init items with self values
         localOrcamento.forEach(item => {
             const isParent = parentIds.has(item.id);
             const matTotal = item.quantidade * item.mat_unit;
@@ -68,23 +21,20 @@ export const useOrcamentoCalculations = (localOrcamento: OrcamentoItem[]) => {
                 matUnitTotal: matTotal,
                 moUnitTotal: moTotal,
                 matMoTotal: matTotal + moTotal,
-                totalNivel: 0, // Will be calculated recursively
+                totalNivel: 0,
                 percentNivel: 0,
             });
         });
 
-        // Recursive subtotal calculation
-        const calculateSubtotals = (itemId: number) => {
+        const calculateSubtotals = (itemId: string | number) => {
             const item = itemsMap.get(itemId);
             if (!item) return { mat: 0, mo: 0, total: 0 };
 
-            // If item is a leaf, its subtotals are its own calculated totals
             if (!item.hasChildren) {
                 item.totalNivel = item.matMoTotal;
                 return { mat: item.matUnitTotal, mo: item.moUnitTotal, total: item.totalNivel };
             }
 
-            // If item is a parent, its subtotals are sum of children
             let sumMat = 0;
             let sumMo = 0;
             let sumTotal = 0;
@@ -107,21 +57,45 @@ export const useOrcamentoCalculations = (localOrcamento: OrcamentoItem[]) => {
         localOrcamento.filter(item => item.pai === null).forEach(root => {
             const totals = calculateSubtotals(root.id);
             grandTotal += totals.total;
-            grandTotalMaterial += totals.mat;
-            grandTotalMaoDeObra += totals.mo;
         });
 
         itemsMap.forEach(item => {
             item.percentNivel = grandTotal > 0 ? (item.totalNivel / grandTotal) * 100 : 0;
         });
 
-        return {
-            processedItems: Array.from(itemsMap.values()),
-            grandTotal,
-            grandTotalMaterial,
-            grandTotalMaoDeObra
-        };
+        return Array.from(itemsMap.values()) as (OrcamentoItem & {
+            hasChildren: boolean;
+            matMoUnit: number;
+            matUnitTotal: number;
+            moUnitTotal: number;
+            matMoTotal: number;
+            totalNivel: number;
+            percentNivel: number;
+        })[];
     }, [localOrcamento]);
 
-    return processedOrcamento;
+    const { grandTotalValue, grandTotalMaterial, grandTotalMaoDeObra } = useMemo(() => {
+        const materialTotal = processedOrcamento
+            .filter(item => item.unidade !== '' && item.unidade !== '-')
+            .reduce((acc, item) => acc + item.matUnitTotal, 0);
+
+        const moTotal = processedOrcamento
+            .filter(item => item.unidade !== '' && item.unidade !== '-')
+            .reduce((acc, item) => acc + item.moUnitTotal, 0);
+
+        const grandTotal = processedOrcamento.reduce((acc, item) => item.pai === null ? acc + item.totalNivel : acc, 0);
+
+        return {
+            grandTotalValue: grandTotal,
+            grandTotalMaterial: materialTotal,
+            grandTotalMaoDeObra: moTotal,
+        };
+    }, [processedOrcamento]);
+
+    return {
+        processedOrcamento,
+        grandTotalValue,
+        grandTotalMaterial,
+        grandTotalMaoDeObra
+    };
 };

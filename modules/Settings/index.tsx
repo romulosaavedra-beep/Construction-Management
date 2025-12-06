@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { ModuleHeader } from '@/components/layout';
-import { GeneralSettings } from '@/components/features/settings/GeneralSettings';
-import { ProfessionalsSettings } from '@/components/features/settings/ProfessionalsSettings';
-import { SuppliersSettings } from '@/components/features/settings/SuppliersSettings';
-import { UnitsSettings } from '@/components/features/settings/UnitsSettings';
-import { ResourcesSettings } from '@/components/features/settings/ResourcesSettings';
-import { CalendarSettings } from '@/components/features/settings/CalendarSettings';
+import { GeneralSettings } from './components/GeneralSettings';
+import { ProfessionalsSettings } from './components/ProfessionalsSettings';
+import { SuppliersSettings } from './components/SuppliersSettings';
+import { UnitsSettings } from './components/UnitsSettings';
+import { ResourcesSettings } from './components/ResourcesSettings';
+import { CalendarSettings } from './components/CalendarSettings';
 import { useSettings } from '@/hooks/useSettings';
 import type { GeneralSettingsData } from '@/hooks/useSettings';
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";

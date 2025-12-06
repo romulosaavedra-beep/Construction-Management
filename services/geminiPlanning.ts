@@ -1,7 +1,7 @@
 // src/services/geminiPlanning.ts
 import { GoogleGenAI } from "@google/genai";
-import type { EvmMetrics } from '../utils/planning/evmCalculator';
-import type { Activity } from '../utils/planning/cpmCalculator';
+import type { EvmMetrics } from '../modules/Planejamento/utils/evmCalculator';
+import type { Activity } from '../modules/Planejamento/utils/cpmCalculator';
 
 // IMPORTANTE: Configure a API Key no arquivo .env
 // GEMINI_API_KEY=sua_chave_aqui

@@ -1,10 +1,8 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
 
-interface UnitItem {
-    category: string;
-    name: string;
-    symbol: string;
-}
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { cn } from "@/lib/utils";
+import { handleEnterNavigation } from '../utils';
+import type { UnitItem } from '../types';
 
 interface UnitAutocompleteCellProps {
     value: string;
@@ -12,7 +10,6 @@ interface UnitAutocompleteCellProps {
     availableUnits: UnitItem[];
     isSelected?: boolean;
     columnId?: string;
-    handleEnterNavigation?: (e: React.KeyboardEvent<HTMLElement>, colId: string) => void;
 }
 
 export const UnitAutocompleteCell: React.FC<UnitAutocompleteCellProps> = ({
@@ -20,8 +17,7 @@ export const UnitAutocompleteCell: React.FC<UnitAutocompleteCellProps> = ({
     onCommit,
     availableUnits,
     isSelected = false,
-    columnId,
-    handleEnterNavigation
+    columnId
 }) => {
     const [searchTerm, setSearchTerm] = useState(value);
     const [isOpen, setIsOpen] = useState(false);
@@ -29,22 +25,19 @@ export const UnitAutocompleteCell: React.FC<UnitAutocompleteCellProps> = ({
     const containerRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
-    // Update local state when prop changes
     useEffect(() => {
         setSearchTerm(value);
     }, [value]);
 
-    // Filter units based on search term
     const filteredUnits = useMemo(() => {
         const term = searchTerm.toLowerCase();
         return availableUnits.filter(u =>
             u.symbol.toLowerCase().includes(term) ||
             u.name.toLowerCase().includes(term) ||
             u.category.toLowerCase().includes(term)
-        ).slice(0, 50); // Limit results for performance
+        ).slice(0, 50);
     }, [searchTerm, availableUnits]);
 
-    // Handle outside click
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
@@ -53,7 +46,7 @@ export const UnitAutocompleteCell: React.FC<UnitAutocompleteCellProps> = ({
                 if (exactMatch) {
                     if (exactMatch.symbol !== value) onCommit(exactMatch.symbol);
                 } else {
-                    setSearchTerm(value); // Revert
+                    setSearchTerm(value);
                 }
             }
         };
@@ -79,7 +72,7 @@ export const UnitAutocompleteCell: React.FC<UnitAutocompleteCellProps> = ({
             if (isOpen && filteredUnits.length > 0) {
                 e.preventDefault();
                 handleSelect(filteredUnits[highlightedIndex]);
-            } else if (columnId && handleEnterNavigation) {
+            } else if (columnId) {
                 handleEnterNavigation(e, columnId);
             }
         } else if (e.key === 'Escape') {
@@ -114,10 +107,11 @@ export const UnitAutocompleteCell: React.FC<UnitAutocompleteCellProps> = ({
                 }}
                 onFocus={handleFocus}
                 onKeyDown={handleKeyDown}
-                className={`w-full border rounded-md p-1 text-xs text-center
-                    ${isSelected ? 'bg-accent-500/20 border-accent-500 text-white' : 'bg-surface border-default'}
-                    focus:ring-1 focus:ring-accent-500 outline-none
-                `}
+                className={cn(
+                    "w-full h-7 rounded px-1.5 text-xs text-center transition-colors focus:outline-none",
+                    "bg-surface text-white border border-default focus:border-default",
+                    isSelected && "bg-accent-500/25 border-accent-500"
+                )}
                 placeholder="-"
             />
             {isOpen && filteredUnits.length > 0 && (
@@ -126,19 +120,15 @@ export const UnitAutocompleteCell: React.FC<UnitAutocompleteCellProps> = ({
                         <div
                             key={`${unit.category}-${unit.symbol}-${index}`}
                             onClick={() => handleSelect(unit)}
-                            className={`px-3 py-2 cursor-pointer flex justify-between items-center border-b border-default/30 last:border-0
-                                ${index === highlightedIndex ? 'bg-accent-500/20 text-white' : 'text-secondary hover:bg-elevated'}
-                            `}
+                            className={cn(
+                                "px-3 py-2 cursor-pointer flex justify-between items-center border-b border-default/30 last:border-0 transition-colors",
+                                index === highlightedIndex ? "bg-accent-500/20 text-white" : "text-secondary hover:bg-elevated"
+                            )}
                         >
                             <span className="font-bold text-white w-10 text-center bg-elevated/50 rounded px-1">{unit.symbol}</span>
                             <span className="text-xs truncate flex-1 text-right pl-2">{unit.name}</span>
                         </div>
                     ))}
-                </div>
-            )}
-            {isOpen && filteredUnits.length === 0 && (
-                <div className="absolute top-full left-0 w-48 bg-surface border border-default rounded-md shadow-xl z-[100] p-2 text-center text-xs text-gray-500 mt-1">
-                    Nenhuma unidade encontrada
                 </div>
             )}
         </div>

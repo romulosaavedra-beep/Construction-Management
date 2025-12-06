@@ -35,12 +35,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 // Componentes de Planejamento
-import { CPMCalculator, type Activity as CPMActivity, type CPMResult } from '@/utils/planning/cpmCalculator';
-import { EVMCalculator, type EvmMetrics } from '@/utils/planning/evmCalculator';
+import { CPMCalculator, type Activity as CPMActivity, type CPMResult } from './utils/cpmCalculator';
+import { EVMCalculator, type EvmMetrics } from './utils/evmCalculator';
 import { geminiService } from '@/services/geminiPlanning';
-import { CurvaSChart } from '@/components/features/planning/CurvaSChart';
-import { EvmKpiCards } from '@/components/features/planning/EvmKpiCards';
-import { CriticalActivitiesTable } from '@/components/features/planning/CriticalActivitiesTable';
+import { CurvaSChart } from './components/CurvaSChart';
+import { EvmKpiCards } from './components/EvmKpiCards';
+import { CriticalActivitiesTable } from './components/CriticalActivitiesTable';
 
 // Tipos
 interface Atividade {
@@ -239,7 +239,7 @@ export default function Planejamento() {
                 { duration: 5000 }
             );
 
-            console.log('📊 Resultado CPM:', result);
+
         } catch (error: any) {
             console.error('Erro ao calcular CPM:', error);
             toast.error(`Erro ao calcular CPM: ${error.message}`);
@@ -319,8 +319,7 @@ export default function Planejamento() {
                 toast.success('✓ Projeto dentro do esperado!');
             }
 
-            console.log('💰 Resultado EVM:', metrics);
-            console.log('🔔 Alertas:', alerts);
+
         } catch (error: any) {
             console.error('Erro ao calcular EVM:', error);
             toast.error(`Erro ao calcular EVM: ${error.message}`);
@@ -353,7 +352,7 @@ export default function Planejamento() {
                 cpmResult.activities
             );
 
-            console.log('🔍 Desvios identificados:', deviations);
+
 
             // 2. Gerar recomendações
             const recommendations = await geminiService.generateRecommendations(
@@ -365,7 +364,7 @@ export default function Planejamento() {
                 }
             );
 
-            console.log('💡 Recomendações geradas:', recommendations);
+
 
             setAiRecommendations({ deviations, recommendations });
 
@@ -392,7 +391,7 @@ export default function Planejamento() {
     // RENDER
     // ========================================
     return (
-        <div className="p-6 space-y-6">
+        <div className="space-y-6">
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>

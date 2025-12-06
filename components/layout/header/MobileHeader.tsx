@@ -15,7 +15,7 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
     setMobileMenuOpen,
 }) => {
     return (
-        <div className="mobile-header md:hidden flex items-center justify-between bg-[var(--ds-bg-base)] h-[60px] px-4 border-b border-[var(--ds-border-default)] z-[1001] sticky top-0">
+        <div className="mobile-header md:hidden flex items-center justify-between bg-base h-[60px] px-4 border-b border-border z-[1001] sticky top-0">
             <Button
                 variant="ghost"
                 size="icon"
@@ -31,8 +31,8 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
             </Button>
 
             <div className="flex items-center gap-2">
-                <Building2 className="w-5 h-5 text-[var(--ds-primary-500)]" />
-                <h1 className="text-base font-bold text-[var(--ds-text-primary)]">
+                <Building2 className="w-5 h-5 text-accent-500" />
+                <h1 className="text-base font-bold text-primary">
                     {APP_CONFIG.app.title}
                 </h1>
             </div>

@@ -33,14 +33,14 @@ export class ErrorBoundary extends Component<Props, State> {
             }
 
             return (
-                <div className="flex flex-col items-center justify-center h-full p-6 text-center bg-[var(--ds-bg-base)] rounded-lg border border-[var(--ds-border-default)]">
-                    <div className="bg-[var(--ds-error-bg)] p-4 rounded-full mb-4">
-                        <AlertTriangle className="w-8 h-8 text-[var(--ds-error)]" />
+                <div className="flex flex-col items-center justify-center h-full p-6 text-center bg-base rounded-lg border border-border">
+                    <div className="bg-error-bg p-4 rounded-full mb-4">
+                        <AlertTriangle className="w-8 h-8 text-error" />
                     </div>
-                    <h2 className="text-xl font-semibold text-[var(--ds-text-primary)] mb-2">
+                    <h2 className="text-xl font-semibold text-primary mb-2">
                         Algo deu errado
                     </h2>
-                    <p className="text-[var(--ds-text-secondary)] mb-6 max-w-md">
+                    <p className="text-secondary mb-6 max-w-md">
                         Ocorreu um erro inesperado ao carregar este componente. Tente recarregar a página.
                     </p>
                     <div className="flex gap-3">
@@ -60,8 +60,8 @@ export class ErrorBoundary extends Component<Props, State> {
                         </Button>
                     </div>
                     {process.env.NODE_ENV === 'development' && this.state.error && (
-                        <div className="mt-8 p-4 bg-[var(--ds-bg-surface)] rounded text-left w-full max-w-2xl overflow-auto max-h-64">
-                            <p className="text-xs font-mono text-[var(--ds-error)]">
+                        <div className="mt-8 p-4 bg-surface rounded text-left w-full max-w-2xl overflow-auto max-h-64">
+                            <p className="text-xs font-mono text-error">
                                 {this.state.error.toString()}
                             </p>
                         </div>

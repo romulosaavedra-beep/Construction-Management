@@ -25,8 +25,8 @@ export const useCalendar = (projectId?: string) => {
     const fetchHolidays = useCallback(async (year: number) => {
         if (!config) return [];
         // Use city/state from settings if available
-        const city = settings.cidade;
-        const state = settings.estado;
+        const city = settings.location.cidade;
+        const state = settings.location.estado;
         const fetchedHolidays = await getHolidaysForYear(year, state, city);
 
         // Merge with custom holidays for that year
@@ -43,28 +43,28 @@ export const useCalendar = (projectId?: string) => {
         const allHolidays = [...fetchedHolidays, ...customHolidaysForYear].sort((a, b) => a.date.getTime() - b.date.getTime());
         setHolidays(allHolidays);
         return allHolidays;
-    }, [config, settings.cidade, settings.estado]);
+    }, [config, settings.location.cidade, settings.location.estado]);
 
     // Wrapper functions that use the current config
     const checkIsWorkDay = useCallback(async (date: Date) => {
         if (!config) return { date, isWorkDay: true, isHalfDay: false, isHoliday: false, dayOfWeek: date.getDay() };
-        return isWorkDay(date, config, settings.cidade, settings.estado);
-    }, [config, settings.cidade, settings.estado]);
+        return isWorkDay(date, config, settings.location.cidade, settings.location.estado);
+    }, [config, settings.location.cidade, settings.location.estado]);
 
     const calcWorkDays = useCallback(async (start: Date, end: Date) => {
         if (!config) return 0;
-        return calculateWorkDays(start, end, config, settings.cidade, settings.estado);
-    }, [config, settings.cidade, settings.estado]);
+        return calculateWorkDays(start, end, config, settings.location.cidade, settings.location.estado);
+    }, [config, settings.location.cidade, settings.location.estado]);
 
     const addDays = useCallback(async (start: Date, days: number) => {
         if (!config) return new Date(start.getTime() + days * 24 * 60 * 60 * 1000);
-        return addWorkDays(start, days, config, settings.cidade, settings.estado);
-    }, [config, settings.cidade, settings.estado]);
+        return addWorkDays(start, days, config, settings.location.cidade, settings.location.estado);
+    }, [config, settings.location.cidade, settings.location.estado]);
 
     const getDaysBetween = useCallback(async (start: Date, end: Date) => {
         if (!config) return [];
-        return getWorkDaysBetween(start, end, config, settings.cidade, settings.estado);
-    }, [config, settings.cidade, settings.estado]);
+        return getWorkDaysBetween(start, end, config, settings.location.cidade, settings.location.estado);
+    }, [config, settings.location.cidade, settings.location.estado]);
 
     return {
         config,

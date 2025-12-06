@@ -11,7 +11,7 @@
  */
 
 import type { Config } from 'tailwindcss';
-import defaultConfig from 'tailwindcss/defaultConfig';
+import defaultTheme from 'tailwindcss/defaultTheme';
 
 const config: Config = {
     content: [
@@ -122,8 +122,8 @@ const config: Config = {
             },
 
             fontFamily: {
-                sans: ['var(--ds-font-family-base)', ...defaultConfig.theme.fontFamily.sans],
-                mono: ['var(--ds-font-family-mono)', ...defaultConfig.theme.fontFamily.mono],
+                sans: ['var(--ds-font-family-base)', ...defaultTheme.fontFamily.sans],
+                mono: ['var(--ds-font-family-mono)', ...defaultTheme.fontFamily.mono],
             },
 
             // ==========================================

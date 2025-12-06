@@ -14,8 +14,8 @@ const Label = React.forwardRef<
     ref={ref}
     className={cn(
       "block mb-1.5",
-      "text-[length:var(--ds-text-sm)] font-medium leading-none",
-      "text-[var(--ds-text-secondary)]",
+      "text-sm font-medium leading-none",
+      "text-secondary",
       "tracking-wide",
       "peer-disabled:cursor-not-allowed peer-disabled:opacity-50",
       className
@@ -23,7 +23,7 @@ const Label = React.forwardRef<
     {...props}
   >
     {children}
-    {required && <span className="ml-1 text-[var(--ds-error)]">*</span>}
+    {required && <span className="ml-1 text-error">*</span>}
   </LabelPrimitive.Root>
 ));
 Label.displayName = "Label";

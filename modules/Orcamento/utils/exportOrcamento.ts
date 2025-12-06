@@ -31,7 +31,7 @@ const processDataWithTotals = (data: OrcamentoItem[]) => {
     });
 
     // Recursive subtotal calculation
-    const calculateSubtotals = (itemId: number) => {
+    const calculateSubtotals = (itemId: string | number) => {
         const item = itemsMap.get(itemId);
         if (!item) return { mat: 0, mo: 0, total: 0 };
 
@@ -192,7 +192,7 @@ export const exportToExcel = async (data: OrcamentoItem[], filename: string, hid
     headerRow.height = 25;
 
     // Build rows and collect info for later parent formula generation
-    const rowsInfo: Array<{ id: number; row: any; depth: number; isParent: boolean }> = [];
+    const rowsInfo: Array<{ id: string | number; row: any; depth: number; isParent: boolean }> = [];
 
     processedItems.forEach(item => {
         const depth = (item.nivel.match(/\./g) || []).length;

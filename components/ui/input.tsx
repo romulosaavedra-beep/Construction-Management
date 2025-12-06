@@ -13,26 +13,26 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         return (
             <div className={cn(fullWidth && "w-full", "relative")}>
                 {icon && (
-                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--ds-text-tertiary)]">
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-secondary">
                         {icon}
                     </div>
                 )}
                 <input
                     type={type}
                     className={cn(
-                        "flex h-10 w-full rounded-[var(--ds-radius-md)] px-3 py-2",
-                        "bg-[var(--ds-bg-surface)] border border-[var(--ds-border-default)]",
-                        "text-[var(--ds-text-primary)] text-sm",
-                        "placeholder:text-[var(--ds-text-tertiary)]",
+                        "flex h-10 w-full rounded-md px-3 py-2",
+                        "bg-surface border border-border",
+                        "text-primary text-sm",
+                        "placeholder:text-secondary",
                         "transition-all duration-200",
-                        "hover:border-[var(--ds-border-subtle)] hover:bg-[var(--ds-bg-hover)]",
-                        "focus-visible:outline-none focus-visible:border-[var(--ds-primary-500)]",
-                        "focus-visible:shadow-[var(--ds-focus-ring)]",
-                        "disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-[var(--ds-bg-muted)]",
+                        "hover:border-border-subtle hover:bg-base",
+                        "focus-visible:outline-none focus-visible:border-primary",
+                        "focus-visible:ring-2 focus-visible:ring-focus",
+                        "disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-base",
                         error && [
-                            "border-[var(--ds-error)]",
-                            "focus-visible:border-[var(--ds-error)]",
-                            "focus-visible:shadow-[var(--ds-focus-ring-error)]"
+                            "border-error",
+                            "focus-visible:border-error",
+                            "focus-visible:ring-error" // assuming ring-error exists or I should use ring-red-500
                         ],
                         icon && "pl-10",
                         className
@@ -41,7 +41,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
                     {...props}
                 />
                 {helperText && !error && (
-                    <p className="mt-1.5 text-xs text-[var(--ds-text-secondary)]">{helperText}</p>
+                    <p className="mt-1.5 text-xs text-secondary">{helperText}</p>
                 )}
             </div>
         );

@@ -686,3 +686,26 @@ body {
 
 .w-12 { width: 3rem; }   /* 48px */
 .h-12 { height: 3rem; }
+/* =================================================================
+   TABLE UTILITIES
+   ================================================================= */
+
+.table-separate-borders {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+/* =================================================================
+   DASHED LINE PATTERN
+   ================================================================= */
+
+.dashed-line-horizontal {
+  background-image: repeating-linear-gradient(
+    to right,
+    var(--ds-error) 0,
+    var(--ds-error) 5px,
+    transparent 5px,
+    transparent 10px
+  );
+}
+

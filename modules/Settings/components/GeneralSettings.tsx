@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { MapPin, Save, AlertCircle } from 'lucide-react';
-import { geocodeAddress } from '@/utils/geocoding';
+import { geocodeAddress } from '../utils/geocoding';
 
 interface GeneralSettingsProps {
     projectId?: string;
